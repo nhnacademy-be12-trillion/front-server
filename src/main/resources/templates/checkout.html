@@ -1,10 +1,295 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="utf-8">
+    <title>Trillion-Shop | 결제</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="도서 판매 사이트, 결제, 주문" name="keywords">
+    <meta content="온라인 도서 판매 사이트 결제" name="description">
+
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+    <link href="/css/style.min.css" rel="stylesheet">
 </head>
+
 <body>
-$END$
+<div class="container-fluid">
+    <div class="row bg-secondary py-1 px-xl-5">
+        <div class="col-lg-6 d-none d-lg-block">
+            <div class="d-inline-flex align-items-center h-100">
+                <a class="text-body mr-3" href="">회사소개</a>
+                <a class="text-body mr-3" href="">고객센터</a>
+                <a class="text-body mr-3" href="">도움말</a>
+                <a class="text-body mr-3" href="">FAQ</a>
+            </div>
+        </div>
+        <div class="col-lg-6 text-center text-lg-right">
+            <div class="d-inline-flex align-items-center">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">내 계정</button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <div th:if="${member == null}">
+                            <a class="dropdown-item" th:href="@{/api/auth/login}">로그인</a>
+                            <a class="dropdown-item" th:href="@{/api/auth/signup}">회원가입</a>
+                        </div>
+                        <div th:unless="${member == null}">
+                            <button class="dropdown-item" type="button" th:text="${member.name} + '님'">회원</button>
+                            <a class="dropdown-item" th:href="@{/api/members/my-page}">마이페이지</a>
+                            <a class="dropdown-item" th:href="@{/api/auth/logout}">로그아웃</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
+        <div class="col-lg-4">
+            <a th:href="@{/}" class="text-decoration-none">
+                <img src="/static/img/logo.png" alt="Book E-commerce Logo" class="img-fluid" style="background-color: #fff;">
+            </a>
+        </div>
+        <div class="col-lg-4 col-6 text-left">
+            <form th:action="@{/api/books/search}" method="get">
+                <div class="input-group">
+                    <input type="text" name="keyword" class="form-control" placeholder="도서 검색">
+                    <div class="input-group-append">
+                        <button type="submit" class="input-group-text bg-transparent text-primary">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-4 col-6 text-right">
+            <p class="m-0">고객 센터</p>
+            <h5 class="m-0">+012 345 6789</h5>
+        </div>
+    </div>
+</div>
+<div class="container-fluid bg-dark mb-30">
+    <div class="row px-xl-5">
+        <div class="col-lg-3 d-none d-lg-block">
+        </div>
+        <div class="col-lg-9">
+            <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                    <div class="navbar-nav mr-auto py-0">
+                        <a th:href="@{/}" class="nav-item nav-link">홈</a>
+                        <a th:href="@{/api/books}" class="nav-item nav-link">쇼핑</a>
+                        <a th:href="@{/api/carts}" class="nav-item nav-link">장바구니</a>
+                        <a th:href="@{/api/orders}" class="nav-item nav-link active">주문/결제</a>
+                        <a th:href="@{/api/coupons}" class="nav-item nav-link">쿠폰</a>
+                    </div>
+                    <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
+                        <a th:href="@{/api/members/likes}" class="btn px-0">
+                            <i class="fas fa-heart text-primary"></i>
+                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
+                        </a>
+                        <a th:href="@{/api/carts}" class="btn px-0 ml-3">
+                            <i class="fas fa-shopping-cart text-primary"></i>
+                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row px-xl-5">
+        <div class="col-12">
+            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">주문 도서 목록</span></h5>
+            <div class="table-responsive mb-30">
+                <table class="table table-light table-borderless table-hover text-center mb-0">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th style="width: 50%;">도서</th>
+                        <th>가격</th>
+                        <th>수량</th>
+                        <th>합계</th>
+                    </tr>
+                    </thead>
+                    <tbody class="align-middle">
+                    <tr th:if="${cart.cartItems != null and !cart.cartItems.empty}" th:each="item : ${cart.cartItems}">
+                        <td class="align-middle text-left">
+                            <img th:src="${item.book.thumbnailUrl != null ? item.book.thumbnailUrl : '/img/product-1.jpg'}" alt="" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover;">
+                            <a th:href="@{/api/books/{id}(id=${item.book.id})}" class="text-dark ml-2" th:text="${item.book.title}">Book Title</a>
+                        </td>
+                        <td class="align-middle" th:text="${#numbers.formatInteger(item.book.price, 0, 'COMMA')} + '원'">12,000원</td>
+                        <td class="align-middle" th:text="${item.quantity}">2</td>
+                        <td class="align-middle" th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">24,000원</td>
+                    </tr>
+                    <tr th:if="${cart.cartItems == null or cart.cartItems.empty}">
+                        <td colspan="4" class="align-middle py-3">
+                            <h6 class="m-0 text-muted">주문할 도서가 없습니다. 장바구니를 확인해주세요.</h6>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row px-xl-5">
+
+        <div class="col-lg-8">
+            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">배송 정보</span></h5>
+            <div class="bg-light p-30 mb-5">
+                <form th:action="@{/api/orders}" method="post" id="orderForm" th:object="${orderRequest}">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>수령인 이름</label>
+                            <input class="form-control" type="text" name="recipientName" th:value="${member.name}" placeholder="이름" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>이메일</label>
+                            <input class="form-control" type="text" name="email" th:value="${member.email}" placeholder="example@email.com" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>휴대폰 번호</label>
+                            <input class="form-control" type="text" name="phoneNumber" th:value="${member.phoneNumber}" placeholder="010-0000-0000" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>우편번호</label>
+                            <input class="form-control" type="text" name="zipcode" th:value="${member.address.zipcode}" placeholder="우편번호 (예: 12345)" required>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>주소</label>
+                            <input class="form-control" type="text" name="street" th:value="${member.address.street}" placeholder="기본 주소 (예: 서울시 강남구)" required>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>상세 주소</label>
+                            <input class="form-control" type="text" name="detail" th:value="${member.address.detail}" placeholder="나머지 주소 (예: A동 101호)" required>
+                        </div>
+
+                        <div class="col-md-12 form-group">
+                            <label>배송 메모 (선택)</label>
+                            <input class="form-control" type="text" name="deliveryMemo" placeholder="예: 문 앞에 놓아주세요.">
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="shipto">
+                                <label class="custom-control-label" for="shipto" data-toggle="collapse" data-target="#shipping-address">
+                                    새로운 주소로 배송
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="collapse mb-5" id="shipping-address">
+                        <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">새 배송지 입력</span></h5>
+                        <div class="row">
+                            <p class="text-muted col-12">
+                                <small>새 배송지를 입력하려면 위의 '새로운 주소로 배송'을 체크하세요.</small>
+                            </p>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">주문 요약</span></h5>
+            <div class="bg-light p-30 mb-5">
+                <div class="border-bottom pb-2">
+                    <div class="d-flex justify-content-between mb-3">
+                        <h6>상품 금액</h6>
+                        <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">72,000원</h6>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <h6 class="font-weight-medium">배송비</h6>
+                        <h6 class="font-weight-medium" th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">3,000원</h6>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <div class="d-flex justify-content-between mt-2">
+                        <h5>총 결제 금액</h5>
+                        <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">75,000원</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">결제 수단</span></h5>
+                <div class="bg-light p-30">
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" name="paymentMethod" id="paypal" value="CARD" checked>
+                            <label class="custom-control-label" for="paypal">신용/체크 카드</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" name="paymentMethod" id="directcheck" value="BANK_TRANSFER">
+                            <label class="custom-control-label" for="directcheck">계좌 이체</label>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" name="paymentMethod" id="cashondevliery" value="CASH">
+                            <label class="custom-control-label" for="cashondevliery">무통장 입금</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" form="orderForm" class="btn btn-block btn-primary font-weight-bold py-3">최종 주문하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid bg-dark text-secondary mt-5 pt-5">
+    <div class="row px-xl-5 pt-5">
+        <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
+            <h5 class="text-secondary text-uppercase mb-4">연락처</h5>
+            <p class="mb-4">No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor. Rebum tempor no vero est magna amet no</p>
+            <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>Seoul, Korea</p>
+            <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
+            <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
+        </div>
+        <div class="col-lg-8 col-md-12">
+            <div class="row">
+                <div class="col-md-4 mb-5">
+                    <h5 class="text-secondary text-uppercase mb-4">빠른 쇼핑</h5>
+                    <div class="d-flex flex-column justify-content-start">
+                        <a class="text-secondary mb-2" th:href="@{/}"><i class="fa fa-angle-right mr-2"></i>홈</a>
+                        <a class="text-secondary mb-2" th:href="@{/api/books}"><i class="fa fa-angle-right mr-2"></i>상품 보기</a>
+                        <a class="text-secondary mb-2" th:href="@{/api/carts}"><i class="fa fa-angle-right mr-2"></i>장바구니</a>
+                        <a class="text-secondary mb-2" th:href="@{/api/orders}"><i class="fa fa-angle-right mr-2"></i>주문/결제</a>
+                        <a class="text-secondary" href="#"><i class="fa fa-angle-right mr-2"></i>고객 센터</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row border-top mx-xl-5 py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
+        <div class="col-md-6 px-xl-0">
+            <p class="mb-md-0 text-center text-md-left text-secondary">
+                &copy; <a class="text-primary" href="#">Trillion-Shop</a>. All Rights Reserved.
+                Designed by <a class="text-primary" href="https://htmlcodex.com">HTML Codex</a>
+            </p>
+        </div>
+        <div class="col-md-6 px-xl-0 text-center text-md-right">
+            <img class="img-fluid" th:src="@{/img/payments.png}" alt="">
+        </div>
+    </div>
+</div>
+<a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<script th:src="@{/js/main.js}"></script>
 </body>
+
 </html>

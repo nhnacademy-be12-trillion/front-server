@@ -12,5 +12,8 @@
 
 package com.nhnacademy.frontserver.dto.book;
 
-public record CategoryResponse() {
+public record CategoryResponse(
+        Long categoryId,
+        String categoryName
+) {
 }

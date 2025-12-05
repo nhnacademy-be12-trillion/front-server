@@ -10,7 +10,7 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order;
+package com.nhnacademy.frontserver.dto.order.util;
 
 public enum OrderItemStatus {
     PREPARING,  // 상품 준비중

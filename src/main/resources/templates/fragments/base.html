@@ -1,10 +1,51 @@
+<!--
+  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
+  ~ + * While every precaution has been taken in the preparation of this resource,  assumes no
+  ~ + responsibility for errors or omissions, or for damages resulting from the use of the information
+  ~ + contained herein
+  ~ + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
+  ~ + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
+  ~ + prior written permission.
+  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  -->
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta charset="utf-8">
+
+  <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE">Trillion-Shop | Book Store</title>
+
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="Book Store, E-commerce" name="keywords">
+  <meta content="Online Book Store" name="description">
+
+  <link th:href="@{/img/favicon.ico}" rel="icon">
+  <link th:href="@{/css/style.min.css}" rel="stylesheet">
+
+  <th:block layout:fragment="head"></th:block>
 </head>
+
 <body>
-$END$
+
+<div class="container-fluid">
+  <div th:include="~{fragments/header :: topbar}"></div>
+</div>
+<div class="container-fluid bg-dark mb-30">
+  <div th:include="~{fragments/header :: navbar}"></div>
+</div>
+<div layout:fragment="content">
+  <p>기본 콘텐츠 영역</p>
+</div>
+
+
+<div th:include="~{fragments/footer :: footer}" class="container-fluid bg-dark text-secondary mt-5 pt-5"></div>
+<a th:include="~{fragments/footer :: back_to_top}" href="#" class="btn btn-primary back-to-top"></a>
+<div th:include="~{fragments/footer :: scripts}"></div>
+
+<th:block layout:fragment="script"></th:block>
+
 </body>
 </html>

@@ -12,14 +12,32 @@
 
 package com.nhnacademy.frontserver.controller;
 
+import com.nhnacademy.frontserver.client.BookClient;
+import com.nhnacademy.frontserver.dto.book.BookListResponse;
+import com.nhnacademy.frontserver.dto.book.CategoryResponse;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+@RequiredArgsConstructor
 @Controller
 public class HomeController {
 
+    BookClient bookClient;
+
     @GetMapping("/")
-    public String home() {
-        return "index.html";
+    public String home(Model model) {
+
+        // 1. 도서 리스트 (가져올 데이터가 없으면 빈 리스트 혹은 null)
+        List<BookListResponse> books = bookClient.getBooks();
+        model.addAttribute("books", books); // null이면 화면에 "추후 추가될 예정" 출력
+
+        // 2. 카테고리 리스트
+        List<CategoryResponse> categories = bookClient.getCategories();
+        model.addAttribute("categories", categories);
+
+        return "index";
     }
 }

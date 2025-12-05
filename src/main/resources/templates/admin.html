@@ -1,10 +1,309 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta charset="utf-8">
+  <title>Trillion-Shop | 관리자 페이지</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="관리자, 주문, 정책, 회원" name="keywords">
+  <meta content="Trillion-Shop 관리자 시스템" name="description">
+
+  <link th:href="@{/img/favicon.ico}" rel="icon">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
+  <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+  <link href="/css/style.min.css" rel="stylesheet">
+
+  <style>
+    /* 관리자 페이지의 배경 및 폰트 크기 조정 */
+    body {
+      background-color: #f5f5f5;
+    }
+    .admin-container {
+      padding-top: 50px;
+      padding-bottom: 50px;
+    }
+    .nav-pills .nav-link {
+      border-radius: 0.25rem;
+      margin-bottom: 5px;
+      background-color: #e9ecef;
+      color: #3D464D;
+    }
+    .nav-pills .nav-link.active,
+    .nav-pills .nav-link:hover {
+      background-color: #5BADE9; /* Primary Color */
+      color: #fff;
+    }
+    .policy-group {
+      border: 1px solid #dee2e6;
+      padding: 20px;
+      margin-bottom: 30px;
+      background-color: #fff;
+    }
+  </style>
 </head>
+
 <body>
-$END$
+<div class="container-fluid admin-container">
+  <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
+
+  <div class="row px-xl-5">
+    <div class="col-lg-3 col-md-4">
+      <h5 class="section-title position-relative text-uppercase mb-4"><span class="bg-secondary pr-3">관리 메뉴</span></h5>
+      <div class="nav flex-column nav-pills" id="admin-tab" role="tablist" aria-orientation="vertical">
+        <a class="nav-link active" id="orders-tab" data-toggle="pill" href="#orders-content" role="tab">최근 주문 관리 (200건)</a>
+        <a class="nav-link" id="policy-tab" data-toggle="pill" href="#policy-content" role="tab">정책 설정</a>
+        <a class="nav-link" id="member-tab" data-toggle="pill" href="#member-content" role="tab">회원 관리</a>
+      </div>
+    </div>
+    <div class="col-lg-9 col-md-8">
+      <div class="tab-content" id="admin-tabContent">
+
+        <div class="tab-pane fade show active" id="orders-content" role="tabpanel">
+          <h4 class="mb-4 text-primary">최근 주문 조회 (총 200건)</h4>
+
+          <div class="table-responsive">
+            <table class="table table-light table-hover text-center mb-0">
+              <thead class="thead-dark">
+              <tr>
+                <th>주문번호</th>
+                <th>주문자 ID</th>
+                <th>총액</th>
+                <th>주문일</th>
+                <th>상태</th>
+                <th style="width: 200px;">관리</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="i : ${#numbers.sequence(1, 20)}">
+                <td th:text="'O' + ${#numbers.formatInteger(100200 - i, 6)}">O100200</td>
+                <td th:text="'user' + ${i}">user1</td>
+                <td th:text="${#numbers.formatInteger(i * 15000 + 5000, 0, 'COMMA')} + '원'">15,000원</td>
+                <td th:text="'2025-12-' + ${i}">2025-12-01</td>
+                <td>결제 완료</td>
+                <td>
+                  <button class="btn btn-sm btn-danger mb-1" th:data-order-id="'O100200' - ${i}">결제 취소</button>
+                  <button class="btn btn-sm btn-warning mb-1" th:data-order-id="'O100200' - ${i}">반품 처리</button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+              <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+              <li class="page-item active"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item"><a class="page-link" href="#">10</a></li>
+              <li class="page-item"><a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+            </ul>
+          </nav>
+        </div>
+
+
+        <div class="tab-pane fade" id="policy-content" role="tabpanel">
+          <h4 class="mb-4 text-primary">정책 설정 및 관리</h4>
+
+          <form th:action="@{/api/admin/policies}" method="post">
+
+            <div class="policy-group">
+              <h5 class="mb-3">🚛 배송 정책 설정</h5>
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label">기본 배송비 (원)</label>
+                <div class="col-sm-8">
+                  <input type="number" class="form-control" name="shippingFee" th:value="3000" required>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label">배송비 무료 조건 금액 (원)</label>
+                <div class="col-sm-8">
+                  <input type="number" class="form-control" name="freeShippingCondition" th:value="50000" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="policy-group">
+              <h5 class="mb-3">🎁 포장 정책 설정</h5>
+              <p class="text-muted small">기존 포장지 가격을 수정하거나 새로운 포장지 정책을 추가할 수 있습니다.</p>
+
+              <div id="existing-packaging-policies">
+                <h6 class="mt-4 mb-3 text-secondary">▪️ 기존 포장지 가격 수정</h6>
+                <div class="form-group row" th:each="pkg, stat : ${packagingList}">
+                  <label class="col-sm-4 col-form-label" th:text="${pkg.name} + ' 포장지 가격 (원)'">일반 포장지 가격 (원)</label>
+                  <div class="col-sm-8 input-group">
+                    <input type="hidden" th:name="'packaging[' + ${stat.index} + '].name'" th:value="${pkg.name}">
+                    <input type="number" class="form-control" th:name="'packaging[' + ${stat.index} + '].price'" th:value="${pkg.price}" min="0" required>
+                    <div class="input-group-append">
+                      <button type="button" class="btn btn-sm btn-danger remove-packaging-btn" title="삭제"><i class="fa fa-times"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <h6 class="mt-4 mb-3 text-secondary">▪️ 새로운 포장지 정책 추가</h6>
+              <div id="add-new-packaging-form">
+                <div class="form-group row">
+                  <label class="col-sm-4 col-form-label">포장지 이름</label>
+                  <div class="col-sm-8">
+                    <input type="text" class="form-control new-pkg-name" placeholder="새 포장지 이름 (예: 크리스마스 에디션)" required>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-sm-4 col-form-label">가격 (원)</label>
+                  <div class="col-sm-8">
+                    <input type="number" class="form-control new-pkg-price" placeholder="가격 (숫자만)" min="0" required>
+                  </div>
+                </div>
+                <button type="button" id="add-packaging-btn" class="btn btn-sm btn-info mt-2">새 포장지 정책 추가</button>
+              </div>
+            </div>
+
+            <div class="policy-group">
+              <h5 class="mb-3">💰 포인트 적립률 설정</h5>
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label">기본 적립률 (도서 판매액 대비 %)</label>
+                <div class="col-sm-8">
+                  <input type="number" class="form-control" name="basePointRate" th:value="1" step="0.1" required>
+                </div>
+              </div>
+              <h6 class="mt-4 mb-3">회원 등급별 추가 적립률 (%)</h6>
+
+              <div class="form-group row" th:each="grade, stat : ${memberGrades}">
+                <label class="col-sm-4 col-form-label" th:text="${grade.displayName} + ' 등급'">COMMON 등급</label>
+                <div class="col-sm-8 input-group">
+                  <select class="custom-select col-4" th:name="'grade[' + ${stat.index} + '].level'">
+                    <option th:value="${grade.level}" th:text="${grade.level}" selected>COMMON</option>
+                  </select>
+                  <input type="number" class="form-control col-8" th:name="'grade[' + ${stat.index} + '].rate'" th:value="${grade.rate}" step="0.1" required>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-block btn-primary py-3">정책 변경 사항 저장</button>
+          </form>
+        </div>
+
+
+        <div class="tab-pane fade" id="member-content" role="tabpanel">
+          <h4 class="mb-4 text-primary">회원 아이디 조회 및 휴면 해제</h4>
+
+          <form th:action="@{/api/admin/members/search}" method="get" class="mb-4">
+            <div class="input-group">
+              <input type="text" name="memberId" class="form-control p-4" placeholder="검색할 회원 아이디를 입력하세요 (예: user123)" required>
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-primary px-4">
+                  <i class="fa fa-search"></i> 회원 조회
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="table table-light table-hover text-center mb-0">
+              <thead class="thead-dark">
+              <tr>
+                <th>회원번호</th>
+                <th>아이디</th>
+                <th>이름</th>
+                <th>상태</th>
+                <th>관리</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:if="${memberInfo != null}">
+                <td th:text="${memberInfo.id}">M1234</td>
+                <td th:text="${memberInfo.userId}">dormant_user</td>
+                <td th:text="${memberInfo.name}">홍길동</td>
+                <td th:classappend="${memberInfo.isDormant} ? 'text-danger' : 'text-success'" th:text="${memberInfo.isDormant} ? '휴면 상태' : '정상'">휴면 상태</td>
+                <td>
+                  <button th:if="${memberInfo.isDormant}"
+                          class="btn btn-sm btn-success"
+                          th:data-member-id="${memberInfo.id}">
+                    휴면 해제 요청
+                  </button>
+                  <span th:unless="${memberInfo.isDormant}" class="text-muted">관리 불필요</span>
+                </td>
+              </tr>
+              <tr th:unless="${memberInfo != null}">
+                <td colspan="5" class="py-4 text-muted">검색 결과가 없거나, 아직 회원을 조회하지 않았습니다.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<script th:src="@{/js/main.js}"></script>
+
+<script th:inline="javascript">
+  $(document).ready(function() {
+    // Thymeleaf를 사용하여 현재 존재하는 정책 목록의 크기로 인덱스를 초기화합니다.
+    // [[${packagingList}]]가 서버에서 제공되는 리스트라고 가정합니다.
+    let packagingIndex = 0;
+    // Thymeleaf를 사용하여 초기 인덱스 값을 설정합니다. (서버 사이드 코드)
+    /*[# th:if="${packagingList != null}"]*/
+    packagingIndex = [[${packagingList.size()}]];
+    /*[/#]*/
+
+    // 새 포장지 정책 추가 버튼 이벤트
+    $('#add-packaging-btn').on('click', function() {
+      const nameInput = $('.new-pkg-name');
+      const priceInput = $('.new-pkg-price');
+      const name = nameInput.val();
+      const price = priceInput.val();
+
+      if (!name || price === null || price === "" || price < 0) {
+        alert("포장지 이름과 가격(0 이상)을 모두 입력해주세요.");
+        return;
+      }
+
+      // 새로운 정책의 HTML 구조 생성
+      const newRow = `
+                    <div class="form-group row dynamic-packaging-row">
+                        <label class="col-sm-4 col-form-label">${name} 포장지 가격 (원)</label>
+                        <div class="col-sm-8 input-group">
+                            <input type="hidden" name="packaging[${packagingIndex}].name" value="${name}">
+                            <input type="number" class="form-control" name="packaging[${packagingIndex}].price" value="${price}" min="0" required>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-sm btn-danger remove-packaging-btn" title="삭제"><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+      // 기존 정책 목록 영역에 추가
+      $('#existing-packaging-policies').append(newRow);
+
+      // 인덱스 증가 및 입력 필드 초기화
+      packagingIndex++;
+      nameInput.val('');
+      priceInput.val('');
+
+      // 스크롤 이동하여 추가된 항목이 보이게 합니다.
+      $('html, body').animate({
+        scrollTop: $('#existing-packaging-policies').offset().top
+      }, 500);
+    });
+
+    // 포장지 정책 제거 버튼 이벤트 (동적으로 추가된 요소에 대해 처리)
+    $(document).on('click', '.remove-packaging-btn', function() {
+      if (confirm("해당 포장지 정책을 삭제하시겠습니까? (저장 버튼을 눌러야 최종 반영됩니다.)")) {
+        $(this).closest('.form-group.row').remove();
+      }
+    });
+  });
+</script>
 </body>
 </html>
