@@ -20,41 +20,36 @@
     <div class="row bg-secondary py-1 px-xl-5">
         <div class="col-lg-6 d-none d-lg-block">
             <div class="d-inline-flex align-items-center h-100">
-                <a class="text-body mr-3" href="">회사소개</a>
-                <a class="text-body mr-3" href="">고객센터</a>
-                <a class="text-body mr-3" href="">도움말</a>
-                <a class="text-body mr-3" href="">FAQ</a>
+                <a class="text-body mr-3" href="">About</a>
+                <a class="text-body mr-3" href="">Contact</a>
+                <a class="text-body mr-3" href="">Help</a>
+                <a class="text-body mr-3" href="">FAQs</a>
             </div>
         </div>
         <div class="col-lg-6 text-center text-lg-right">
-            <div class="d-inline-flex align-items-center">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">내 계정</button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div th:if="${member == null}">
-                            <a class="dropdown-item" th:href="@{/api/auth/login}">로그인</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/signup}">회원가입</a>
-                        </div>
-                        <div th:unless="${member == null}">
-                            <button class="dropdown-item" type="button" th:text="${member.name} + '님'">회원</button>
-                            <a class="dropdown-item" th:href="@{/api/members/my-page}">마이페이지</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/logout}">로그아웃</a>
-                        </div>
-                    </div>
-                </div>
+            <div class="d-inline-flex align-items-center d-block d-lg-none">
+                <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
+                    <i class="fas fa-heart text-dark"></i>
+                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
+                </a>
+                <a th:href="@{/api/carts}" class="btn px-0 ml-2">
+                    <i class="fas fa-shopping-cart text-dark"></i>
+                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
+                </a>
             </div>
         </div>
     </div>
     <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
         <div class="col-lg-4">
             <a th:href="@{/}" class="text-decoration-none">
-                <img th:src="@{/img/logo.png}" alt="Book E-commerce Logo" class="img-fluid" style="background-color: #fff;">
+                <img src="/static/img/logo.png" alt="Book E-commerce Logo" class="img-fluid" style="background-color: #fff;">
             </a>
         </div>
+
         <div class="col-lg-4 col-6 text-left">
             <form th:action="@{/api/books/search}" method="get">
                 <div class="input-group">
-                    <input type="text" name="keyword" class="form-control" placeholder="도서 검색">
+                    <input type="text" name="keyword" class="form-control" placeholder="Search for books">
                     <div class="input-group-append">
                         <button type="submit" class="input-group-text bg-transparent text-primary">
                             <i class="fa fa-search"></i>
@@ -63,9 +58,38 @@
                 </div>
             </form>
         </div>
+
+        <!-- ✅ 로그인/회원가입/비회원조회 / 환영문구 + 마이페이지 영역 -->
         <div class="col-lg-4 col-6 text-right">
-            <p class="m-0">고객 센터</p>
-            <h5 class="m-0">+012 345 6789</h5>
+
+            <!-- 비로그인 상태 -->
+            <div class="d-inline-flex align-items-center justify-content-end w-100" th:if="${member == null}">
+                <a th:href="@{/api/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
+                    로그인
+                </a>
+                <a th:href="@{/api/auth/signup}" class="btn btn-sm btn-primary mx-1">
+                    회원가입
+                </a>
+                <a th:href="@{/api/orders/guest}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+                    비회원 주문조회
+                </a>
+            </div>
+
+            <!-- 로그인 상태 -->
+            <div class="d-inline-flex flex-column align-items-end w-100" th:unless="${member == null}">
+            <span class="small mb-2" th:text="${member.name} + ' 님, 환영합니다'">
+                홍길동 님, 환영합니다
+            </span>
+                <div>
+                    <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
+                        마이페이지
+                    </a>
+                    <a th:href="@{/api/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+                        로그아웃
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -80,11 +104,9 @@
                 </button>
                 <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                     <div class="navbar-nav mr-auto py-0">
-                        <a th:href="@{/}" class="nav-item nav-link">홈</a>
-                        <a th:href="@{/api/books}" class="nav-item nav-link active">쇼핑</a>
-                        <a th:href="@{/api/carts}" class="nav-item nav-link">장바구니</a>
-                        <a th:href="@{/api/orders}" class="nav-item nav-link">주문/결제</a>
-                        <a th:href="@{/api/coupons}" class="nav-item nav-link">쿠폰</a>
+                        <a th:href="@{/}" class="nav-item nav-link">베스트</a>
+                        <a href="#" class="nav-item nav-link">최근 발매</a>
+                        <a href="#" class="nav-item nav-link">생일책</a>
                     </div>
                     <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                         <a th:href="@{/api/members/likes}" class="btn px-0">
@@ -105,10 +127,26 @@
     <div class="row px-xl-5">
         <div class="col-12">
             <nav class="breadcrumb bg-light mb-30">
-                <a class="breadcrumb-item text-dark" th:href="@{/}">홈</a>
-                <a class="breadcrumb-item text-dark" th:href="@{/api/books}">쇼핑</a>
-                <span class="breadcrumb-item active" th:text="${book.title}">도서 제목</span>
+                <!-- 항상 홈으로 시작 -->
+                <a class="breadcrumb-item text-dark" th:href="@{/}">홈 / </a>
+
+                <!-- 카테고리 경로: 1뎁스 ~ 3뎁스까지 노출 & 클릭 시 해당 카테고리 리스트로 이동 -->
+                <th:block th:if="${categoryPath != null and !#lists.isEmpty(categoryPath)}">
+                    <th:block th:each="cat : ${categoryPath}">
+                        <a class="breadcrumb-item text-dark"
+                           th:href="@{/api/books/category/{id}(id=${cat.id})}"
+                           th:text="${cat.name} /">
+                            카테고리명
+                        </a>
+                    </th:block>
+                </th:block>
+
+                <!-- 마지막: 현재 도서 제목 -->
+                <span class="breadcrumb-item active" th:text="${book.title}">
+        도서 제목
+    </span>
             </nav>
+
         </div>
     </div>
 </div>
@@ -173,16 +211,6 @@
                 </div>
                 <button class="btn btn-primary px-3 mr-2"><i class="fa fa-shopping-cart mr-1"></i> 장바구니</button>
                 <button class="btn btn-dark px-3"><i class="fa fa-credit-card mr-1"></i> 바로 구매</button>
-            </div>
-
-            <div class="d-flex pt-2">
-                <p class="text-dark font-weight-medium mb-0 mr-2">공유:</p>
-                <div class="d-inline-flex">
-                    <a class="text-dark px-2" href=""><i class="fab fa-facebook-f"></i></a>
-                    <a class="text-dark px-2" href=""><i class="fab fa-twitter"></i></a>
-                    <a class="text-dark px-2" href=""><i class="fab fa-linkedin-in"></i></a>
-                    <a class="text-dark px-2" href=""><i class="fab fa-pinterest"></i></a>
-                </div>
             </div>
         </div>
     </div>

@@ -1,12 +1,18 @@
+<!--
+  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
+  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+-->
+
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="utf-8">
-    <title>Trillion-Shop | Shopping Cart</title>
+    <title>Trillion-Shop | 장바구니</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Book Store, Shopping Cart" name="keywords">
-    <meta content="Online Book Store Shopping Cart" name="description">
+    <meta content="도서 쇼핑몰, 장바구니, Trillion-Shop" name="keywords">
+    <meta content="Trillion-Shop 온라인 도서 쇼핑몰 장바구니 페이지" name="description">
 
     <link th:href="@{/img/favicon.ico}" rel="icon">
 
@@ -22,6 +28,7 @@
 </head>
 
 <body>
+<!-- 상단 공통 헤더 -->
 <div class="container-fluid">
     <div class="row bg-secondary py-1 px-xl-5">
         <div class="col-lg-6 d-none d-lg-block">
@@ -33,44 +40,33 @@
             </div>
         </div>
         <div class="col-lg-6 text-center text-lg-right">
-            <div class="d-inline-flex align-items-center">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">My Account</button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div th:if="${member == null}">
-                            <a class="dropdown-item" th:href="@{/api/auth/login}">Sign in</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/signup}">Sign up</a>
-                        </div>
-                        <div th:unless="${member == null}">
-                            <button class="dropdown-item" type="button" th:text="${member.name} + '님'">User</button>
-                            <a class="dropdown-item" th:href="@{/api/members/my-page}">My Page</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/logout}">Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="d-inline-flex align-items-center d-block d-lg-none">
                 <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
                     <i class="fas fa-heart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
+                    <span class="badge text-dark border border-dark rounded-circle"
+                          style="padding-bottom: 2px;">0</span>
                 </a>
                 <a th:href="@{/api/carts}" class="btn px-0 ml-2">
                     <i class="fas fa-shopping-cart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
+                    <span class="badge text-dark border border-dark rounded-circle"
+                          style="padding-bottom: 2px;">0</span>
                 </a>
             </div>
         </div>
     </div>
+
     <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
         <div class="col-lg-4">
             <a th:href="@{/}" class="text-decoration-none">
-                <img th:src="@{/img/logo.png}" alt="Book E-commerce Logo" class="img-fluid" style="background-color: #fff;">
+                <img src="/static/img/logo.png" alt="Book E-commerce Logo"
+                     class="img-fluid" style="background-color: #fff;">
             </a>
         </div>
+
         <div class="col-lg-4 col-6 text-left">
             <form th:action="@{/api/books/search}" method="get">
                 <div class="input-group">
-                    <input type="text" name="keyword" class="form-control" placeholder="Search for books">
+                    <input type="text" name="keyword" class="form-control" placeholder="도서를 검색해 보세요">
                     <div class="input-group-append">
                         <button type="submit" class="input-group-text bg-transparent text-primary">
                             <i class="fa fa-search"></i>
@@ -79,12 +75,41 @@
                 </div>
             </form>
         </div>
+
+        <!-- 로그인 / 환영 영역 -->
         <div class="col-lg-4 col-6 text-right">
-<!--            <p class="m-0">Customer Service</p>-->
-<!--            <h5 class="m-0">+012 345 6789</h5>-->
+            <!-- 비로그인 상태 -->
+            <div class="d-inline-flex align-items-center justify-content-end w-100" th:if="${member == null}">
+                <a th:href="@{/api/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
+                    로그인
+                </a>
+                <a th:href="@{/api/auth/signup}" class="btn btn-sm btn-primary mx-1">
+                    회원가입
+                </a>
+                <a th:href="@{/api/orders/guest}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+                    비회원 주문조회
+                </a>
+            </div>
+
+            <!-- 로그인 상태 -->
+            <div class="d-inline-flex flex-column align-items-end w-100" th:unless="${member == null}">
+                <span class="small mb-2" th:text="${member.name} + ' 님, 환영합니다'">
+                    홍길동 님, 환영합니다
+                </span>
+                <div>
+                    <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
+                        마이페이지
+                    </a>
+                    <a th:href="@{/api/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+                        로그아웃
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- 상단 네비게이션 (베스트 / 최근 발매 / 생일책) -->
 <div class="container-fluid bg-dark mb-30">
     <div class="row px-xl-5">
         <div class="col-lg-3 d-none d-lg-block">
@@ -96,20 +121,20 @@
                 </button>
                 <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                     <div class="navbar-nav mr-auto py-0">
-                        <a th:href="@{/}" class="nav-item nav-link">Home</a>
-                        <a th:href="@{/api/books}" class="nav-item nav-link">Shop</a>
-<!--                        <a th:href="@{/api/carts}" class="nav-item nav-link active">Cart</a>-->
-<!--                        <a th:href="@{/api/orders}" class="nav-item nav-link">Order</a>-->
-<!--                        <a th:href="@{/api/coupons}" class="nav-item nav-link">Coupon</a>-->
+                        <a th:href="@{/}" class="nav-item nav-link">베스트</a>
+                        <a th:href="@{/api/books?sort=new}" class="nav-item nav-link">최근 발매</a>
+                        <a th:href="@{/api/books/birthday}" class="nav-item nav-link">생일책</a>
                     </div>
                     <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                         <a th:href="@{/api/members/likes}" class="btn px-0">
                             <i class="fas fa-heart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
+                            <span class="badge text-secondary border border-secondary rounded-circle"
+                                  style="padding-bottom: 2px;">0</span>
                         </a>
                         <a th:href="@{/api/carts}" class="btn px-0 ml-3">
                             <i class="fas fa-shopping-cart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
+                            <span class="badge text-secondary border border-secondary rounded-circle"
+                                  style="padding-bottom: 2px;">0</span>
                         </a>
                     </div>
                 </div>
@@ -117,141 +142,204 @@
         </div>
     </div>
 </div>
+
+<!-- 장바구니 본문 -->
 <div class="container-fluid">
     <div class="row px-xl-5">
-        <div class="col-12">
-            <nav class="breadcrumb bg-light mb-30">
-                <a class="breadcrumb-item text-dark" th:href="@{/}">Home</a>
-                <a class="breadcrumb-item text-dark" th:href="@{/api/books}">Shop</a>
-                <span class="breadcrumb-item active">Shopping Cart</span>
-            </nav>
-        </div>
-    </div>
-</div>
-<div class="container-fluid">
-    <div class="row px-xl-5">
-        <div class="col-lg-8 table-responsive mb-5">
-            <table class="table table-light table-borderless table-hover text-center mb-0">
-                <thead class="thead-dark">
-                <tr>
-                    <th>Books</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                    <th>Remove</th>
-                </tr>
-                </thead>
-                <tbody class="align-middle">
-                <tr th:if="${cartItems != null and !cartItems.empty}" th:each="item : ${cartItems}">
-                    <td class="align-middle text-left">
-                        <img th:src="${item.book.thumbnailUrl != null ? item.book.thumbnailUrl : '/img/product-1.jpg'}" alt="" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover;">
-                        <a th:href="@{/api/books/{id}(id=${item.book.id})}" class="text-dark ml-2" th:text="${item.book.title}">Book Title</a>
-                    </td>
-                    <td class="align-middle" th:text="${#numbers.formatInteger(item.book.price, 0, 'COMMA')} + '원'">12,000원</td>
+        <!-- 왼쪽: 장바구니 목록 -->
+        <div class="col-lg-8 mb-5">
+            <h5 class="section-title position-relative text-uppercase mb-3">
+                <span class="bg-secondary pr-3">장바구니</span>
+            </h5>
+            <div class="bg-light p-30 table-responsive">
+                <table class="table table-light table-borderless table-hover text-center mb-0">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th class="text-left">상품정보</th>
+                        <th>가격</th>
+                        <th>수량</th>
+                        <th>합계</th>
+                        <th>삭제</th>
+                    </tr>
+                    </thead>
+                    <tbody class="align-middle">
+                    <!-- 장바구니에 담긴 도서가 있을 때 -->
+                    <tr th:if="${cartItems != null and !cartItems.empty}" th:each="item : ${cartItems}">
+                        <td class="align-middle text-left">
+                            <img th:src="${item.book.thumbnailUrl != null ? item.book.thumbnailUrl : '/img/product-1.jpg'}"
+                                 alt="" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover;">
+                            <a th:href="@{/api/books/{id}(id=${item.book.id})}"
+                               class="text-dark ml-2"
+                               th:text="${item.book.title}">
+                                도서 제목
+                            </a>
+                        </td>
+                        <td class="align-middle"
+                            th:text="${#numbers.formatInteger(item.book.price, 0, 'COMMA')} + '원'">
+                            12,000원
+                        </td>
 
-                    <td class="align-middle">
-                        <div class="input-group quantity mx-auto" style="width: 100px;">
-                            <div class="input-group-btn">
-                                <form th:action="@{/api/carts/update}" method="post" style="display:inline;">
-                                    <input type="hidden" name="cartItemId" th:value="${item.id}">
-                                    <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
-                                    <button type="submit" class="btn btn-sm btn-primary btn-minus">
-                                        <i class="fa fa-minus"></i>
-                                    </button>
-                                </form>
+                        <td class="align-middle">
+                            <div class="input-group quantity mx-auto" style="width: 100px;">
+                                <div class="input-group-btn">
+                                    <form th:action="@{/api/carts/update}" method="post" style="display:inline;">
+                                        <input type="hidden" name="cartItemId" th:value="${item.id}">
+                                        <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
+                                        <button type="submit" class="btn btn-sm btn-primary btn-minus">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <input type="text"
+                                       class="form-control form-control-sm bg-secondary border-0 text-center"
+                                       th:value="${item.quantity}" readonly>
+                                <div class="input-group-btn">
+                                    <form th:action="@{/api/carts/update}" method="post" style="display:inline;">
+                                        <input type="hidden" name="cartItemId" th:value="${item.id}">
+                                        <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
+                                        <button type="submit" class="btn btn-sm btn-primary btn-plus">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                            <input type="text" class="form-control form-control-sm bg-secondary border-0 text-center"
-                                   th:value="${item.quantity}" readonly>
-                            <div class="input-group-btn">
-                                <form th:action="@{/api/carts/update}" method="post" style="display:inline;">
-                                    <input type="hidden" name="cartItemId" th:value="${item.id}">
-                                    <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
-                                    <button type="submit" class="btn btn-sm btn-primary btn-plus">
-                                        <i class="fa fa-plus"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="align-middle" th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">24,000원</td>
-                    <td class="align-middle">
-                        <form th:action="@{/api/carts/{id}/remove(id=${item.id})}" method="post" style="display:inline;">
-                            <input type="hidden" name="_method" value="delete">
-                            <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></button>
-                        </form>
-                    </td>
-                </tr>
-                <tr th:if="${cartItems == null or cartItems.empty}">
-                    <td colspan="5" class="align-middle py-5">
-                        <h5 class="m-0 text-muted">장바구니에 담긴 도서가 없습니다.</h5>
-                        <a th:href="@{/api/books}" class="btn btn-sm btn-primary mt-3">책 구경하기</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                        </td>
+                        <td class="align-middle"
+                            th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">
+                            24,000원
+                        </td>
+                        <td class="align-middle">
+                            <form th:action="@{/api/carts/{id}/remove(id=${item.id})}" method="post"
+                                  style="display:inline;">
+                                <input type="hidden" name="_method" value="delete">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- 장바구니가 비어 있을 때 -->
+                    <tr th:if="${cartItems == null or cartItems.empty}">
+                        <td colspan="5" class="align-middle py-5 text-center">
+                            <h5 class="m-0 text-muted">장바구니에 담긴 도서가 없습니다.</h5>
+                            <a th:href="@{/api/books}" class="btn btn-sm btn-primary mt-3">
+                                도서 둘러보기
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
+        <!-- 오른쪽: 쿠폰 + 요약 -->
         <div class="col-lg-4">
+            <!-- 쿠폰 적용 -->
             <form class="mb-30" th:action="@{/api/coupons/apply}" method="post">
-                <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Coupon Apply</span></h5>
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">쿠폰 적용</span>
+                </h5>
                 <div class="bg-light p-30 mb-5">
                     <div class="input-group">
-                        <input type="text" class="form-control border-0 p-4" name="couponCode" placeholder="Coupon Code">
+                        <input type="text" class="form-control border-0 p-4"
+                               name="couponCode" placeholder="쿠폰 코드를 입력하세요">
                         <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary">Apply Coupon</button>
+                            <button type="submit" class="btn btn-primary">
+                                쿠폰 적용
+                            </button>
                         </div>
                     </div>
+                    <small class="form-text text-muted mt-2">
+                        보유하신 쿠폰 번호를 입력하면 할인 금액이 장바구니에 반영됩니다.
+                    </small>
                 </div>
             </form>
 
-            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Cart Summary</span></h5>
+            <!-- 장바구니 요약 -->
+            <h5 class="section-title position-relative text-uppercase mb-3">
+                <span class="bg-secondary pr-3">장바구니 요약</span>
+            </h5>
             <div class="bg-light p-30 mb-5">
                 <div class="border-bottom pb-2">
                     <div class="d-flex justify-content-between mb-3">
-                        <h6>Subtotal</h6>
-                        <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">72,000원</h6>
+                        <h6>상품 금액</h6>
+                        <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">
+                            72,000원
+                        </h6>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <h6 class="font-weight-medium">Shipping</h6>
-                        <h6 class="font-weight-medium" th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">3,000원</h6>
+                        <h6 class="font-weight-medium">배송비</h6>
+                        <h6 class="font-weight-medium"
+                            th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">
+                            3,000원
+                        </h6>
                     </div>
                 </div>
                 <div class="pt-2">
                     <div class="d-flex justify-content-between mt-2">
-                        <h5>Total</h5>
-                        <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">75,000원</h5>
+                        <h5>총 결제 예정 금액</h5>
+                        <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">
+                            75,000원
+                        </h5>
                     </div>
-                    <a th:href="@{/api/orders/checkout}" class="btn btn-block btn-primary font-weight-bold my-3 py-3">Proceed To Checkout</a>
+
+                    <a th:href="@{/api/orders/checkout}"
+                       class="btn btn-block btn-primary font-weight-bold my-3 py-3">
+                        주문서 작성하기
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- footer -->
 <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
     <div class="row px-xl-5 pt-5">
         <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
             <h5 class="text-secondary text-uppercase mb-4">Get In Touch</h5>
-            <p class="mb-4">No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor. Rebum tempor no vero est magna amet no</p>
-            <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>Seoul, Korea</p>
-            <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
-            <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
+            <p class="mb-4">
+                No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor.
+                Rebum tempor no vero est magna amet no
+            </p>
+            <p class="mb-2">
+                <i class="fa fa-map-marker-alt text-primary mr-3"></i>Seoul, Korea
+            </p>
+            <p class="mb-2">
+                <i class="fa fa-envelope text-primary mr-3"></i>info@example.com
+            </p>
+            <p class="mb-0">
+                <i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890
+            </p>
         </div>
         <div class="col-lg-8 col-md-12">
             <div class="row">
                 <div class="col-md-4 mb-5">
                     <h5 class="text-secondary text-uppercase mb-4">Quick Shop</h5>
                     <div class="d-flex flex-column justify-content-start">
-                        <a class="text-secondary mb-2" th:href="@{/}"><i class="fa fa-angle-right mr-2"></i>Home</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/books}"><i class="fa fa-angle-right mr-2"></i>Our Shop</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/carts}"><i class="fa fa-angle-right mr-2"></i>Shopping Cart</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/orders}"><i class="fa fa-angle-right mr-2"></i>Checkout</a>
-                        <a class="text-secondary" href="#"><i class="fa fa-angle-right mr-2"></i>Contact Us</a>
+                        <a class="text-secondary mb-2" th:href="@{/}">
+                            <i class="fa fa-angle-right mr-2"></i>Home
+                        </a>
+                        <a class="text-secondary mb-2" th:href="@{/api/books}">
+                            <i class="fa fa-angle-right mr-2"></i>Our Shop
+                        </a>
+                        <a class="text-secondary mb-2" th:href="@{/api/carts}">
+                            <i class="fa fa-angle-right mr-2"></i>Shopping Cart
+                        </a>
+                        <a class="text-secondary mb-2" th:href="@{/api/orders}">
+                            <i class="fa fa-angle-right mr-2"></i>Checkout
+                        </a>
+                        <a class="text-secondary" href="#">
+                            <i class="fa fa-angle-right mr-2"></i>Contact Us
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row border-top mx-xl-5 py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
+    <div class="row border-top mx-xl-5 py-4"
+         style="border-color: rgba(256, 256, 256, .1) !important;">
         <div class="col-md-6 px-xl-0">
             <p class="mb-md-0 text-center text-md-left text-secondary">
                 &copy; <a class="text-primary" href="#">Trillion-Shop</a>. All Rights Reserved.
@@ -263,15 +351,15 @@
         </div>
     </div>
 </div>
-<a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
+<a href="#" class="btn btn-primary back-to-top">
+    <i class="fa fa-angle-double-up"></i>
+</a>
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/lib/easing/easing.min.js}"></script>
 <script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
-
 <script th:src="@{/js/main.js}"></script>
 </body>
-
 </html>

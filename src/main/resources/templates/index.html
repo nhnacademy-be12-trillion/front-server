@@ -45,22 +45,7 @@
             </div>
         </div>
         <div class="col-lg-6 text-center text-lg-right">
-            <div class="d-inline-flex align-items-center">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">My Account</button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div th:if="${member == null}">
-                            <a class="dropdown-item" th:href="@{/api/auth/login}">Sign in</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/signup}">Sign up</a>
-                        </div>
-                        <div th:unless="${member == null}">
-                            <button class="dropdown-item" type="button" th:text="${member.name} + '님'">User</button>
-                            <a class="dropdown-item" th:href="@{/api/members/my-page}">My Page</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/logout}">Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
             <div class="d-inline-flex align-items-center d-block d-lg-none">
                 <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
                     <i class="fas fa-heart text-dark"></i>
@@ -92,8 +77,35 @@
             </form>
         </div>
         <div class="col-lg-4 col-6 text-right">
-<!--            <p class="m-0">Customer Service</p>-->
-<!--            <h5 class="m-0">+012 345 6789</h5>-->
+
+            <!-- 비로그인 상태 -->
+            <div class="d-inline-flex align-items-center justify-content-end w-100" th:if="${member == null}">
+                <a th:href="@{/api/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
+                    로그인
+                </a>
+                <a th:href="@{/api/auth/signup}" class="btn btn-sm btn-primary mx-1">
+                    회원가입
+                </a>
+                <a th:href="@{/api/orders/guest}" class="btn btn-sm text-dark btn-outline-secondary mx-1">
+                    비회원 주문조회
+                </a>
+            </div>
+
+            <!-- 로그인 상태 -->
+            <div class="d-inline-flex flex-column align-items-end w-100" th:unless="${member == null}">
+            <span class="small mb-2" th:text="${member.name} + ' 님, 환영합니다'">
+                홍길동 님, 환영합니다
+            </span>
+                <div>
+                    <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
+                        마이페이지
+                    </a>
+                    <a th:href="@{/api/auth/logout}" class="btn btn-sm text-dark btn-outline-secondary mx-1">
+                        로그아웃
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -124,11 +136,9 @@
                 </button>
                 <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                     <div class="navbar-nav mr-auto py-0">
-                        <a th:href="@{/}" class="nav-item nav-link active">Home</a>
-                        <a th:href="@{/api/books}" class="nav-item nav-link">Shop</a>
-                        <a th:href="@{/api/carts}" class="nav-item nav-link">Cart</a>
-                        <a th:href="@{/api/orders}" class="nav-item nav-link">Order</a>
-                        <a th:href="@{/api/coupons}" class="nav-item nav-link">Coupon</a>
+                        <a th:href="@{/}" class="nav-item nav-link">베스트</a>
+                        <a href="#" class="nav-item nav-link">최근 발매</a>
+                        <a href="#" class="nav-item nav-link">생일책</a>
                     </div>
                     <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                         <a th:href="@{/api/members/likes}" class="btn px-0">
@@ -198,34 +208,7 @@
         </div>
     </div>
 </div>
-<div class="container-fluid pt-5">
-    <div class="row px-xl-5 pb-3">
-        <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-            <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                <h1 class="fa fa-check text-primary m-0 mr-3"></h1>
-                <h5 class="font-weight-semi-bold m-0">Quality Books</h5>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-            <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                <h1 class="fa fa-shipping-fast text-primary m-0 mr-2"></h1>
-                <h5 class="font-weight-semi-bold m-0">Fast Shipping</h5>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-            <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                <h1 class="fas fa-exchange-alt text-primary m-0 mr-3"></h1>
-                <h5 class="font-weight-semi-bold m-0">14-Day Return</h5>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
-            <div class="d-flex align-items-center bg-light mb-4" style="padding: 30px;">
-                <h1 class="fa fa-phone-volume text-primary m-0 mr-3"></h1>
-                <h5 class="font-weight-semi-bold m-0">24/7 Support</h5>
-            </div>
-        </div>
-    </div>
-</div>
+
 <div class="container-fluid pt-5">
     <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">Categories</span></h2>
 

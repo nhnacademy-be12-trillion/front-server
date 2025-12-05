@@ -1,3 +1,15 @@
+<!--
+  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
+  ~ + * While every precaution has been taken in the preparation of this resource,  assumes no
+  ~ + responsibility for errors or omissions, or for damages resulting from the use of the information
+  ~ + contained herein
+  ~ + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
+  ~ + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
+  ~ + prior written permission.
+  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  -->
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -20,28 +32,22 @@
     <div class="row bg-secondary py-1 px-xl-5">
         <div class="col-lg-6 d-none d-lg-block">
             <div class="d-inline-flex align-items-center h-100">
-                <a class="text-body mr-3" href="">회사소개</a>
-                <a class="text-body mr-3" href="">고객센터</a>
-                <a class="text-body mr-3" href="">도움말</a>
-                <a class="text-body mr-3" href="">FAQ</a>
+                <a class="text-body mr-3" href="">About</a>
+                <a class="text-body mr-3" href="">Contact</a>
+                <a class="text-body mr-3" href="">Help</a>
+                <a class="text-body mr-3" href="">FAQs</a>
             </div>
         </div>
         <div class="col-lg-6 text-center text-lg-right">
-            <div class="d-inline-flex align-items-center">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">내 계정</button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div th:if="${member == null}">
-                            <a class="dropdown-item" th:href="@{/api/auth/login}">로그인</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/signup}">회원가입</a>
-                        </div>
-                        <div th:unless="${member == null}">
-                            <button class="dropdown-item" type="button" th:text="${member.name} + '님'">회원</button>
-                            <a class="dropdown-item" th:href="@{/api/members/my-page}">마이페이지</a>
-                            <a class="dropdown-item" th:href="@{/api/auth/logout}">로그아웃</a>
-                        </div>
-                    </div>
-                </div>
+            <div class="d-inline-flex align-items-center d-block d-lg-none">
+                <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
+                    <i class="fas fa-heart text-dark"></i>
+                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
+                </a>
+                <a th:href="@{/api/carts}" class="btn px-0 ml-2">
+                    <i class="fas fa-shopping-cart text-dark"></i>
+                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
+                </a>
             </div>
         </div>
     </div>
@@ -51,10 +57,11 @@
                 <img src="/static/img/logo.png" alt="Book E-commerce Logo" class="img-fluid" style="background-color: #fff;">
             </a>
         </div>
+
         <div class="col-lg-4 col-6 text-left">
             <form th:action="@{/api/books/search}" method="get">
                 <div class="input-group">
-                    <input type="text" name="keyword" class="form-control" placeholder="도서 검색">
+                    <input type="text" name="keyword" class="form-control" placeholder="Search for books">
                     <div class="input-group-append">
                         <button type="submit" class="input-group-text bg-transparent text-primary">
                             <i class="fa fa-search"></i>
@@ -63,9 +70,38 @@
                 </div>
             </form>
         </div>
+
+        <!-- ✅ 로그인/회원가입/비회원조회 / 환영문구 + 마이페이지 영역 -->
         <div class="col-lg-4 col-6 text-right">
-            <p class="m-0">고객 센터</p>
-            <h5 class="m-0">+012 345 6789</h5>
+
+            <!-- 비로그인 상태 -->
+            <div class="d-inline-flex align-items-center justify-content-end w-100" th:if="${member == null}">
+                <a th:href="@{/api/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
+                    로그인
+                </a>
+                <a th:href="@{/api/auth/signup}" class="btn btn-sm btn-primary mx-1">
+                    회원가입
+                </a>
+                <a th:href="@{/api/orders/guest}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+                    비회원 주문조회
+                </a>
+            </div>
+
+            <!-- 로그인 상태 -->
+            <div class="d-inline-flex flex-column align-items-end w-100" th:unless="${member == null}">
+            <span class="small mb-2" th:text="${member.name} + ' 님, 환영합니다'">
+                홍길동 님, 환영합니다
+            </span>
+                <div>
+                    <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
+                        마이페이지
+                    </a>
+                    <a th:href="@{/api/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+                        로그아웃
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -80,11 +116,9 @@
                 </button>
                 <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                     <div class="navbar-nav mr-auto py-0">
-                        <a th:href="@{/}" class="nav-item nav-link">홈</a>
-                        <a th:href="@{/api/books}" class="nav-item nav-link">쇼핑</a>
-                        <a th:href="@{/api/carts}" class="nav-item nav-link">장바구니</a>
-                        <a th:href="@{/api/orders}" class="nav-item nav-link active">주문/결제</a>
-                        <a th:href="@{/api/coupons}" class="nav-item nav-link">쿠폰</a>
+                        <a th:href="@{/}" class="nav-item nav-link">베스트</a>
+                        <a href="#" class="nav-item nav-link">최근 발매</a>
+                        <a href="#" class="nav-item nav-link">생일책</a>
                     </div>
                     <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                         <a th:href="@{/api/members/likes}" class="btn px-0">
@@ -137,114 +171,152 @@
     </div>
 </div>
 <div class="container-fluid">
-    <div class="row px-xl-5">
+    <!-- 주문 전체 폼 -->
+    <form th:action="@{/api/orders}" method="post" id="orderForm" th:object="${orderRequest}">
+        <div class="row px-xl-5">
 
-        <div class="col-lg-8">
-            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">배송 정보</span></h5>
-            <div class="bg-light p-30 mb-5">
-                <form th:action="@{/api/orders}" method="post" id="orderForm" th:object="${orderRequest}">
+            <!-- ✅ 왼쪽 : 배송주소 -->
+            <div class="col-lg-8">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">배송주소</span>
+                </h5>
+                <div class="bg-light p-30 mb-5">
                     <div class="row">
                         <div class="col-md-6 form-group">
                             <label>수령인 이름</label>
-                            <input class="form-control" type="text" name="recipientName" th:value="${member.name}" placeholder="이름" required>
+                            <input class="form-control" type="text" name="recipientName"
+                                   th:value="${member != null ? member.name : ''}" placeholder="이름" required>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>이메일</label>
-                            <input class="form-control" type="text" name="email" th:value="${member.email}" placeholder="example@email.com" required>
+                            <input class="form-control" type="text" name="email"
+                                   th:value="${member != null ? member.email : ''}" placeholder="example@email.com" required>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>휴대폰 번호</label>
-                            <input class="form-control" type="text" name="phoneNumber" th:value="${member.phoneNumber}" placeholder="010-0000-0000" required>
+                            <input class="form-control" type="text" name="phoneNumber"
+                                   th:value="${member != null ? member.phoneNumber : ''}" placeholder="010-0000-0000" required>
                         </div>
-                        <div class="col-md-6 form-group">
-                            <label>우편번호</label>
-                            <input class="form-control" type="text" name="zipcode" th:value="${member.address.zipcode}" placeholder="우편번호 (예: 12345)" required>
-                        </div>
+                        <!-- 주소 (회원가입과 동일한 UI) -->
                         <div class="col-md-12 form-group">
                             <label>주소</label>
-                            <input class="form-control" type="text" name="street" th:value="${member.address.street}" placeholder="기본 주소 (예: 서울시 강남구)" required>
+
+                            <!-- 우편번호 + 주소검색 버튼 -->
+                            <div class="form-row">
+                                <div class="form-group col-md-5">
+                                    <input type="text" class="form-control"
+                                           name="zipcode" id="zipcode"
+                                           th:value="${member != null ? member.address.zipcode : ''}"
+                                           placeholder="우편번호" readonly required>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <button type="button" class="btn btn-outline-secondary btn-block"
+                                            id="btnSearchAddress">
+                                        주소 검색
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 기본 주소 + 상세 주소 -->
+                            <div class="form-group">
+                                <input type="text" class="form-control mb-2"
+                                       name="street" id="street"
+                                       th:value="${member != null ? member.address.street : ''}"
+                                       placeholder="기본 주소" readonly required>
+                                <input type="text" class="form-control"
+                                       name="detail" id="detail"
+                                       th:value="${member != null ? member.address.detail : ''}"
+                                       placeholder="상세 주소를 입력하세요" required>
+                            </div>
                         </div>
-                        <div class="col-md-12 form-group">
-                            <label>상세 주소</label>
-                            <input class="form-control" type="text" name="detail" th:value="${member.address.detail}" placeholder="나머지 주소 (예: A동 101호)" required>
-                        </div>
+
 
                         <div class="col-md-12 form-group">
                             <label>배송 메모 (선택)</label>
-                            <input class="form-control" type="text" name="deliveryMemo" placeholder="예: 문 앞에 놓아주세요.">
+                            <input class="form-control" type="text" name="deliveryMemo"
+                                   placeholder="예: 문 앞에 놓아주세요.">
                         </div>
-
-                        <div class="col-md-12">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="shipto">
-                                <label class="custom-control-label" for="shipto" data-toggle="collapse" data-target="#shipping-address">
-                                    새로운 주소로 배송
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="collapse mb-5" id="shipping-address">
-                        <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">새 배송지 입력</span></h5>
-                        <div class="row">
-                            <p class="text-muted col-12">
-                                <small>새 배송지를 입력하려면 위의 '새로운 주소로 배송'을 체크하세요.</small>
-                            </p>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">주문 요약</span></h5>
-            <div class="bg-light p-30 mb-5">
-                <div class="border-bottom pb-2">
-                    <div class="d-flex justify-content-between mb-3">
-                        <h6>상품 금액</h6>
-                        <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">72,000원</h6>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <h6 class="font-weight-medium">배송비</h6>
-                        <h6 class="font-weight-medium" th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">3,000원</h6>
-                    </div>
-                </div>
-                <div class="pt-2">
-                    <div class="d-flex justify-content-between mt-2">
-                        <h5>총 결제 금액</h5>
-                        <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">75,000원</h5>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-5">
-                <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">결제 수단</span></h5>
-                <div class="bg-light p-30">
+            <!-- ✅ 오른쪽 : 주문고객 + 주문 요약 + 결제하기 버튼 -->
+            <div class="col-lg-4">
+
+                <!-- 주문고객 정보 -->
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">주문고객</span>
+                </h5>
+                <div class="bg-light p-30 mb-4">
                     <div class="form-group">
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" name="paymentMethod" id="paypal" value="CARD" checked>
-                            <label class="custom-control-label" for="paypal">신용/체크 카드</label>
-                        </div>
+                        <label>이름</label>
+                        <input class="form-control" type="text" name="ordererName"
+                               th:value="${member != null ? member.name : ''}" placeholder="주문하시는 분 이름">
                     </div>
                     <div class="form-group">
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" name="paymentMethod" id="directcheck" value="BANK_TRANSFER">
-                            <label class="custom-control-label" for="directcheck">계좌 이체</label>
-                        </div>
+                        <label>휴대폰 번호</label>
+                        <input class="form-control" type="text" name="ordererPhoneNumber"
+                               th:value="${member != null ? member.phoneNumber : ''}" placeholder="010-0000-0000">
                     </div>
-                    <div class="form-group mb-4">
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" name="paymentMethod" id="cashondevliery" value="CASH">
-                            <label class="custom-control-label" for="cashondevliery">무통장 입금</label>
-                        </div>
+                    <div class="form-group">
+                        <label>이메일</label>
+                        <input class="form-control" type="text" name="ordererEmail"
+                               th:value="${member != null ? member.email : ''}" placeholder="example@email.com">
                     </div>
 
-                    <button type="submit" form="orderForm" class="btn btn-block btn-primary font-weight-bold py-3">최종 주문하기</button>
+                    <!-- 🔐 비회원 주문 비밀번호 (member == null 일 때만) -->
+                    <div class="form-group" th:if="${member == null}">
+                        <label>비회원 주문 비밀번호</label>
+                        <input class="form-control" type="password" name="guestPassword"
+                               placeholder="주문 조회에 사용할 비밀번호 (4자 이상)" required>
+                        <small class="form-text text-muted">
+                            비회원 주문 조회 시 사용되며, 영문/숫자 포함 4자 이상으로 입력해주세요.
+                        </small>
+                    </div>
+
+                    <!-- 회원일 때 안내 문구만 -->
+                    <div class="form-group mb-0" th:if="${member != null}">
+                        <small class="text-muted">
+                            로그인된 회원 정보로 주문이 진행되며, 별도의 비밀번호 입력은 필요하지 않습니다.
+                        </small>
+                    </div>
                 </div>
+
+                <!-- 주문 요약 -->
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">주문 요약</span>
+                </h5>
+                <div class="bg-light p-30 mb-4">
+                    <div class="border-bottom pb-2">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6>상품 금액</h6>
+                            <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">72,000원</h6>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <h6 class="font-weight-medium">배송비</h6>
+                            <h6 class="font-weight-medium"
+                                th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">
+                                3,000원
+                            </h6>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <div class="d-flex justify-content-between mt-2">
+                            <h5>총 결제 금액</h5>
+                            <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">75,000원</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ 결제 수단 없이 버튼만 -->
+                <button type="submit" class="btn btn-block btn-primary font-weight-bold py-3">
+                    결제하기
+                </button>
             </div>
         </div>
-    </div>
+    </form>
 </div>
+
 <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
     <div class="row px-xl-5 pt-5">
         <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
