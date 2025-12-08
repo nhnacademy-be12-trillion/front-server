@@ -10,16 +10,9 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.book;
+package com.nhnacademy.frontserver.controller.book;
 
-public record BookListResponse(
-        String bookName,
-        String bookPublisher,
-        boolean bookPackaging,
-        BookState bookState,
-        int bookStock,
-        int bookRegularPrice,
-        int bookSalePrice,
-        double bookReviewRate,
-        String bookImage
-) {}
+public enum BookState {
+    // 판매 중, 품절, 판매 종료
+    ON_SALE, SOLD_OUT, SALE_END
+}

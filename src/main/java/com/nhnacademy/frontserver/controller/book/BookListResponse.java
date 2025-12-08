@@ -10,23 +10,16 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.book;
+package com.nhnacademy.frontserver.controller.book;
 
-import java.time.LocalDate;
-
-public record BookDetailResponse(
+public record BookListResponse(
         String bookName,
-        String bookDescription,
         String bookPublisher,
-        LocalDate bookPublicationDate,
-        String bookIndex,
         boolean bookPackaging,
         BookState bookState,
         int bookStock,
         int bookRegularPrice,
         int bookSalePrice,
         double bookReviewRate,
-        String bookImage,
-        int viewCount
-) {
-}
+        String bookImage
+) {}
