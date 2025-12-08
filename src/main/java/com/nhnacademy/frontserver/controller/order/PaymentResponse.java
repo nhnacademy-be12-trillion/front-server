@@ -10,7 +10,7 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order;
+package com.nhnacademy.frontserver.controller.order;
 
 import java.time.LocalDateTime;
 

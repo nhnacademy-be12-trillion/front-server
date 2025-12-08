@@ -10,18 +10,9 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order.util;
+package com.nhnacademy.frontserver.controller.order;
 
-import java.time.LocalDateTime;
-
-public record OrderDetails(
-    LocalDateTime orderDate,
-    String shippingPostCode, // 우편번호
-    LocalDateTime deliveryDate,
-    int deliveryFee,
-    int pointUsage,
-    int originPrice,
-    int totalPrice,
-    Long couponId
-) {
-}
+public record NonMemberOrderGetRequest(
+    String orderNumber,
+    String nonMemberPassword
+) {}

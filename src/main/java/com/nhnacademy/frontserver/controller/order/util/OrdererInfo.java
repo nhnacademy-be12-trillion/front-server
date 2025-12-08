@@ -10,17 +10,9 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order;
+package com.nhnacademy.frontserver.controller.order.util;
 
-import com.nhnacademy.frontserver.dto.order.util.OrderItemStatus;
-
-public record OrderItemResponse(
-        Long orderId,
-        Long bookId,
-        String bookName,
-        int quantity,
-        int price,
-        int packagingPrice,
-        OrderItemStatus orderItemStatus
-) {
-}
+public record OrdererInfo(
+    String ordererName,
+    String ordererContact
+) {}

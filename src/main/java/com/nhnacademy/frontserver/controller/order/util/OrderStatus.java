@@ -10,9 +10,11 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order.util;
+package com.nhnacademy.frontserver.controller.order.util;
 
-public record OrdererInfo(
-    String ordererName,
-    String ordererContact
-) {}
+public enum OrderStatus {
+    PENDING,    // 결제 대기
+    COMPLETED,  // 결제 완료
+    CANCELED,   // 모든 상품 취소/환불
+    FAILED      // 주문 생성 실패
+}

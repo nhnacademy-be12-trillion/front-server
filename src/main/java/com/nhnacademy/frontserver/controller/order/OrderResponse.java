@@ -10,11 +10,25 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order.util;
+package com.nhnacademy.frontserver.controller.order;
 
-public enum OrderStatus {
-    PENDING,    // 결제 대기
-    COMPLETED,  // 결제 완료
-    CANCELED,   // 모든 상품 취소/환불
-    FAILED      // 주문 생성 실패
+import com.nhnacademy.frontserver.controller.order.util.OrderStatus;
+import com.nhnacademy.frontserver.controller.order.util.OrdererInfo;
+import com.nhnacademy.frontserver.controller.order.util.ReceiverInfo;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record OrderResponse(
+        Long orderId,
+        Long memberId,
+        String orderNumber,
+        LocalDateTime orderDate,
+        OrderStatus orderStatus,
+        int originPrice,
+        int totalPrice,
+        int deliveryFee,
+        OrdererInfo ordererInfo,
+        ReceiverInfo receiverInfo,
+        List<OrderItemResponse> orderItems
+) {
 }

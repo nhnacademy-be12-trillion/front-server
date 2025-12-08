@@ -10,10 +10,10 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order.util;
+package com.nhnacademy.frontserver.controller.order;
 
-public record ReceiverInfo(
-    String receiverName,
-    String receiverContact,
-    String receiverAddress
+import com.nhnacademy.frontserver.controller.order.util.OrderItemStatus;
+
+public record OrderItemStatusPatchRequest(
+    OrderItemStatus status
 ) {}

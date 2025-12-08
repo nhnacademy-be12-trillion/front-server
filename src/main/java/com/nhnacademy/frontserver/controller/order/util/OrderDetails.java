@@ -10,10 +10,18 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order;
+package com.nhnacademy.frontserver.controller.order.util;
 
-import com.nhnacademy.frontserver.dto.order.util.OrderItemStatus;
+import java.time.LocalDateTime;
 
-public record OrderItemStatusPatchRequest(
-    OrderItemStatus status
-) {}
+public record OrderDetails(
+    LocalDateTime orderDate,
+    String shippingPostCode, // 우편번호
+    LocalDateTime deliveryDate,
+    int deliveryFee,
+    int pointUsage,
+    int originPrice,
+    int totalPrice,
+    Long couponId
+) {
+}

@@ -10,16 +10,26 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order.util;
+package com.nhnacademy.frontserver.controller.order;
 
-public enum OrderItemStatus {
-    PREPARING,  // 상품 준비중
-    SHIPPED,    // 배송중
-    DELIVERED,  // 배송 완료
-    RETURNED,   // 반품 완료
-    CONFIRMED,  // 구매 확정
-    CANCELED,   // 주문 취소
+import java.time.LocalDateTime;
+import java.util.List;
 
-    RETURN_REQUESTED_CHANGE_OF_MIND,    // 반품 요청 (단순 변심)
-    RETURN_REQUESTED_DAMAGED,           // 반품 요청 (파손)
-}
+public record OrderCreateRequest(
+    String orderName,
+    String orderContact,
+    LocalDateTime deliveryDate,
+
+    String receiverName,
+    String receiverContact,
+    String receiverAddress,
+    String receiverPostCode,
+
+    String nonMemberPassword,
+
+    int pointUsage,
+
+    Long couponId,
+
+    List<OrderItemCreateRequest> orderItems
+) {}

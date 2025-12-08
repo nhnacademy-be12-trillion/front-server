@@ -10,9 +10,9 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order;
+package com.nhnacademy.frontserver.controller.order;
 
-import com.nhnacademy.frontserver.dto.order.util.OrderItemStatus;
+import com.nhnacademy.frontserver.controller.order.util.OrderItemStatus;
 
 public record NonMemberOrderItemStatusPatchRequest(
     String nonMemberPassword,

@@ -10,25 +10,11 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order;
+package com.nhnacademy.frontserver.controller.order;
 
-import com.nhnacademy.frontserver.dto.order.util.OrderStatus;
-import com.nhnacademy.frontserver.dto.order.util.OrdererInfo;
-import com.nhnacademy.frontserver.dto.order.util.ReceiverInfo;
-import java.time.LocalDateTime;
-import java.util.List;
-
-public record OrderResponse(
-        Long orderId,
-        Long memberId,
-        String orderNumber,
-        LocalDateTime orderDate,
-        OrderStatus orderStatus,
-        int originPrice,
-        int totalPrice,
-        int deliveryFee,
-        OrdererInfo ordererInfo,
-        ReceiverInfo receiverInfo,
-        List<OrderItemResponse> orderItems
+public record OrderItemCreateRequest(
+        Long bookId,
+        int quantity,
+        Long packagingId
 ) {
 }

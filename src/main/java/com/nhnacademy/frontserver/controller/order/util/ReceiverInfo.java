@@ -10,9 +10,10 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.order;
+package com.nhnacademy.frontserver.controller.order.util;
 
-public record NonMemberOrderGetRequest(
-    String orderNumber,
-    String nonMemberPassword
+public record ReceiverInfo(
+    String receiverName,
+    String receiverContact,
+    String receiverAddress
 ) {}
