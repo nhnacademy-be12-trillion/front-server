@@ -10,20 +10,28 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.client;
+package com.nhnacademy.frontserver.controller.book;
 
-import com.nhnacademy.frontserver.dto.book.BookListResponse;
-import com.nhnacademy.frontserver.dto.book.CategoryResponse;
-import java.util.List;
+import com.nhnacademy.frontserver.controller.PageResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "bookClient", url = "http://localhost:10413/")
+@FeignClient(name = "book-service",
+        url = "http://localhost:10413" // TODO eureka 서버 등록 시 비활성화 처리
+)
+@RequestMapping("/api/books")
 public interface BookClient {
 
-    @GetMapping("/api/books/categories}")
-    List<CategoryResponse> getCategories(); //뎁스 맞춰서 반환할 수 있게
+    //TODO 현재 publisherName 호출 시 null
+    @GetMapping
+    PageResponse<BookListResponse> getBooks(
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("sort") String sort
+    );
 
-    @GetMapping("/api/books/list")
-    List<BookListResponse> getBooks();
+    @GetMapping
+    BookDetailResponse getBookDetail(@RequestParam("id") long id);
 }
