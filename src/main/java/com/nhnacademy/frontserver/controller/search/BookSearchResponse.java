@@ -1,8 +1,8 @@
-package com.nhnacademy.frontserver.dto.search;
+package com.nhnacademy.frontserver.controller.search;
 
 import java.util.List;
 
-public record BookSearchResponse(
+record BookSearchResponse(
         List<BookSearchResult> results,
         long total,
         int page,

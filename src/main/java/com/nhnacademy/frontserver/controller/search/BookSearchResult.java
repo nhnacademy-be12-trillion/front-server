@@ -1,6 +1,6 @@
-package com.nhnacademy.frontserver.dto.search;
+package com.nhnacademy.frontserver.controller.search;
 
-public record BookSearchResult(
+record BookSearchResult(
         String id,
         String isbn,
         String title,

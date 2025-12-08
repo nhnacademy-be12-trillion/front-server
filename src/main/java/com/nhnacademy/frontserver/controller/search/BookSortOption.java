@@ -1,8 +1,6 @@
-package com.nhnacademy.frontserver.dto.search;
+package com.nhnacademy.frontserver.controller.search;
 
-import java.util.List;
-
-public enum BookSortOption {
+enum BookSortOption {
     RELEVANCE,
     NEW,
     LOW_PRICE,
