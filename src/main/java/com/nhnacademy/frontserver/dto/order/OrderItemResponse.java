@@ -17,6 +17,7 @@ import com.nhnacademy.frontserver.dto.order.util.OrderItemStatus;
 public record OrderItemResponse(
         Long orderId,
         Long bookId,
+        String bookName,
         int quantity,
         int price,
         int packagingPrice,

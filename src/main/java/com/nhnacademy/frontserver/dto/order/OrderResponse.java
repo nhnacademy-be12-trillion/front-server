@@ -24,6 +24,7 @@ public record OrderResponse(
         String orderNumber,
         LocalDateTime orderDate,
         OrderStatus orderStatus,
+        int originPrice,
         int totalPrice,
         int deliveryFee,
         OrdererInfo ordererInfo,
