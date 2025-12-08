@@ -10,11 +10,11 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.book;
+package com.nhnacademy.frontserver.controller.review;
 
 import java.time.LocalDateTime;
 
-public record ReviewResponse(
+record ReviewResponse(
         Long reviewId,
         int reviewRate,
         String reviewContents,
