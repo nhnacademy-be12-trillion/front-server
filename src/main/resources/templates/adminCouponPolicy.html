@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <title>Trillion-Shop | 관리자 페이지</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="관리자, 주문, 정책, 회원" name="keywords">
+    <meta content="Trillion-Shop 관리자 시스템" name="description">
+
+    <link th:href="@{/img/favicon.ico}" rel="icon">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
+    <link href="/css/style.min.css" rel="stylesheet">
+
+    <style>
+        /* 관리자 페이지의 배경 및 폰트 크기 조정 */
+        body {
+            background-color: #f5f5f5;
+        }
+        .admin-container {
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+        .nav-pills .nav-link {
+            border-radius: 0.25rem;
+            margin-bottom: 5px;
+            background-color: #e9ecef;
+            color: #3D464D;
+        }
+        .nav-pills .nav-link.active,
+        .nav-pills .nav-link:hover {
+            background-color: #5BADE9; /* Primary Color */
+            color: #fff;
+        }
+        .policy-group {
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-fluid admin-container">
+    <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
+
+    <div class="row px-xl-5">
+        <div class="col-lg-3 col-md-4">
+            <h5 class="section-title position-relative text-uppercase mb-4"><span class="bg-secondary pr-3">관리 메뉴</span></h5>
+            <div class="nav flex-column nav-pills" id="admin-tab" role="tablist" aria-orientation="vertical">
+                <a class="nav-link" id="orders-tab" data-toggle="pill" href="#orders-content" role="tab">최근 주문 관리 (200건)</a>
+                <a class="nav-link" id="policy-tab" data-toggle="pill" href="#policy-content" role="tab">상품 정책 설정</a>
+                <a class="nav-link" id="member-tab" data-toggle="pill" href="#member-content" role="tab">회원 관리</a>
+                <a class="nav-link" id="coupon-policy-tab" data-toggle="pill" th:href="@{admin/coupon-policies}" role="tab">쿠폰 정책 설정</a>
+            </div>
+        </div>
+        <div class="col-lg-9 col-md-8">
+            <div class="tab-content" id="admin-tabContent">
+                <div class="tab-pane fade show active" id="orders-content" role="tabpanel">
+                    <h4 class="mb-4 text-primary">쿠폰 정책조회</h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-light table-hover text-center mb-0">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th>정책이름</th>
+                                <th>최소주문금액</th>
+                                <th>최대할인금액</th>
+                                <th>할인금액</th>
+                                <th>쿠폰타입</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="content : ${contents}">
+                                <td th:text="${content.name}">100200</td>
+                                <td th:text="${content.minOrderPrice==null?'없음':#numbers.formatInteger(content.minOrderPrice,0,'COMMA')+ '원'}">user1</td>
+                                <td th:text="${content.maxDiscountPrice==null?'없음':#numbers.formatInteger(content.maxDiscountPrice,0,'COMMA') + '원'}">15,000원</td>
+                                <td th:text="${content.couponDiscountType== 'FIXED_AMOUNT' ? #numbers.formatInteger(content.discountValue,0,'COMMA') +'원':content.discountValue+'%'}">15,000원</td>
+                                <td th:text="${content.couponDiscountType== 'FIXED_AMOUNT' ? '금액 할인 (정액)' : '퍼센트 할인 (정률)'}">2025-12-01</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <div class="pagination justify-content-center">
+                            <div class="page-item"><a class="page-link" href="#" aria-label="Previous" id ="page-previous"><span aria-hidden="true">&laquo;</span></a></div>
+                            <ul class="pagination justify-content-center" id="page-container">
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">10</a></li>
+                            </ul>
+                            <div class="page-item"><a class="page-link" href="#" aria-label="Next" id="page-next"><span aria-hidden="true">&raquo;</span></a></div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/lib/easing/easing.min.js}"></script>
+<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+
+<script th:src="@{/js/main.js}"></script>
+
+<script th:inline="javascript">
+    const totalPages = 20; // ⭐ 총 페이지 수 (데이터에 따라 변경되어야 함)
+    const pagesToShow = 5;  // 화면에 한 번에 표시할 페이지 버튼 개수
+
+
+    const pageNumbersContainer = document.getElementById('page-container');
+    const prevButton = document.getElementById('page-previous');
+    const nextButton = document.getElementById('page-next');
+
+
+    /**
+     * 1. 현재 페이지를 기준으로 페이지 번호 링크를 동적으로 생성합니다.
+     */
+    function generatePageLinks() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentPage= urlParams.get('pageNumber')==undefined?0:urlParams.get('pageNumber');
+
+        pageNumbersContainer.innerHTML = ''; // 기존 링크 모두 삭제
+
+        // 표시할 페이지 블록의 시작 번호를 계산 (현재 페이지를 중앙에 두도록 시도)
+        let startPage = Math.max(0, currentPage - Math.floor(pagesToShow / 2));
+        let endPage = startPage + pagesToShow - 1;
+
+        // 끝 페이지가 총 페이지를 초과하는 경우 조정
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            // 블록이 끝에 붙으면, 시작 페이지를 다시 조정 (5개 블록 유지)
+            startPage = Math.max(1, endPage - pagesToShow + 1);
+        }
+
+        // 페이지 링크 생성 및 이벤트 리스너 추가
+        for (let i = startPage; i <= endPage; i++) {
+            const page = document.createElement("li");
+            page.className="page-item";
+            if (i == currentPage) {
+                page.classList.add('active'); // 현재 페이지에 active 클래스 부여
+            }
+
+            const pageLink = document.createElement('a');
+            pageLink.className="page-link"
+            pageLink.href = "?pageNumber="+i+"&pageSize=10";
+            pageLink.textContent = i;
+            pageLink.dataset.page = i; // 페이지 번호를 data 속성에 저장
+
+            page.appendChild(pageLink);
+            pageNumbersContainer.appendChild(page);
+        }
+        prevButton.href = "?pageNumber="+(Math.max(0,currentPage-1))+"&pageSize=10";
+        nextButton.href=  "?pageNumber="+(currentPage+1)+"&pageSize=10";
+    }
+    generatePageLinks();
+</script>
+</body>
+</html>
