@@ -1,16 +1,14 @@
 package com.nhnacademy.frontserver.controller;
 
+import com.nhnacademy.frontserver.controller.order.NonMemberOrderGetRequest;
 import com.nhnacademy.frontserver.controller.order.OrderClient;
 import com.nhnacademy.frontserver.controller.order.OrderItemStatusPatchRequest;
 import com.nhnacademy.frontserver.controller.order.OrderResponse;
+import com.nhnacademy.frontserver.controller.order.util.OrderItemStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/orders")
@@ -41,11 +39,11 @@ public class OrderDetailsController {
 
     @PostMapping("/{orderId}/items/{itemId}/return")
     public String requestReturnItem(@PathVariable Long orderId, @PathVariable Long itemId, @RequestParam String reason) {
-        com.nhnacademy.frontserver.controller.order.util.OrderItemStatus status;
+        OrderItemStatus status;
         if ("CHANGE_OF_MIND".equals(reason)) {
-            status = com.nhnacademy.frontserver.controller.order.util.OrderItemStatus.RETURN_REQUESTED_CHANGE_OF_MIND;
+            status = OrderItemStatus.RETURN_REQUESTED_CHANGE_OF_MIND;
         } else if ("DAMAGED".equals(reason)) {
-            status = com.nhnacademy.frontserver.controller.order.util.OrderItemStatus.RETURN_REQUESTED_DAMAGED;
+            status = OrderItemStatus.RETURN_REQUESTED_DAMAGED;
         } else {
             // 잘못된 reason -> 일단 리다이렉트
             return "redirect:/orders/" + orderId;
@@ -53,5 +51,13 @@ public class OrderDetailsController {
         OrderItemStatusPatchRequest request = new OrderItemStatusPatchRequest(status);
         orderClient.patchOrderItemStatusByMember(orderId, itemId, request);
         return "redirect:/orders/" + orderId;
+    }
+
+    @PostMapping("/non-members")
+    public String getOrderDetailForNonMember(@RequestBody NonMemberOrderGetRequest request, Model model) {
+        OrderResponse order = orderClient.getOrderByNonMember(request);
+        model.addAttribute("order", order);
+
+        return "order-detail";
     }
 }
