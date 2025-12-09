@@ -14,17 +14,14 @@ package com.nhnacademy.frontserver.controller.book;
 
 import com.nhnacademy.frontserver.controller.PageResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "book-service",
-        url = "http://localhost:10413" // TODO eureka 서버 등록 시 비활성화 처리
-)
-@RequestMapping("/api/books")
+
+@FeignClient(name = "book-service", url = "http://localhost:10413")
 public interface BookClient {
 
     //TODO 현재 publisherName 호출 시 null
+    // Pageable 응답 예시
     @GetMapping
     PageResponse<BookListResponse> getBooks(
             @RequestParam("page") int page,
@@ -34,4 +31,25 @@ public interface BookClient {
 
     @GetMapping
     BookDetailResponse getBookDetail(@RequestParam("id") long id);
+
+    //TODO category 뎁스를 노출하는 추천로직 @은해
+    /*
+    *public CategoryTreeResponse toTreeDto(Category category) {
+    return new CategoryTreeResponse(
+            category.getCategoryId(),
+            category.getCategoryName(),
+            category.getChildren().stream()
+                    .map(this::toTreeDto)
+                    .toList()
+    );
+}
+
+    * @OneToMany(mappedBy = "parent")
+private List<Category> children = new ArrayList<>();
+    *
+    *
+     */
+
+    @GetMapping("/api/categories")
+    CategoryTreeResponse getCategoryTree();
 }
