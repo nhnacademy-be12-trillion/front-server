@@ -12,8 +12,8 @@
 
 package com.nhnacademy.frontserver.controller;
 
-import com.nhnacademy.frontserver.client.BookClient;
-import com.nhnacademy.frontserver.dto.book.BookListResponse;
+import com.nhnacademy.frontserver.controller.book.BookClient;
+import com.nhnacademy.frontserver.controller.book.BookListResponse;
 import com.nhnacademy.frontserver.dto.book.CategoryResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

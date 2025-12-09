@@ -20,7 +20,11 @@ public record OrderDetails(
     LocalDateTime deliveryDate,
     int deliveryFee,
     int pointUsage,
+
+    // 총 상품 금액: (모든 도서 가격 * 수량) + 모든 도서의 포장비 합
     int originPrice,
+
+    // 최종 청구 금액: originPrice - (총 쿠폰 할인액 + 사용 포인트) + 배송비
     int totalPrice,
     Long couponId
 ) {

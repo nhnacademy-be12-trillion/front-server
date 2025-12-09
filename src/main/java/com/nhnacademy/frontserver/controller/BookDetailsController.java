@@ -12,8 +12,8 @@
 
 package com.nhnacademy.frontserver.controller;
 
-import com.nhnacademy.frontserver.dto.book.BookDetailResponse;
-import com.nhnacademy.frontserver.dto.book.ReviewResponse;
+import com.nhnacademy.frontserver.controller.book.BookDetailResponse;
+import com.nhnacademy.frontserver.controller.review.ReviewResponse;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

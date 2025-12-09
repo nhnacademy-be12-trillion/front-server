@@ -16,11 +16,15 @@ import com.nhnacademy.frontserver.controller.order.util.OrderItemStatus;
 
 public record OrderItemResponse(
         Long orderId,
+        Long orderItemId,
         Long bookId,
         String bookName,
         int quantity,
         int price,
         int packagingPrice,
+
+        // TODO: 도서 이미지 추가 필요
+        // String thumbnailUrl,
         OrderItemStatus orderItemStatus
 ) {
 }

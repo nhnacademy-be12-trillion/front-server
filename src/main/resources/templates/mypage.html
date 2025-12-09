@@ -216,50 +216,38 @@
         <span class="bg-secondary pr-3">MY 메뉴</span>
       </h5>
 
-      <!-- 주문 내역 -->
-      <div class="mb-4">
-        <h6 class="text-dark mb-2">📦 주문 내역</h6>
-        <div class="list-group mypage-menu">
-          <a th:href="@{/api/members/my-page(tab='orders')}"
-             class="list-group-item list-group-item-action"
-             th:classappend="${activeTab} == null || ${activeTab} == 'orders' ? ' active' : ''">
-            주문 조회/변경/취소
-          </a>
-          <a th:href="@{/api/orders/returns}"
-             class="list-group-item list-group-item-action">
-            반품/교환 내역
-          </a>
-        </div>
-      </div>
+      <div class="nav flex-column nav-pills mypage-menu" id="mypage-tab" role="tablist" aria-orientation="vertical">
+        <!-- 주문 내역 -->
+        <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
+        <a class="nav-link" id="orders-tab-link" data-toggle="pill" href="#orders-content" role="tab"
+           th:classappend="${activeTab == 'orders' or activeTab == null} ? 'active'">
+          주문/배송 조회
+        </a>
+        <a class="nav-link" id="history-tab-link" data-toggle="pill" href="#history-content" role="tab"
+           th:classappend="${activeTab == 'history'} ? 'active'">
+          취소/반품 내역
+        </a>
 
-      <hr class="my-4">
+        <hr class="my-3">
 
-      <!-- 회원 정보 관리 -->
-      <div class="mb-4">
+        <!-- 회원 정보 관리 -->
         <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
-        <div class="list-group mypage-menu">
-          <a th:href="@{/api/members/my-page(tab='profile')}"
-             class="list-group-item list-group-item-action"
-             th:classappend="${activeTab} == 'profile' ? ' active' : ''">
-            개인정보 수정
-          </a>
-          <a th:href="@{/api/members/my-page(tab='reviews')}"
-             class="list-group-item list-group-item-action"
-             th:classappend="${activeTab} == 'reviews' ? ' active' : ''">
-            마이 리뷰 조회/관리
-          </a>
-          <a th:href="@{/api/members/my-page(tab='addresses')}"
-             class="list-group-item list-group-item-action"
-             th:classappend="${activeTab} == 'addresses' ? ' active' : ''">
-            배송 주소록 관리
-          </a>
-        </div>
-      </div>
+        <a class="nav-link" id="profile-tab-link" data-toggle="pill" href="#profile-content" role="tab"
+           th:classappend="${activeTab == 'profile'} ? 'active'">
+          개인정보 수정
+        </a>
+        <a class="nav-link" id="reviews-tab-link" data-toggle="pill" href="#reviews-content" role="tab"
+           th:classappend="${activeTab == 'reviews'} ? 'active'">
+          마이 리뷰
+        </a>
+        <a class="nav-link" id="addresses-tab-link" data-toggle="pill" href="#addresses-content" role="tab"
+           th:classappend="${activeTab == 'addresses'} ? 'active'">
+          배송 주소록 관리
+        </a>
+        <hr class="my-3">
 
-      <!-- 회원 탈퇴 -->
-      <div class="list-group mypage-menu mb-4">
-        <a th:href="@{/api/auth/withdraw}"
-           class="list-group-item list-group-item-action text-danger">
+        <!-- 회원 탈퇴 -->
+        <a th:href="@{/my-page/withdraw}" class="nav-link text-danger">
           회원 탈퇴
         </a>
       </div>
@@ -267,330 +255,445 @@
 
     <!-- 오른쪽: 탭별 내용 -->
     <div class="col-lg-9 col-md-8">
+      <div class="tab-content" id="mypage-tabContent">
 
-      <!-- 1) 주문 조회/변경/취소 탭 (기본) -->
-      <div th:if="${activeTab} == null or ${activeTab} == 'orders'">
-        <h5 class="section-title position-relative text-uppercase mb-3">
-          <span class="bg-secondary pr-3">주문 조회/변경/취소</span>
-        </h5>
+        <!-- 1) 주문 조회/변경/취소 탭 -->
+        <div class="tab-pane fade" id="orders-content" role="tabpanel"
+             th:classappend="${activeTab == 'orders' or activeTab == null} ? 'show active'">
+          <h5 class="section-title position-relative text-uppercase mb-3">
+            <span class="bg-secondary pr-3">주문 조회/변경/취소</span>
+          </h5>
 
-        <div class="bg-light p-4">
-          <div class="table-responsive">
-            <table class="table table-bordered mb-0 text-center">
-              <thead class="bg-secondary text-dark">
-              <tr>
-                <th style="width:10%;">주문일</th>
-                <th style="width:15%;">주문번호</th>
-                <th style="width:10%;">수령인</th>
-                <th style="width:35%;">주문상품</th>
-                <th style="width:10%;">배송상태</th>
-                <th style="width:20%;">관리</th>
-              </tr>
-              </thead>
-
-              <!-- 주문 내역 있을 때 -->
-              <tbody th:if="${orders != null and !#lists.isEmpty(orders)}">
-              <tr th:each="order : ${orders}">
-                <!-- 주문일 -->
-                <td class="align-middle">
-                  <span th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">
-                    2000-00-00
-                  </span>
-                </td>
-
-                <!-- 주문번호 -->
-                <td class="align-middle">
-                  <a class="text-primary font-weight-bold"
-                     th:href="@{/api/members/{orderId}(orderId=${order.id})}"
-                     th:text="${order.orderNumber}">
-                    001-A123456789
-                  </a>
-                </td>
-
-                <!-- 수령인 -->
-                <td class="align-middle">
-                  <span th:text="${order.receiverName}">홍길동</span>
-                </td>
-
-                <!-- 주문상품 -->
-                <td class="align-middle text-left">
-                  <div class="font-weight-bold text-truncate"
-                       th:text="${order.mainBookTitle}">
-                    [도서] 외의 쓸모
-                  </div>
-                  <div class="small text-muted">
-                    총
-                    <span th:text="${order.totalQuantity}">1</span>권,
-                    <span th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')}">15,400</span>원
-                  </div>
-                </td>
-
-                <!-- 배송상태 -->
-                <td class="align-middle">
-                  <span class="text-dark font-weight-bold"
-                        th:text="${order.status}">배송중</span>
-                </td>
-
-                <!-- 관리 버튼들 -->
-                <td class="align-middle">
-                  <div class="d-flex flex-column align-items-stretch">
-                    <button type="button" class="btn btn-sm btn-outline-dark mb-1">
-                      주문확인
-                    </button>
-                    <button type="button" class="btn btn-sm btn-return mb-1">
-                      반품
-                    </button>
-                    <button type="button" class="btn btn-sm btn-damage mb-1">
-                      파손
-                    </button>
-                    <button type="button" class="btn btn-sm btn-primary">
-                      구매확정
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-
-              <!-- 주문 내역 없을 때 -->
-              <tbody th:if="${orders == null or #lists.isEmpty(orders)}">
-              <tr>
-                <td colspan="6" class="py-5 text-muted">
-                  조회 가능한 주문 내역이 없습니다.
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 2) 개인정보 수정 탭 -->
-      <div th:if="${activeTab} == 'profile'">
-        <h5 class="section-title position-relative text-uppercase mb-3">
-          <span class="bg-secondary pr-3">개인정보 수정</span>
-        </h5>
-
-        <div class="bg-light p-5">
-          <form th:action="@{/api/members/info}" method="post" th:object="${member}">
-            <div class="form-group">
-              <label>이름</label>
-              <input class="form-control" type="text"
-                     th:field="*{name}" placeholder="이름을 입력하세요">
-            </div>
-
-            <div class="form-group">
-              <label>이메일</label>
-              <input class="form-control" type="email"
-                     th:value="*{email}" readonly>
-            </div>
-
-            <div class="form-group">
-              <label>비밀번호</label>
-              <div class="d-flex">
-                <input class="form-control mr-5" type="text"
-                       value="********" readonly>
-                <a th:href="@{/api/members/password}"
-                   class="btn btn-sm btn-outline-secondary text-dark mr-2 text-sm-center">
-                  비밀번호 변경
+          <!-- 주문 내역 있을 때: 카드 리스트 형태 -->
+          <div th:if="${orders != null and !#lists.isEmpty(orders.content)}">
+            <div th:each="order : ${orders.content}" class="card mb-4">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="font-weight-bold">주문일:</span>
+                  <span class="ml-2" th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">2025-12-25</span>
+                </div>
+                <a th:href="@{/orders/{orderId}(orderId=${order.orderId})}" class="btn btn-sm btn-outline-dark">
+                  주문 상세 보기
                 </a>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label>연락처</label>
-              <input class="form-control" type="text"
-                     th:field="*{phoneNumber}" placeholder="010-0000-0000">
-            </div>
-
-            <div class="form-group">
-              <label>생일</label>
-              <input class="form-control" type="date"
-                     th:field="*{birthday}"
-                     th:value="${member.birthday != null ? #temporals.format(member.birthday, 'yyyy-MM-dd') : ''}">
-              <small class="form-text text-muted">
-                생일 정보를 기준으로 생일 쿠폰 등 맞춤 서비스를 제공할 수 있습니다.
-              </small>
-            </div>
-
-            <div class="text-right mt-4">
-              <button type="submit" class="btn btn-primary px-4">
-                수정하기
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- 3) 마이 리뷰 조회/관리 탭 -->
-      <div th:if="${activeTab} == 'reviews'">
-        <h5 class="section-title position-relative text-uppercase mb-3">
-          <span class="bg-secondary pr-3">마이 리뷰 조회/관리</span>
-        </h5>
-
-        <div class="bg-light p-4">
-          <div class="table-responsive">
-            <table class="table table-bordered mb-0 text-center">
-              <thead style="background-color:#f3fcff;">
-              <tr>
-                <th style="width:15%;">주문번호</th>
-                <th style="width:15%;">작성일자</th>
-                <th style="width:20%;">상품</th>
-                <th style="width:35%;">내용</th>
-                <th style="width:15%;">상태</th>
-              </tr>
-              </thead>
-
-              <!-- 리뷰 있을 때 -->
-              <tbody th:if="${reviews != null and !#lists.isEmpty(reviews)}">
-              <tr th:each="review : ${reviews}">
-                <td class="align-middle">
-                  <a th:href="@{/api/members/{orderId}(orderId=${review.orderId})}"
-                     class="text-primary"
-                     th:text="${review.orderNumber}">
-                    001-A123456789
-                  </a>
-                </td>
-                <td class="align-middle">
-                  <span th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd')}">
-                    2025-10-18
-                  </span>
-                </td>
-                <td class="align-middle text-left">
-                  <a th:href="@{/api/books/{id}(id=${review.bookId})}"
-                     class="text-dark"
-                     th:text="${review.bookTitle}">
-                    [도서] 책 제목
-                  </a>
-                </td>
-                <td class="align-middle text-left">
-                  <span class="d-inline-block text-truncate"
-                        style="max-width: 100%;"
-                        th:text="${review.content}">
-                    리뷰 내용이 한 줄 정도로 표시됩니다.
-                  </span>
-                </td>
-                <td class="align-middle">
-                  <span th:text="${review.status}">노출중</span>
-                </td>
-              </tr>
-              </tbody>
-
-              <!-- 리뷰 없을 때 -->
-              <tbody th:if="${reviews == null or #lists.isEmpty(reviews)}">
-              <tr>
-                <td colspan="5" class="py-5 text-muted">
-                  작성한 리뷰가 없습니다.
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4) 배송 주소록 관리 탭 -->
-      <div th:if="${activeTab} == 'addresses'">
-        <h5 class="section-title position-relative text-uppercase mb-3">
-          <span class="bg-secondary pr-3">배송 주소록 관리</span>
-        </h5>
-
-        <div class="bg-light p-4">
-          <!-- 검색 & 버튼 -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <!-- 왼쪽: 수령인 검색 -->
-            <form th:action="@{/api/members/addresses}" method="get"
-                  class="form-inline flex-grow-1">
-              <div class="input-group w-100" style="max-width: 400px;">
-                <input type="text" name="receiverName" class="form-control"
-                       placeholder="'수령인'을 입력해주세요.">
-                <div class="input-group-append">
-                  <button type="submit" class="btn btn-primary">
-                    주소검색
-                  </button>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <tbody>
+                    <tr th:each="item : ${order.orderItems}">
+                      <td style="width: 60%;">
+                        <div class="d-flex align-items-center">
+                          <img th:src="${item.thumbnailUrl != null ? item.thumbnailUrl : '/img/product-1.jpg'}" alt="Book Thumbnail" style="width: 40px; aspect-ratio: 1/1.4; object-fit: cover; margin-right: 10px;">
+                          <span th:text="${item.bookName}">상품명</span>
+                        </div>
+                      </td>
+                      <td class="align-middle" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '원 x ' + ${item.quantity} + '개'">15,000원 x 1개</td>
+                      <td class="align-middle">
+                        <span class="badge badge-primary" th:text="${item.orderItemStatus}">PREPARING</span>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </form>
-
-            <!-- 오른쪽: 선택삭제 / 새 주소 추가 -->
-            <div class="ml-3 text-right">
-              <button type="submit" form="addressDeleteForm"
-                      class="btn btn-sm btn-outline-secondary mr-2">
-                선택삭제
-              </button>
-              <a th:href="@{/api/members/addresses/new}"
-                 class="btn btn-sm btn-primary">
-                + 새 주소 추가
-              </a>
             </div>
           </div>
 
-          <!-- 주소 목록 -->
-          <form th:action="@{/api/members/addresses/delete}" method="post"
-                id="addressDeleteForm">
+          <!-- 주문 내역 없을 때 -->
+          <div th:if="${orders == null or #lists.isEmpty(orders.content)}" class="bg-light p-4 text-center">
+            <p class="text-muted my-5">조회 가능한 주문 내역이 없습니다.</p>
+          </div>
+        </div>
+
+        <!-- 2) 취소/반품 내역 탭 -->
+        <div class="tab-pane fade" id="history-content" role="tabpanel"
+             th:classappend="${activeTab == 'history'} ? 'show active'">
+          <h5 class="section-title position-relative text-uppercase mb-3">
+            <span class="bg-secondary pr-3">취소/반품 내역</span>
+          </h5>
+
+          <!-- Sub-tabs: 주문 취소 vs 상품 반품 -->
+          <ul class="nav nav-tabs" id="historySubTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="cancel-history-tab" data-toggle="tab" href="#cancel-history"
+                 role="tab" aria-controls="cancel-history" aria-selected="true">
+                주문 취소 내역
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="return-history-tab" data-toggle="tab" href="#return-history"
+                 role="tab" aria-controls="return-history" aria-selected="false">
+                상품 반품 내역
+              </a>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="historySubTabContent">
+            <!-- 주문 취소 내역 -->
+            <div class="tab-pane fade show active" id="cancel-history" role="tabpanel" aria-labelledby="cancel-history-tab">
+              <div class="bg-light p-4 mt-3">
+                <div class="table-responsive">
+                  <table class="table table-bordered mb-0 text-center">
+                    <thead style="background-color:#f3fcff;">
+                      <tr>
+                        <th style="width:20%;">주문일</th>
+                        <th style="width:40%;">주문번호</th>
+                        <th style="width:25%;">취소 금액</th>
+                        <th style="width:15%;">상태</th>
+                      </tr>
+                    </thead>
+                    <!-- 취소된 주문 목록 (예시) -->
+                    <tbody>
+                      <!-- th:each
+                      <tr th:each="order : ${cancelledOrders}">
+                        <td class="align-middle" th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">2025-11-05</td>
+                        <td class="align-middle">
+                           <a th:href="@{/orders/{orderId}(orderId=${order.orderId})}"
+                             class="text-primary"
+                             th:text="${order.orderNumber}">ORD-1a2b3c-4d5e6f</a>
+                        </td>
+                        <td class="align-middle" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')} + '원'">35,000원</td>
+                        <td class="align-middle">
+                          <span class="badge badge-danger" th:text="${order.orderStatus.displayName}">취소 완료</span>
+                        </td>
+                      </tr>
+                      -->
+                      <!-- 예시 데이터 1 -->
+                      <tr>
+                        <td class="align-middle">2025-11-05</td>
+                        <td class="align-middle">
+                           <a href="#" class="text-primary">ORD-c1a2b3-4d5e6f</a>
+                        </td>
+                        <td class="align-middle">35,000원</td>
+                        <td class="align-middle"><span class="badge badge-danger">취소 완료</span></td>
+                      </tr>
+                       <!-- 예시 데이터 2 -->
+                      <tr>
+                        <td class="align-middle">2025-10-21</td>
+                        <td class="align-middle">
+                           <a href="#" class="text-primary">ORD-d4e5f6-7g8h9i</a>
+                        </td>
+                        <td class="align-middle">12,000원</td>
+                        <td class="align-middle"><span class="badge badge-danger">취소 완료</span></td>
+                      </tr>
+
+                      <!-- 내역 없을 때 -->
+                      <tr th:if="${cancelledOrders == null or #lists.isEmpty(cancelledOrders)}">
+                        <td colspan="4" class="py-5 text-muted">
+                          주문을 취소한 내역이 없습니다.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 상품 반품 내역 -->
+            <div class="tab-pane fade" id="return-history" role="tabpanel" aria-labelledby="return-history-tab">
+              <div class="bg-light p-4 mt-3">
+                <div class="table-responsive">
+                  <table class="table table-bordered mb-0 text-center">
+                     <thead style="background-color:#f3fcff;">
+                      <tr>
+                        <th style="width:15%;">반품 신청일</th>
+                        <th style="width:40%;">상품 정보</th>
+                        <th style="width:15%;">반품 금액</th>
+                        <th style="width:15%;">수량</th>
+                        <th style="width:15%;">상태</th>
+                      </tr>
+                    </thead>
+                    <!-- 반품된 상품 목록 (예시) -->
+                    <tbody>
+                      <!-- th:each
+                      <tr th:each="item : ${returnedItems}">
+                        <td class="align-middle" th:text="${#temporals.format(item.returnDate, 'yyyy-MM-dd')}">2025-12-01</td>
+                        <td class="align-middle text-left">
+                          <img th:src="${item.thumbnailUrl != null ? item.thumbnailUrl : '/img/product-1.jpg'}" alt="Book" style="width: 30px; height: 42px; object-fit: cover; margin-right: 10px;">
+                          <a th:href="@{/api/books/{id}(id=${item.bookId})}" class="text-dark" th:text="${item.bookName}">코딩의 신</a>
+                          <small class="d-block text-muted" th:text="'주문번호: ' + ${item.orderNumber}">주문번호: ORD-a1b2c3-d4e5f6</small>
+                        </td>
+                        <td class="align-middle" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA')} + '원'">22,500원</td>
+                        <td class="align-middle" th:text="${item.quantity}">1개</td>
+                        <td class="align-middle">
+                          <span class="badge badge-warning" th:text="${item.orderItemStatus.displayName}">반품 처리중</span>
+                        </td>
+                      </tr>
+                      -->
+                      <!-- 예시 데이터 1 -->
+                      <tr>
+                         <td class="align-middle">2025-12-01</td>
+                        <td class="align-middle text-left d-flex align-items-center">
+                          <img src="/img/product-1.jpg" alt="Book" style="width: 30px; height: 42px; object-fit: cover; margin-right: 10px;">
+                          <div>
+                            <a href="#" class="text-dark">코딩의 신</a>
+                            <small class="d-block text-muted">주문번호: ORD-a1b2c3-d4e5f6</small>
+                          </div>
+                        </td>
+                        <td class="align-middle">22,500원</td>
+                        <td class="align-middle">1개</td>
+                        <td class="align-middle"><span class="badge badge-warning">반품 처리중</span></td>
+                      </tr>
+                      <!-- 예시 데이터 2 -->
+                      <tr>
+                         <td class="align-middle">2025-11-15</td>
+                        <td class="align-middle text-left d-flex align-items-center">
+                          <img src="/img/product-2.jpg" alt="Book" style="width: 30px; height: 42px; object-fit: cover; margin-right: 10px;">
+                          <div>
+                            <a href="#" class="text-dark">스프링부트 완전 정복</a>
+                            <small class="d-block text-muted">주문번호: ORD-b2c3d4-e5f6g7</small>
+                          </div>
+                        </td>
+                        <td class="align-middle">31,500원</td>
+                        <td class="align-middle">1개</td>
+                        <td class="align-middle"><span class="badge badge-success">반품 완료</span></td>
+                      </tr>
+
+                      <!-- 내역 없을 때 -->
+                       <tr th:if="${returnedItems == null or #lists.isEmpty(returnedItems)}">
+                        <td colspan="5" class="py-5 text-muted">
+                          상품을 반품한 내역이 없습니다.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3) 개인정보 수정 탭 -->
+        <div class="tab-pane fade" id="profile-content" role="tabpanel"
+             th:classappend="${activeTab == 'profile'} ? 'show active'">
+          <h5 class="section-title position-relative text-uppercase mb-3">
+            <span class="bg-secondary pr-3">개인정보 수정</span>
+          </h5>
+
+          <div class="bg-light p-5">
+            <form th:action="@{/api/members/info}" method="post" th:object="${member}">
+              <div class="form-group">
+                <label>이름</label>
+                <input class="form-control" type="text"
+                       th:field="*{name}" placeholder="이름을 입력하세요">
+              </div>
+
+              <div class="form-group">
+                <label>이메일</label>
+                <input class="form-control" type="email"
+                       th:value="*{email}" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>비밀번호</label>
+                <div class="d-flex">
+                  <input class="form-control mr-5" type="text"
+                         value="********" readonly>
+                  <a th:href="@{/api/members/password}"
+                     class="btn btn-sm btn-outline-secondary text-dark mr-2 text-sm-center">
+                    비밀번호 변경
+                  </a>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>연락처</label>
+                <input class="form-control" type="text"
+                       th:field="*{phoneNumber}" placeholder="010-0000-0000">
+              </div>
+
+              <div class="form-group">
+                <label>생일</label>
+                <input class="form-control" type="date"
+                       th:field="*{birthday}"
+                       th:value="${member.birthday != null ? #temporals.format(member.birthday, 'yyyy-MM-dd') : ''}">
+                <small class="form-text text-muted">
+                  생일 정보를 기준으로 생일 쿠폰 등 맞춤 서비스를 제공할 수 있습니다.
+                </small>
+              </div>
+
+              <div class="text-right mt-4">
+                <button type="submit" class="btn btn-primary px-4">
+                  수정하기
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- 4) 마이 리뷰 조회/관리 탭 -->
+        <div class="tab-pane fade" id="reviews-content" role="tabpanel"
+             th:classappend="${activeTab == 'reviews'} ? 'show active'">
+          <h5 class="section-title position-relative text-uppercase mb-3">
+            <span class="bg-secondary pr-3">마이 리뷰 조회/관리</span>
+          </h5>
+
+          <div class="bg-light p-4">
             <div class="table-responsive">
-              <table class="table table-bordered mb-0">
+              <table class="table table-bordered mb-0 text-center">
                 <thead style="background-color:#f3fcff;">
-                <tr class="text-center">
-                  <th style="width:5%;">
-                    <input type="checkbox" id="checkAll">
-                  </th>
-                  <th style="width:20%;">수령인</th>
-                  <th>주소</th>
-                  <th style="width:12%;">수정/삭제</th>
+                <tr>
+                  <th style="width:15%;">주문번호</th>
+                  <th style="width:15%;">작성일자</th>
+                  <th style="width:20%;">상품</th>
+                  <th style="width:35%;">내용</th>
+                  <th style="width:15%;">상태</th>
                 </tr>
                 </thead>
 
-                <!-- 주소 있을 때 -->
-                <tbody th:if="${addresses != null and !#lists.isEmpty(addresses)}">
-                <tr th:each="addr : ${addresses}">
-                  <td class="align-middle text-center">
-                    <input type="checkbox" name="addressIds"
-                           th:value="${addr.id}" class="address-check">
-                  </td>
+                <!-- 리뷰 있을 때 -->
+                <tbody th:if="${reviews != null and !#lists.isEmpty(reviews)}">
+                <tr th:each="review : ${reviews}">
                   <td class="align-middle">
-                    <div class="font-weight-bold"
-                         th:text="${addr.receiverName}">
-                      홍길동
-                    </div>
-                    <div class="small text-danger"
-                         th:if="${addr.defaultAddress}">
-                      (기본 정보 주소)
-                    </div>
-                  </td>
-                  <td class="align-middle">
-                    <div th:text="'(' + ${addr.zipcode} + ')'">
-                      11111
-                    </div>
-                    <div th:text="${addr.addressLine}">
-                      광역시
-                    </div>
-                    <div th:text="${addr.phoneNumber}">
-                      010-0000-0000
-                    </div>
-                  </td>
-                  <td class="align-middle text-center">
-                    <a th:href="@{/api/members/addresses/{id}/edit(id=${addr.id})}"
-                       class="btn btn-sm btn-outline-secondary">
-                      수정
+                    <a th:href="@{/api/members/{orderId}(orderId=${review.orderId})}"
+                       class="text-primary"
+                       th:text="${review.orderNumber}">
+                      001-A123456789
                     </a>
+                  </td>
+                  <td class="align-middle">
+                    <span th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd')}">
+                    2025-10-18
+                  </span>
+                  </td>
+                  <td class="align-middle text-left">
+                    <a th:href="@{/api/books/{id}(id=${review.bookId})}"
+                       class="text-dark"
+                       th:text="${review.bookTitle}">
+                      [도서] 책 제목
+                    </a>
+                  </td>
+                  <td class="align-middle text-left">
+                    <span class="d-inline-block text-truncate"
+                          style="max-width: 100%;"
+                          th:text="${review.content}">
+                    리뷰 내용이 한 줄 정도로 표시됩니다.
+                  </span>
+                  </td>
+                  <td class="align-middle">
+                    <span th:text="${review.status}">노출중</span>
                   </td>
                 </tr>
                 </tbody>
 
-                <!-- 주소 없을 때 -->
-                <tbody th:if="${addresses == null or #lists.isEmpty(addresses)}">
+                <!-- 리뷰 없을 때 -->
+                <tbody th:if="${reviews == null or #lists.isEmpty(reviews)}">
                 <tr>
-                  <td colspan="4" class="py-4 text-center text-muted">
-                    등록된 배송지가 없습니다. ‘+ 새 주소 추가’ 버튼을 눌러 배송지를 등록해 주세요.
+                  <td colspan="5" class="py-5 text-muted">
+                    작성한 리뷰가 없습니다.
                   </td>
                 </tr>
                 </tbody>
               </table>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
 
+        <!-- 5) 배송 주소록 관리 탭 -->
+        <div class="tab-pane fade" id="addresses-content" role="tabpanel"
+             th:classappend="${activeTab == 'addresses'} ? 'show active'">
+          <h5 class="section-title position-relative text-uppercase mb-3">
+            <span class="bg-secondary pr-3">배송 주소록 관리</span>
+          </h5>
+
+          <div class="bg-light p-4">
+            <!-- 검색 & 버튼 -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <!-- 왼쪽: 수령인 검색 -->
+              <form th:action="@{/api/members/addresses}" method="get"
+                    class="form-inline flex-grow-1">
+                <div class="input-group w-100" style="max-width: 400px;">
+                  <input type="text" name="receiverName" class="form-control"
+                         placeholder="'수령인'을 입력해주세요.">
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                      주소검색
+                    </button>
+                  </div>
+                </div>
+              </form>
+
+              <!-- 오른쪽: 선택삭제 / 새 주소 추가 -->
+              <div class="ml-3 text-right">
+                <button type="submit" form="addressDeleteForm"
+                        class="btn btn-sm btn-outline-secondary mr-2">
+                  선택삭제
+                </button>
+                <a th:href="@{/api/members/addresses/new}"
+                   class="btn btn-sm btn-primary">
+                  + 새 주소 추가
+                </a>
+              </div>
+            </div>
+
+            <!-- 주소 목록 -->
+            <form th:action="@{/api/members/addresses/delete}" method="post"
+                  id="addressDeleteForm">
+              <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                  <thead style="background-color:#f3fcff;">
+                  <tr class="text-center">
+                    <th style="width:5%;">
+                      <input type="checkbox" id="checkAll">
+                    </th>
+                    <th style="width:20%;">수령인</th>
+                    <th>주소</th>
+                    <th style="width:12%;">수정/삭제</th>
+                  </tr>
+                  </thead>
+
+                  <!-- 주소 있을 때 -->
+                  <tbody th:if="${addresses != null and !#lists.isEmpty(addresses)}">
+                  <tr th:each="addr : ${addresses}">
+                    <td class="align-middle text-center">
+                      <input type="checkbox" name="addressIds"
+                             th:value="${addr.id}" class="address-check">
+                    </td>
+                    <td class="align-middle">
+                      <div class="font-weight-bold"
+                           th:text="${addr.receiverName}">
+                        홍길동
+                      </div>
+                      <div class="small text-danger"
+                           th:if="${addr.defaultAddress}">
+                        (기본 정보 주소)
+                      </div>
+                    </td>
+                    <td class="align-middle">
+                      <div th:text="'(' + ${addr.zipcode} + ')'">
+                        11111
+                      </div>
+                      <div th:text="${addr.addressLine}">
+                        광역시
+                      </div>
+                      <div th:text="${addr.phoneNumber}">
+                        010-0000-0000
+                      </div>
+                    </td>
+                    <td class="align-middle text-center">
+                      <a th:href="@{/api/members/addresses/{id}/edit(id=${addr.id})}"
+                         class="btn btn-sm btn-outline-secondary">
+                        수정
+                      </a>
+                    </td>
+                  </tr>
+                  </tbody>
+
+                  <!-- 주소 없을 때 -->
+                  <tbody th:if="${addresses == null or #lists.isEmpty(addresses)}">
+                  <tr>
+                    <td colspan="4" class="py-4 text-center text-muted">
+                      등록된 배송지가 없습니다. ‘+ 새 주소 추가’ 버튼을 눌러 배송지를 등록해 주세요.
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
     </div><!-- /col-lg-9 -->
   </div><!-- /row -->
 </div><!-- /container-fluid -->

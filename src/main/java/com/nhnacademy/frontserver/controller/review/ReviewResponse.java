@@ -14,7 +14,7 @@ package com.nhnacademy.frontserver.controller.review;
 
 import java.time.LocalDateTime;
 
-record ReviewResponse(
+public record ReviewResponse(
         Long reviewId,
         int reviewRate,
         String reviewContents,
