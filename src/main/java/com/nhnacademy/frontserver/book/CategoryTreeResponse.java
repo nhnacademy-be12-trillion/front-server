@@ -10,10 +10,13 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.dto.book;
+package com.nhnacademy.frontserver.book;
 
-public record CategoryResponse(
+import java.util.List;
+
+public record CategoryTreeResponse(
         Long categoryId,
-        String categoryName
+        String categoryName,
+        List<CategoryTreeResponse> children
 ) {
 }
