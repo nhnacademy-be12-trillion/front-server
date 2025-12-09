@@ -12,7 +12,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
     <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
-    <link href="/css/style.min.css" rel="stylesheet">
+    <link href="/static/css/style.min.css" rel="stylesheet">
+<!--    <link th:href="@{/css/style.min.css}" rel="stylesheet">-->
 </head>
 
 <body>
@@ -181,14 +182,7 @@
             <div class="d-flex mb-3 align-items-center">
                 <p class="text-dark font-weight-medium mb-0 mr-3">🎁 포장 옵션:</p>
                 <div th:if="${packagingOptions != null and packagingOptions.size() > 0}">
-                    <select class="custom-select" style="width: auto;" name="selectedPackagingId" id="packaging-select">
-                        <option value="" selected>포장 선택 안 함 (기본)</option>
-                        <option th:each="pkg : ${packagingOptions}"
-                                th:value="${pkg.id}"
-                                th:text="${pkg.name} + ' (' + (${pkg.price > 0} ? ${#numbers.formatInteger(pkg.price, 0, 'COMMA')} + '원' : '무료') + ')'">
-                            일반 포장 (2,000원)
-                        </option>
-                    </select>
+                    <span class="text-success font-weight-bold">포장 가능</span>
                 </div>
                 <div th:unless="${packagingOptions != null and packagingOptions.size() > 0}">
                     <span class="text-danger font-weight-bold">포장 불가</span>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}">
+
+<head>
+  <meta charset="utf-8">
+  <title>Trillion-Shop | My Page - 배송 주소록 관리</title>
+</head>
+
+<body>
+<div class="container-fluid">
+  <div class="row px-xl-5">
+    <!-- 왼쪽 메뉴 (공통, activeTab='addresses') -->
+    <!-- 왼쪽 MY 메뉴 -->
+    <div class="col-lg-3 col-md-4">
+      <h5 class="section-title position-relative text-uppercase mb-3">
+        <span class="bg-secondary pr-3">MY 메뉴</span>
+      </h5>
+
+      <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
+        <!-- 주문 내역 -->
+        <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
+        <a class="list-group-item list-group-item-action"
+           th:classappend="${activeTab == 'orders'} ? ' active'"
+           th:href="@{/my-page/orders}">
+          주문/배송 조회
+        </a>
+        <a class="list-group-item list-group-item-action"
+           th:classappend="${activeTab == 'history'} ? ' active'"
+           th:href="@{/my-page/history}">
+          취소/반품 내역
+        </a>
+
+        <hr class="my-3">
+
+        <!-- 회원 정보 관리 -->
+        <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
+        <a class="list-group-item list-group-item-action"
+           th:classappend="${activeTab == 'profile'} ? ' active'"
+           th:href="@{/my-page/profile}">
+          개인정보 수정
+        </a>
+        <a class="list-group-item list-group-item-action"
+           th:classappend="${activeTab == 'reviews'} ? ' active'"
+           th:href="@{/my-page/reviews}">
+          마이 리뷰
+        </a>
+        <a class="list-group-item list-group-item-action"
+           th:classappend="${activeTab == 'addresses'} ? ' active'"
+           th:href="@{/my-page/addresses}">
+          배송 주소록 관리
+        </a>
+        <hr class="my-3">
+
+        <!-- 회원 탈퇴 -->
+        <a th:href="@{/my-page/withdraw}" class="list-group-item list-group-item-action text-danger">
+          회원 탈퇴
+        </a>
+      </div>
+    </div>
+
+
+    <div class="col-lg-9 col-md-8">
+      <h5 class="section-title position-relative text-uppercase mb-3">
+        <span class="bg-secondary pr-3">배송 주소록 관리</span>
+      </h5>
+
+      <div class="bg-light p-4">
+        <!-- 검색 & 버튼 -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <!-- 왼쪽: 수령인 검색 -->
+          <form th:action="@{/api/members/addresses}" method="get"
+                class="form-inline flex-grow-1">
+            <div class="input-group w-100" style="max-width: 400px;">
+              <input type="text" name="receiverName" class="form-control"
+                     placeholder="'수령인'을 입력해주세요.">
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">
+                  주소검색
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- 오른쪽: 선택삭제 / 새 주소 추가 -->
+          <div class="ml-3 text-right">
+            <button type="submit" form="addressDeleteForm"
+                    class="btn btn-sm btn-outline-secondary mr-2">
+              선택삭제
+            </button>
+            <a th:href="@{/api/members/addresses/new}"
+               class="btn btn-sm btn-primary">
+              + 새 주소 추가
+            </a>
+          </div>
+        </div>
+
+        <!-- 주소 목록 -->
+        <form th:action="@{/api/members/addresses/delete}" method="post"
+              id="addressDeleteForm">
+          <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+              <thead style="background-color:#f3fcff;">
+              <tr class="text-center">
+                <th style="width:5%;">
+                  <input type="checkbox" id="checkAll">
+                </th>
+                <th style="width:20%;">수령인</th>
+                <th>주소</th>
+                <th style="width:12%;">수정/삭제</th>
+              </tr>
+              </thead>
+
+              <!-- 주소 있을 때 -->
+              <tbody th:if="${addresses != null and !#lists.isEmpty(addresses)}">
+              <tr th:each="addr : ${addresses}">
+                <td class="align-middle text-center">
+                  <input type="checkbox" name="addressIds"
+                         th:value="${addr.id}" class="address-check">
+                </td>
+                <td class="align-middle">
+                  <div class="font-weight-bold"
+                       th:text="${addr.receiverName}">
+                    홍길동
+                  </div>
+                  <div class="small text-danger"
+                       th:if="${addr.defaultAddress}">
+                    (기본 정보 주소)
+                  </div>
+                </td>
+                <td class="align-middle">
+                  <div th:text="'(' + ${addr.zipcode} + ')'">
+                    11111
+                  </div>
+                  <div th:text="${addr.addressLine}">
+                    광역시
+                  </div>
+                  <div th:text="${addr.phoneNumber}">
+                    010-0000-0000
+                  </div>
+                </td>
+                <td class="align-middle text-center">
+                  <a th:href="@{/api/members/addresses/{id}/edit(id=${addr.id})}"
+                     class="btn btn-sm btn-outline-secondary">
+                    수정
+                  </a>
+                </td>
+              </tr>
+              </tbody>
+
+              <!-- 주소 없을 때 -->
+              <tbody th:if="${addresses == null or #lists.isEmpty(addresses)}">
+              <tr>
+                <td colspan="4" class="py-4 text-center text-muted">
+                  등록된 배송지가 없습니다. ‘+ 새 주소 추가’ 버튼을 눌러 배송지를 등록해 주세요.
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // 배송 주소록 전체 선택
+  $(function () {
+    $('#checkAll').on('change', function () {
+      $('.address-check').prop('checked', $(this).prop('checked'));
+    });
+  });
+</script>
+</body>
+</html>

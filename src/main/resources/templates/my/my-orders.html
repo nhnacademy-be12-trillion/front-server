@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}">
+
+<head>
+    <meta charset="utf-8">
+    <title>Trillion-Shop | My Page - 주문/배송 조회</title>
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row px-xl-5">
+        <!-- 왼쪽 MY 메뉴 -->
+        <div class="col-lg-3 col-md-4">
+            <h5 class="section-title position-relative text-uppercase mb-3">
+                <span class="bg-secondary pr-3">MY 메뉴</span>
+            </h5>
+
+            <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
+                <!-- 주문 내역 -->
+                <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
+                <a class="list-group-item list-group-item-action"
+                   th:classappend="${activeTab == 'orders'} ? ' active'"
+                   th:href="@{/my-page/orders}">
+                    주문/배송 조회
+                </a>
+                <a class="list-group-item list-group-item-action"
+                   th:classappend="${activeTab == 'history'} ? ' active'"
+                   th:href="@{/my-page/history}">
+                    취소/반품 내역
+                </a>
+
+                <hr class="my-3">
+
+                <!-- 회원 정보 관리 -->
+                <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
+                <a class="list-group-item list-group-item-action"
+                   th:classappend="${activeTab == 'profile'} ? ' active'"
+                   th:href="@{/my-page/profile}">
+                    개인정보 수정
+                </a>
+                <a class="list-group-item list-group-item-action"
+                   th:classappend="${activeTab == 'reviews'} ? ' active'"
+                   th:href="@{/my-page/reviews}">
+                    마이 리뷰
+                </a>
+                <a class="list-group-item list-group-item-action"
+                   th:classappend="${activeTab == 'addresses'} ? ' active'"
+                   th:href="@{/my-page/addresses}">
+                    배송 주소록 관리
+                </a>
+                <hr class="my-3">
+
+                <!-- 회원 탈퇴 -->
+                <a th:href="@{/my-page/withdraw}" class="list-group-item list-group-item-action text-danger">
+                    회원 탈퇴
+                </a>
+            </div>
+        </div>
+
+
+        <!-- 오른쪽: 주문/배송 조회 내용 -->
+        <div class="col-lg-9 col-md-8">
+            <h5 class="section-title position-relative text-uppercase mb-3">
+                <span class="bg-secondary pr-3">주문 조회/변경/취소</span>
+            </h5>
+
+            <!-- 주문 내역 있을 때: 카드 리스트 형태 -->
+            <div th:if="${orders != null and !#lists.isEmpty(orders.content)}">
+                <div th:each="order : ${orders.content}" class="card mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="font-weight-bold">주문일:</span>
+                            <span class="ml-2"
+                                  th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">
+                2025-12-25
+              </span>
+                        </div>
+                        <a th:href="@{/orders/{orderId}(orderId=${order.orderId})}"
+                           class="btn btn-sm btn-outline-dark">
+                            주문 상세 보기
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <tbody>
+                                <tr th:each="item : ${order.orderItems}">
+                                    <td style="width: 60%;">
+                                        <div class="d-flex align-items-center">
+                                            <img th:src="${item.thumbnailUrl != null ? item.thumbnailUrl : '/img/product-1.jpg'}"
+                                                 alt="Book Thumbnail"
+                                                 style="width: 40px; aspect-ratio: 1/1.4; object-fit: cover; margin-right: 10px;">
+                                            <span th:text="${item.bookName}">상품명</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle"
+                                        th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '원 x ' + ${item.quantity} + '개'">
+                                        15,000원 x 1개
+                                    </td>
+                                    <td class="align-middle">
+                    <span class="badge badge-primary"
+                          th:text="${item.orderItemStatus}">
+                      PREPARING
+                    </span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주문 내역 없을 때 -->
+            <div th:if="${orders == null or #lists.isEmpty(orders.content)}"
+                 class="bg-light p-4 text-center">
+                <p class="text-muted my-5">조회 가능한 주문 내역이 없습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
