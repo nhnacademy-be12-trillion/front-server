@@ -10,9 +10,9 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-package com.nhnacademy.frontserver.controller.book;
+package com.nhnacademy.frontserver.book;
 
-import com.nhnacademy.frontserver.controller.PageResponse;
+import com.nhnacademy.frontserver.PageResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,15 +22,21 @@ public interface BookClient {
 
     //TODO 현재 publisherName 호출 시 null
     // Pageable 응답 예시
-    @GetMapping
+    @GetMapping("/api/books")
     PageResponse<BookListResponse> getBooks(
             @RequestParam("page") int page,
             @RequestParam("size") int size,
             @RequestParam("sort") String sort
     );
 
-    @GetMapping
-    BookDetailResponse getBookDetail(@RequestParam("id") long id);
+    @GetMapping("/api/books/{book_id}")
+    BookDetailResponse getBookDetail(@PathVariable("book_id") Long bookId);
+
+    @GetMapping("/api/books/{book_id}/reviews")
+    PageResponse<ReviewResponse> getReviews(@PathVariable("book_id") Long bookId,
+                                            @RequestParam("page") int page,
+                                            @RequestParam("size") int size,
+                                            @RequestParam(name = "sort", defaultValue = "bookId,desc") String sort);
 
     //TODO category 뎁스를 노출하는 추천로직 @은해
     /*
