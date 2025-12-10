@@ -1,6 +1,6 @@
-package com.nhnacademy.frontserver.controller.order;
+package com.nhnacademy.frontserver.order;
 
-import com.nhnacademy.frontserver.controller.PageResponse;
+import com.nhnacademy.frontserver.PageResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,7 @@ public interface OrderClient {
                                                    @RequestParam("sort") String sort);
 
     // 주문 전체 조회 (회원)
-    @GetMapping
+    @GetMapping("/api/orders")
     PageResponse<OrderResponse> getAllOrderByMember(@RequestParam("page") int page,
                                                     @RequestParam("size") int size,
                                                     @RequestParam("sort") String sort);
@@ -24,8 +24,8 @@ public interface OrderClient {
     OrderResponse getOrderByMember(@PathVariable Long orderId);
 
     // 주문 단건 조회 (비회원) TODO - 조회에 POST 메소드 사용??
-    @PostMapping("/api/orders/non-members")
-    OrderResponse getOrderByNonMember(@RequestBody NonMemberOrderGetRequest request);
+    @PostMapping("/api/orders/non-members/")
+    OrderResponse getOrderByNonMember(NonMemberOrderGetRequest request);
 
     // 주문 생성 (회원, 비회원)
     @PostMapping
@@ -50,15 +50,6 @@ public interface OrderClient {
 //    void cancelOrderByNonMember(@PathVariable Long orderId,
 //                                @RequestBody NonMemberOrderCancelRequest request);
 
-    //TODO 지훈 PaymentRequestDto 확인, API 경로 논의필요, 결제취소 amount 파라미터 논의
-//    @PostMapping("/payments")
-//    void createPayment(@RequestBody PaymentRequestDto paymentRequestDto);
-
-    @GetMapping("/api/orders/{orderId}/payment")
-    PaymentResponse getPayment(@PathVariable Long orderId);
-
-    @DeleteMapping("/api/orders/{orderId}/payment")
-    void deletePayment(@PathVariable Long orderId);
 
 
 }
