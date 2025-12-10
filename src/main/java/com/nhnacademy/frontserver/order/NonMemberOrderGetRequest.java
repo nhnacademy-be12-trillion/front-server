@@ -12,7 +12,7 @@
 
 package com.nhnacademy.frontserver.order;
 
-record NonMemberOrderGetRequest(
+public record NonMemberOrderGetRequest(
     String orderNumber,
     String nonMemberPassword
 ) {}

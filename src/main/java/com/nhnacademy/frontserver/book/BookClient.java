@@ -36,7 +36,7 @@ public interface BookClient {
     PageResponse<ReviewResponse> getReviews(@PathVariable("book_id") Long bookId,
                                             @RequestParam("page") int page,
                                             @RequestParam("size") int size,
-                                            @RequestParam(name = "sort", defaultValue = "bookId,desc") String sort);
+                                            @RequestParam("sort") String sort);
 
     //TODO category 뎁스를 노출하는 추천로직 @은해
     /*

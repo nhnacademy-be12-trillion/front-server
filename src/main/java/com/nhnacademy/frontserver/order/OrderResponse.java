@@ -18,7 +18,7 @@ import com.nhnacademy.frontserver.order.util.ReceiverInfo;
 import java.time.LocalDateTime;
 import java.util.List;
 
-record OrderResponse(
+public record OrderResponse(
         Long orderId,
         Long memberId,
         String orderNumber,

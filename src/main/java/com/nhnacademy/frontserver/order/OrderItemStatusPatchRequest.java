@@ -14,6 +14,6 @@ package com.nhnacademy.frontserver.order;
 
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 
-record OrderItemStatusPatchRequest(
+public record OrderItemStatusPatchRequest(
     OrderItemStatus status
 ) {}

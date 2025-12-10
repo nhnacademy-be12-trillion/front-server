@@ -14,7 +14,7 @@ package com.nhnacademy.frontserver.book;
 
 import java.util.List;
 
-public record CategoryTreeResponse(
+record CategoryTreeResponse(
         Long categoryId,
         String categoryName,
         List<CategoryTreeResponse> children

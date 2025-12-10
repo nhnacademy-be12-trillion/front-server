@@ -1,10 +1,10 @@
-package com.nhnacademy.frontserver.controller;
+package com.nhnacademy.frontserver.order.controller;
 
-import com.nhnacademy.frontserver.controller.order.NonMemberOrderGetRequest;
-import com.nhnacademy.frontserver.controller.order.OrderClient;
-import com.nhnacademy.frontserver.controller.order.OrderItemStatusPatchRequest;
-import com.nhnacademy.frontserver.controller.order.OrderResponse;
-import com.nhnacademy.frontserver.controller.order.util.OrderItemStatus;
+import com.nhnacademy.frontserver.order.NonMemberOrderGetRequest;
+import com.nhnacademy.frontserver.order.OrderClient;
+import com.nhnacademy.frontserver.order.OrderItemStatusPatchRequest;
+import com.nhnacademy.frontserver.order.OrderResponse;
+import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +26,7 @@ public class OrderDetailsController {
 
     @PostMapping("/{orderId}/items/{itemId}/confirm")
     public String confirmOrderItem(@PathVariable Long orderId, @PathVariable Long itemId) {
-        OrderItemStatusPatchRequest request = new OrderItemStatusPatchRequest(com.nhnacademy.frontserver.controller.order.util.OrderItemStatus.CONFIRMED);
+        OrderItemStatusPatchRequest request = new OrderItemStatusPatchRequest(OrderItemStatus.CONFIRMED);
         orderClient.patchOrderItemStatusByMember(orderId, itemId, request);
         return "redirect:/orders/" + orderId;
     }

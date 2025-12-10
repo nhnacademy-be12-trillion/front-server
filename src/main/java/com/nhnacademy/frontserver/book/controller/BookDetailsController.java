@@ -35,10 +35,9 @@ public class BookDetailsController {
     public String bookDetail(@PathVariable("book_id") Long bookId,
                              @RequestParam(name = "page", defaultValue = "0") int page,
                              @RequestParam(name = "size", defaultValue = "20") int size,
-                             @RequestParam(name = "sort", defaultValue = "bookId,desc") String sort,
                              @RequestHeader(name = "X-USER-ID" , required = false) String userId,
                              Model model) {
-
+        String sort = "bookId,desc";
         BookDetailResponse bookDetail = bookClient.getBookDetail(bookId);
         PageResponse<ReviewResponse> review = bookClient.getReviews(bookId, page, size, sort);
         ReviewSummaryResponse reviewSummary = reviewSummaryClient.getReviewSummary(bookId.toString());
