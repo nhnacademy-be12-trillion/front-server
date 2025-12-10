@@ -1,444 +1,527 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
 
 <head>
     <meta charset="utf-8">
     <title>Trillion-Shop | 도서 상세</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="도서, 상세, 구매, 리뷰" name="keywords">
-    <meta content="온라인 도서 상세 페이지" name="description">
 
-    <link th:href="@{/img/favicon.ico}" rel="icon">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
-    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
-    <link href="/static/css/style.min.css" rel="stylesheet">
-<!--    <link th:href="@{/css/style.min.css}" rel="stylesheet">-->
+    <th:block layout:fragment="head">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="도서, 상세, 구매, 리뷰" name="keywords">
+        <meta content="온라인 도서 상세 페이지" name="description">
+
+        <style>
+            /* ✏️ 노트/메모장 느낌 스타일 */
+
+            #review-summary-box {
+                background: #fffdf7; /* 따뜻한 노트 종이색 */
+                border: 1px solid #e0daca; /* 연필 느낌의 흐린 갈색 */
+                border-radius: 8px;
+                padding: 1.5rem 1.8rem;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+                position: relative;
+                overflow: hidden;
+
+                /* 연한 줄(노트 줄) */
+                background-image: linear-gradient(
+                        to bottom,
+                        rgba(200, 180, 130, 0.25) 1px,
+                        transparent 1px
+                );
+                background-size: 100% 28px; /* 줄 간격 */
+            }
+
+            /* 서머리 앞의 아이콘 대신 동그란 글머리 */
+            #review-summary-prefix {
+                font-family: "Pretendard", "Noto Sans KR", sans-serif;
+                color: #c7925b;
+                font-weight: 600;
+                margin-right: 0.4rem;
+            }
+
+            #review-summary-text {
+                font-family: "Noto Serif KR", "Nanum Myeongjo", serif;
+                font-size: 1rem;
+                color: #4b3f32;
+                white-space: pre-wrap;
+                word-break: keep-all;
+                line-height: 1.7;
+            }
+
+            /* 커서: 형광펜 느낌 */
+            .typing-cursor {
+                display: inline-block;
+                width: 8px;
+                height: 20px;
+                background: rgba(255, 230, 120, 0.9);
+                margin-left: 4px;
+                animation: cursorBlink 1s step-end infinite;
+                border-radius: 2px;
+            }
+
+            @keyframes cursorBlink {
+                0% { opacity: 1; }
+                50% { opacity: .35; }
+                100% { opacity: 1; }
+            }
+        </style>
+
+    </th:block>
 </head>
 
 <body>
-<div class="container-fluid">
-    <div class="row bg-secondary py-1 px-xl-5">
-        <div class="col-lg-6 d-none d-lg-block">
-            <div class="d-inline-flex align-items-center h-100">
-                <a class="text-body mr-3" href="">About</a>
-                <a class="text-body mr-3" href="">Contact</a>
-                <a class="text-body mr-3" href="">Help</a>
-                <a class="text-body mr-3" href="">FAQs</a>
-            </div>
-        </div>
-        <div class="col-lg-6 text-center text-lg-right">
-            <div class="d-inline-flex align-items-center d-block d-lg-none">
-                <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
-                    <i class="fas fa-heart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
-                </a>
-                <a th:href="@{/api/carts}" class="btn px-0 ml-2">
-                    <i class="fas fa-shopping-cart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
-                </a>
-            </div>
-        </div>
-    </div>
-    <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
-        <div class="col-lg-4">
-            <a th:href="@{/}" class="text-decoration-none">
-                <img src="/static/img/logo.png" alt="Book E-commerce Logo" class="img-fluid" style="background-color: #fff;">
-            </a>
-        </div>
+<div layout:fragment="content">
 
-        <div class="col-lg-4 col-6 text-left">
-            <form th:action="@{/api/books/search}" method="get">
-                <div class="input-group">
-                    <input type="text" name="keyword" class="form-control" placeholder="Search for books">
-                    <div class="input-group-append">
-                        <button type="submit" class="input-group-text bg-transparent text-primary">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+    <!-- ====== 브레드크럼 ====== -->
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <!-- 항상 홈으로 시작 -->
+                    <a class="breadcrumb-item text-dark" th:href="@{/}">홈 / </a>
 
-        <!-- ✅ 로그인/회원가입/비회원조회 / 환영문구 + 마이페이지 영역 -->
-        <div class="col-lg-4 col-6 text-right">
-
-            <!-- 비로그인 상태 -->
-            <div class="d-inline-flex align-items-center justify-content-end w-100" th:if="${member == null}">
-                <a th:href="@{/api/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
-                    로그인
-                </a>
-                <a th:href="@{/api/auth/signup}" class="btn btn-sm btn-primary mx-1">
-                    회원가입
-                </a>
-                <a th:href="@{/api/orders/guest}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
-                    비회원 주문조회
-                </a>
-            </div>
-
-            <!-- 로그인 상태 -->
-            <div class="d-inline-flex flex-column align-items-end w-100" th:unless="${member == null}">
-            <span class="small mb-2" th:text="${member} + ' 님, 환영합니다'">
-                홍길동 님, 환영합니다
-            </span>
-                <div>
-                    <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
-                        마이페이지
-                    </a>
-                    <a th:href="@{/api/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
-                        로그아웃
-                    </a>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-<div class="container-fluid bg-dark mb-30">
-    <div class="row px-xl-5">
-        <div class="col-lg-3 d-none d-lg-block">
-        </div>
-        <div class="col-lg-9">
-            <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                    <div class="navbar-nav mr-auto py-0">
-                        <a th:href="@{/}" class="nav-item nav-link">베스트</a>
-                        <a href="#" class="nav-item nav-link">최근 발매</a>
-                        <a href="#" class="nav-item nav-link">생일책</a>
-                    </div>
-                    <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
-                        <a th:href="@{/api/members/likes}" class="btn px-0">
-                            <i class="fas fa-heart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
-                        </a>
-                        <a th:href="@{/api/carts}" class="btn px-0 ml-3">
-                            <i class="fas fa-shopping-cart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
-                        </a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </div>
-</div>
-<div class="container-fluid">
-    <div class="row px-xl-5">
-        <div class="col-12">
-            <nav class="breadcrumb bg-light mb-30">
-                <!-- 항상 홈으로 시작 -->
-                <a class="breadcrumb-item text-dark" th:href="@{/}">홈 / </a>
-
-                <!-- 카테고리 경로: 1뎁스 ~ 3뎁스까지 노출 & 클릭 시 해당 카테고리 리스트로 이동 -->
-                <th:block th:if="${categoryPath != null and !#lists.isEmpty(categoryPath)}">
-                    <th:block th:each="cat : ${categoryPath}">
-                        <a class="breadcrumb-item text-dark"
-                           th:href="@{/api/books/category/{id}(id=${cat.id})}"
-                           th:text="${cat.name} /">
-                            카테고리명
-                        </a>
+                    <!-- 카테고리 경로 -->
+                    <th:block th:if="${categoryPath != null and !#lists.isEmpty(categoryPath)}">
+                        <th:block th:each="cat : ${categoryPath}">
+                            <a class="breadcrumb-item text-dark"
+                               th:href="@{/api/books/category/{id}(id=${cat.id})}"
+                               th:text="${cat.name} + ' /'">
+                                카테고리명
+                            </a>
+                        </th:block>
                     </th:block>
-                </th:block>
 
-                <!-- 마지막: 현재 도서 제목 -->
-                <span class="breadcrumb-item active" th:text="${book.title}">
-        도서 제목
-    </span>
-            </nav>
-
-        </div>
-    </div>
-</div>
-<div class="container-fluid pb-5">
-    <div class="row px-xl-5">
-        <div class="col-lg-5 mb-30">
-            <div class="carousel-item active">
-                <img class="w-100 h-100" th:src="${book.thumbnailUrl ?: '/img/product-1.jpg'}" alt="Book Image" style="object-fit: contain; aspect-ratio: 1/1.4;">
-            </div>
-        </div>
-
-        <div class="col-lg-7 mb-30">
-            <h3 class="font-weight-semi-bold" th:text="${book.title}">도서 제목이 표시됩니다.</h3>
-
-            <div class="d-flex mb-3">
-                <div class="text-primary mr-2">
-                    <small class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}" th:classappend="${book.averageRating >= i} ? '' : 'far'"></small>
-                    <small th:text="'(' + ${book.reviewCount} + ' 리뷰)'"></small>
-                </div>
-            </div>
-
-            <h3 class="font-weight-semi-bold mb-4" th:text="${#numbers.formatInteger(book.price, 0, 'COMMA')} + '원'">19,000원</h3>
-            <p class="mb-4" th:text="${book.shortDescription ?: '책에 대한 짧은 설명입니다. (50자 내외)'}">
-            </p>
-
-            <div class="d-flex mb-3">
-                <p class="text-dark font-weight-medium mb-0 mr-3">재고 상태:</p>
-                <span class="text-success font-weight-bold" th:if="${book.stock > 0}">재고 있음 (<span th:text="${book.stock}">50</span>권)</span>
-                <span class="text-danger font-weight-bold" th:unless="${book.stock > 0}">일시 품절</span>
-            </div>
-
-            <div class="d-flex mb-3 align-items-center">
-                <p class="text-dark font-weight-medium mb-0 mr-3">🎁 포장 옵션:</p>
-                <div th:if="${packagingOptions != null and packagingOptions.size() > 0}">
-                    <span class="text-success font-weight-bold">포장 가능</span>
-                </div>
-                <div th:unless="${packagingOptions != null and packagingOptions.size() > 0}">
-                    <span class="text-danger font-weight-bold">포장 불가</span>
-                </div>
-            </div>
-            <small class="text-muted d-block mb-4 ml-0">※ 포장 서비스는 장바구니/결제 페이지에서 선택 가능합니다.</small>
-            <div class="d-flex align-items-center mb-4 pt-2">
-                <div class="input-group quantity mr-3" style="width: 130px;">
-                    <div class="input-group-btn">
-                        <button class="btn btn-primary btn-minus">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                    <input type="text" class="form-control bg-secondary border-0 text-center" value="1" min="1" max="99">
-                    <div class="input-group-btn">
-                        <button class="btn btn-primary btn-plus">
-                            <i class="fa fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <button class="btn btn-primary px-3 mr-2"><i class="fa fa-shopping-cart mr-1"></i> 장바구니</button>
-                <button class="btn btn-dark px-3"
-                        th:onclick="'location.href=\'/checkout?bookId=' + ${book.bookId} + '&quantity=\' + ' +
-                     'this.closest(\\'.input-group\\').querySelector(\\'input\\').value'">
-                    <i class="fa fa-credit-card mr-1"></i> 바로 구매
-                </button>
+                    <!-- 현재 도서 제목 -->
+                    <span class="breadcrumb-item active" th:text="${book.title}">
+                        도서 제목
+                    </span>
+                </nav>
             </div>
         </div>
     </div>
 
-    <div class="row px-xl-5 pt-5">
-        <div class="col-12">
-            <div class="bg-light p-30">
-
-                <div class="nav nav-tabs mb-4">
-                    <a class="nav-item nav-link text-dark active scroll-link" href="#book-description-content">도서 정보</a>
-                    <a class="nav-item nav-link text-dark scroll-link" href="#review-section-content">리뷰 (<span th:text="${book.reviewCount}">5</span>)</a>
+    <!-- ====== 도서 상세 상단 영역 (이미지 + 기본 정보) ====== -->
+    <div class="container-fluid pb-5">
+        <div class="row px-xl-5">
+            <!-- 표지 이미지 -->
+            <div class="col-lg-5 mb-30">
+                <div class="carousel-item active">
+                    <img class="w-100 h-100"
+                         th:src="${book.thumbnailUrl != null ? book.thumbnailUrl : '/img/product-1.jpg'}"
+                         alt="Book Image"
+                         style="object-fit: contain; aspect-ratio: 1/1.4;">
                 </div>
+            </div>
 
-                <div id="book-description-content" class="pt-3">
-                    <h4 class="mb-3">도서 정보</h4>
+            <!-- 도서 정보 -->
+            <div class="col-lg-7 mb-30">
+                <h3 class="font-weight-semi-bold" th:text="${book.title}">
+                    도서 제목이 표시됩니다.
+                </h3>
 
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered table-sm">
-                            <tbody>
-                            <tr>
-                                <th style="width: 150px;">품목 정보 (ISBN)</th>
-                                <td th:text="${book.isbn}">979-11-0000-000-0</td>
-                            </tr>
-                            <tr>
-                                <th>출판사 / 출간일</th>
-                                <td th:text="${book.publisher} + ' / ' + ${book.publishedDate}">도서 출판 X / 2024.01.01</td>
-                            </tr>
-                            <tr>
-                                <th>카테고리</th>
-                                <td th:text="${book.category.name}">컴퓨터 공학</td>
-                            </tr>
-                            <tr>
-                                <th>태그</th>
-                                <td>
-                                    <span th:each="tag : ${book.tags}" class="badge badge-info mr-1" th:text="${tag}">#프로그래밍</span>
-                                    <span class="badge badge-secondary">#신간</span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h5 class="mb-3 mt-4">책 설명</h5>
-                    <div th:utext="${book.description}">
-                        <p>이 책은...</p>
-                        <ul>
-                            <li>HTML 태그를 포함한 자세한 책 설명이 이곳에 표시됩니다.</li>
-                            <li>줄바꿈 및 서식은 HTML로 처리됩니다.</li>
-                        </ul>
-                    </div>
-
-                    <h5 class="mb-3 mt-4">목차</h5>
-                    <div th:utext="${book.tableOfContents}">
-                        <ol>
-                            <li>1장. 소개</li>
-                            <li>2장. 기본 개념</li>
-                            <li>...</li>
-                        </ol>
+                <!-- 별점 / 리뷰 개수 -->
+                <div class="d-flex mb-3">
+                    <div class="text-primary mr-2">
+                        <small class="fas fa-star"
+                               th:each="i : ${#numbers.sequence(1, 5)}"
+                               th:classappend="${book.averageRating >= i} ? '' : 'far'">
+                        </small>
+                        <small th:text="'(' + ${book.reviewCount != null ? book.reviewCount : 0} + ' 리뷰)'">
+                            (0 리뷰)
+                        </small>
                     </div>
                 </div>
 
-                <hr class="my-5">
+                <!-- 가격 -->
+                <h3 class="font-weight-semi-bold mb-4"
+                    th:text="${#numbers.formatInteger(book.price, 0, 'COMMA')} + '원'">
+                    19,000원
+                </h3>
 
-                <div id="review-section-content" class="pt-5 mt-5">
-                    <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">⭐ 고객 리뷰</span></h5>
+                <!-- 짧은 설명 -->
+                <p class="mb-4"
+                   th:text="${book.shortDescription != null ? book.shortDescription : '책에 대한 짧은 설명입니다. (50자 내외)'}">
+                </p>
 
-                    <div class="mb-4">
-                        <h4 class="mb-2">평균 별점: <span class="text-primary" th:text="${book.averageRating}">4.5</span> / 5.0</h4>
-                        <p class="text-muted" th:text="'총 ' + ${book.reviewCount} + '개의 리뷰가 있습니다.'">총 50개의 리뷰가 있습니다.</p>
-                        <div class="d-flex align-items-center mb-1" th:each="rating : ${#numbers.sequence(5, 1)}">
-                            <p class="m-0" th:text="${rating} + '점'"></p>
-                            <div class="progress ml-3" style="width: 100%; height: 8px;">
-                                <div class="progress-bar bg-primary" role="progressbar" th:style="'width: ' + ${book.ratingDistribution[rating] ?: 0} + '%'"
-                                     th:aria-valuenow="${book.ratingDistribution[rating] ?: 0}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <p class="m-0 ml-3" th:text="${book.ratingCount[rating] ?: 0} + '개'"></p>
+                <!-- 재고 상태 -->
+                <div class="d-flex mb-3">
+                    <p class="text-dark font-weight-medium mb-0 mr-3">재고 상태:</p>
+                    <span class="text-success font-weight-bold" th:if="${book.stock > 0}">
+                        재고 있음 (<span th:text="${book.stock}">0</span>권)
+                    </span>
+                    <span class="text-danger font-weight-bold" th:unless="${book.stock > 0}">
+                        일시 품절
+                    </span>
+                </div>
+
+                <!-- 포장 옵션 -->
+                <div class="d-flex mb-3 align-items-center">
+                    <p class="text-dark font-weight-medium mb-0 mr-3">🎁 포장 옵션:</p>
+                    <div th:if="${packagingOptions != null and !#lists.isEmpty(packagingOptions)}">
+                        <span class="text-success font-weight-bold">포장 가능</span>
+                    </div>
+                    <div th:unless="${packagingOptions != null and !#lists.isEmpty(packagingOptions)}">
+                        <span class="text-danger font-weight-bold">포장 불가</span>
+                    </div>
+                </div>
+                <small class="text-muted d-block mb-4 ml-0">
+                    ※ 포장 서비스는 장바구니/결제 페이지에서 선택 가능합니다.
+                </small>
+
+                <!-- 수량 선택 + 버튼 -->
+                <div class="d-flex align-items-center mb-4 pt-2">
+                    <div class="input-group quantity mr-3" style="width: 130px;">
+                        <div class="input-group-btn">
+                            <button class="btn btn-primary btn-minus" type="button">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                        <input type="text"
+                               class="form-control bg-secondary border-0 text-center"
+                               value="1" min="1" max="99">
+                        <div class="input-group-btn">
+                            <button class="btn btn-primary btn-plus" type="button">
+                                <i class="fa fa-plus"></i>
+                            </button>
                         </div>
                     </div>
 
-                    <hr>
+                    <button class="btn btn-primary px-3 mr-2" type="button">
+                        <i class="fa fa-shopping-cart mr-1"></i> 장바구니
+                    </button>
 
-                    <div id="review-list">
-                        <h5 class="mb-3">최근 리뷰 목록</h5>
-                        <div class="media mb-4" th:each="review : ${reviews}">
-                            <img th:src="@{/img/user.jpg}" alt="User Image" class="img-fluid mr-3 mt-1" style="width: 45px;">
-                            <div class="media-body">
-                                <h6>
-                                    <span th:text="${review.author}">User Name</span>
-                                    <small class="text-muted ml-2" th:text="${#dates.format(review.date, 'yyyy-MM-dd')}">2024-01-01</small>
-                                </h6>
-                                <div class="text-primary mb-2">
-                                    <small class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}" th:classappend="${review.rating >= i} ? '' : 'far'"></small>
-                                </div>
-                                <p th:text="${review.content}">이 책 정말 좋습니다. 배송도 빨랐고 내용도 만족스러워요!</p>
-                            </div>
+                    <button class="btn btn-dark px-3" type="button"
+                            th:onclick="'location.href=\'/checkout?bookId=' + ${book.bookId} + '&quantity=\' + ' +
+                             'this.closest(\\'.row\\').querySelector(\\'.quantity input\\').value'">
+                        <i class="fa fa-credit-card mr-1"></i> 바로 구매
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== 도서 상세 / 리뷰 탭 ====== -->
+        <div class="row px-xl-5 pt-5">
+            <div class="col-12">
+                <div class="bg-light p-30">
+
+                    <!-- 탭 -->
+                    <div class="nav nav-tabs mb-4">
+                        <a class="nav-item nav-link text-dark active scroll-link"
+                           href="#book-description-content">
+                            도서 정보
+                        </a>
+                        <a class="nav-item nav-link text-dark scroll-link"
+                           href="#review-section-content">
+                            리뷰 (<span th:text="${book.reviewCount != null ? book.reviewCount : 0}">0</span>)
+                        </a>
+                    </div>
+
+                    <!-- ====== 도서 정보 ====== -->
+                    <div id="book-description-content" class="pt-3">
+                        <h4 class="mb-3">도서 정보</h4>
+
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered table-sm">
+                                <tbody>
+                                <tr>
+                                    <th style="width: 150px;">품목 정보 (ISBN)</th>
+                                    <td th:text="${book.isbn}">
+                                        979-11-0000-000-0
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>출판사 / 출간일</th>
+                                    <td th:text="${book.publisher} + ' / ' + ${book.publishedDate}">
+                                        도서 출판사 / 2024.01.01
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>카테고리</th>
+                                    <td th:text="${book.category != null ? book.category.name : '카테고리 정보 없음'}">
+                                        컴퓨터 공학
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>태그</th>
+                                    <td>
+                                        <span th:each="tag : ${book.tags}"
+                                              class="badge badge-info mr-1"
+                                              th:text="${tag}">
+                                            #프로그래밍
+                                        </span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h5 class="mb-3 mt-4">책 설명</h5>
+                        <div th:utext="${book.description}">
+                            <p>이 책은...</p>
+                        </div>
+
+                        <h5 class="mb-3 mt-4">목차</h5>
+                        <div th:utext="${book.tableOfContents}">
+                            <ol>
+                                <li>1장. 소개</li>
+                                <li>2장. 기본 개념</li>
+                            </ol>
                         </div>
                     </div>
 
-                    <hr>
+                    <hr class="my-5">
 
-                    <div id="review-form">
-                        <h5 class="mb-4">리뷰 작성</h5>
-                        <small class="text-muted">리뷰는 로그인 후 작성 가능합니다.</small>
-                        <form action="#" th:action="@{/api/reviews}" method="post">
-                            <div class="form-group">
-                                <label>별점</label>
-                                <div class="text-primary d-flex align-items-center mb-2">
-                                    <i class="far fa-star rating-star" data-rating="1"></i>
-                                    <i class="far fa-star rating-star" data-rating="2"></i>
-                                    <i class="far fa-star rating-star" data-rating="3"></i>
-                                    <i class="far fa-star rating-star" data-rating="4"></i>
-                                    <i class="far fa-star rating-star" data-rating="5"></i>
-                                    <span class="ml-2">(<span id="selected-rating">0</span>/5)</span>
+                    <!-- ====== 리뷰 섹션 ====== -->
+                    <div id="review-section-content" class="pt-5 mt-5">
+                        <h5 class="section-title position-relative text-uppercase mb-3">
+                            <span class="bg-secondary pr-3">⭐ 고객 리뷰</span>
+                        </h5>
+
+                        <!-- ✅ 리뷰 서머리 (타자치는 효과) -->
+                        <div id="review-summary-box">
+                            <span id="review-summary-prefix">
+                                <i class="fa fa-terminal"></i> 리뷰 요약&nbsp;$
+                            </span>
+                            <span id="review-summary-text"
+                                  th:data-text="${reviewSummary != null ? reviewSummary : '아직 이 도서에 대한 리뷰 요약이 준비되지 않았습니다.'}">
+                                <!-- JS에서 타이핑으로 채워짐 -->
+                            </span>
+                            <span id="review-summary-cursor" class="typing-cursor">|</span>
+                        </div>
+
+                        <!-- 리뷰 통계 -->
+                        <div class="mb-4">
+                            <h4 class="mb-2">
+                                평균 별점:
+                                <span class="text-primary"
+                                      th:text="${book.averageRating != null ? book.averageRating : 0}">
+                                    0
+                                </span> / 5.0
+                            </h4>
+                            <p class="text-muted"
+                               th:text="'총 ' + ${book.reviewCount != null ? book.reviewCount : 0} + '개의 리뷰가 있습니다.'">
+                                총 0개의 리뷰가 있습니다.
+                            </p>
+
+                            <div class="d-flex align-items-center mb-1"
+                                 th:each="rating : ${#numbers.sequence(5, 1)}">
+                                <p class="m-0" th:text="${rating} + '점'">5점</p>
+                                <div class="progress ml-3" style="width: 100%; height: 8px;">
+                                    <div class="progress-bar bg-primary"
+                                         role="progressbar"
+                                         th:style="'width: ' + (${book.ratingDistribution[rating]} != null ? ${book.ratingDistribution[rating]} : 0) + '%'"
+                                         th:aria-valuenow="${book.ratingDistribution[rating] != null ? book.ratingDistribution[rating] : 0}"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                    </div>
                                 </div>
-                                <input type="hidden" name="rating" id="rating-value" value="0">
+                                <p class="m-0 ml-3"
+                                   th:text="${(book.ratingCount[rating] != null ? book.ratingCount[rating] : 0)} + '개'">
+                                    0개
+                                </p>
                             </div>
-                            <div class="form-group">
-                                <label for="message">리뷰 내용</label>
-                                <textarea id="message" cols="30" rows="5" class="form-control" name="content" required></textarea>
-                            </div>
-                            <div class="form-group mb-0">
-                                <input type="submit" value="리뷰 등록" class="btn btn-primary px-3">
-                            </div>
-                        </form>
-                    </div>
+                        </div>
 
-                </div>
+                        <hr>
+
+                        <!-- 리뷰 리스트 -->
+                        <div id="review-list">
+                            <h5 class="mb-3">최근 리뷰 목록</h5>
+
+                            <div class="media mb-4"
+                                 th:each="review : ${reviews}">
+                                <img th:src="@{/img/user.jpg}"
+                                     alt="User Image"
+                                     class="img-fluid mr-3 mt-1"
+                                     style="width: 45px;">
+                                <div class="media-body">
+                                    <h6>
+                                        <span th:text="${review.author}">
+                                            User Name
+                                        </span>
+                                        <small class="text-muted ml-2"
+                                               th:text="${#dates.format(review.date, 'yyyy-MM-dd')}">
+                                            2024-01-01
+                                        </small>
+                                    </h6>
+                                    <div class="text-primary mb-2">
+                                        <small class="fas fa-star"
+                                               th:each="i : ${#numbers.sequence(1, 5)}"
+                                               th:classappend="${review.rating >= i} ? '' : 'far'">
+                                        </small>
+                                    </div>
+                                    <p th:text="${review.content}">
+                                        이 책 정말 좋습니다. 배송도 빨랐고 내용도 만족스러워요!
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div th:if="${reviews == null or #lists.isEmpty(reviews)}"
+                                 class="text-muted">
+                                아직 등록된 리뷰가 없습니다. 첫 리뷰를 남겨보세요!
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- 리뷰 작성 -->
+                        <div id="review-form">
+                            <h5 class="mb-4">리뷰 작성</h5>
+                            <small class="text-muted d-block mb-2">
+                                리뷰는 로그인 후 작성 가능합니다.
+                            </small>
+                            <form th:action="@{/api/reviews}" method="post">
+                                <div class="form-group">
+                                    <label>별점</label>
+                                    <div class="text-primary d-flex align-items-center mb-2">
+                                        <i class="far fa-star rating-star" data-rating="1"></i>
+                                        <i class="far fa-star rating-star" data-rating="2"></i>
+                                        <i class="far fa-star rating-star" data-rating="3"></i>
+                                        <i class="far fa-star rating-star" data-rating="4"></i>
+                                        <i class="far fa-star rating-star" data-rating="5"></i>
+                                        <span class="ml-2">
+                                            (<span id="selected-rating">0</span>/5)
+                                        </span>
+                                    </div>
+                                    <input type="hidden" name="rating" id="rating-value" value="0">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="message">리뷰 내용</label>
+                                    <textarea id="message"
+                                              cols="30" rows="5"
+                                              class="form-control"
+                                              name="content"
+                                              required></textarea>
+                                </div>
+
+                                <div class="form-group mb-0">
+                                    <input type="submit"
+                                           value="리뷰 등록"
+                                           class="btn btn-primary px-3">
+                                </div>
+                            </form>
+                        </div>
+
+                    </div> <!-- /review-section-content -->
+                </div> <!-- /bg-light -->
             </div>
         </div>
     </div>
+
 </div>
-<div class="container-fluid bg-dark text-secondary mt-5 pt-5">
-    <div class="row px-xl-5 pt-5">
-        <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
-            <h5 class="text-secondary text-uppercase mb-4">연락처</h5>
-            <p class="mb-4">No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor. Rebum tempor no vero est magna amet no</p>
-            <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>Seoul, Korea</p>
-            <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
-            <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
-        </div>
-        <div class="col-lg-8 col-md-12">
-            <div class="row">
-                <div class="col-md-4 mb-5">
-                    <h5 class="text-secondary text-uppercase mb-4">빠른 쇼핑</h5>
-                    <div class="d-flex flex-column justify-content-start">
-                        <a class="text-secondary mb-2" th:href="@{/}"><i class="fa fa-angle-right mr-2"></i>홈</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/books}"><i class="fa fa-angle-right mr-2"></i>상품 보기</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/carts}"><i class="fa fa-angle-right mr-2"></i>장바구니</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/orders}"><i class="fa fa-angle-right mr-2"></i>주문/결제</a>
-                        <a class="text-secondary" href="#"><i class="fa fa-angle-right mr-2"></i>고객 센터</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row border-top mx-xl-5 py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
-        <div class="col-md-6 px-xl-0">
-            <p class="mb-md-0 text-center text-md-left text-secondary">
-                &copy; <a class="text-primary" href="#">Trillion-Shop</a>. All Rights Reserved.
-                Designed by <a class="text-primary" href="https://htmlcodex.com">HTML Codex</a>
-            </p>
-        </div>
-        <div class="col-md-6 px-xl-0 text-center text-md-right">
-            <img class="img-fluid" th:src="@{/img/payments.png}" alt="">
-        </div>
-    </div>
-</div>
-<a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
+<!-- ====== 페이지 전용 스크립트 ====== -->
+<th:block layout:fragment="script">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // === 도서 정보/리뷰 탭 클릭 시 부드러운 스크롤 ===
+            var scrollLinks = document.querySelectorAll('.scroll-link');
+            scrollLinks.forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var targetId = this.getAttribute('href');
+                    if (!targetId) return;
 
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/lib/easing/easing.min.js}"></script>
-<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+                    // 탭 active 상태 전환
+                    scrollLinks.forEach(function (l) {
+                        l.classList.remove('active');
+                    });
+                    this.classList.add('active');
 
-<script th:src="@{/js/main.js}"></script>
+                    var target = document.querySelector(targetId);
+                    if (!target) return;
 
-<script>
-    $(document).ready(function () {
-        // **[요청 기능] 도서 정보/리뷰 버튼 클릭 시 해당 섹션으로 스크롤 이동 (스크롤 기능만 남김)**
-        $('.scroll-link').on('click', function(e) {
-            e.preventDefault();
-            const targetId = $(this).attr('href');
-
-            // 탭 활성 상태 변경 (UI만 변경)
-            $('.nav-item .scroll-link').removeClass('active');
-            $(this).addClass('active');
-
-            // 해당 섹션으로 부드럽게 스크롤
-            $('html, body').animate({
-                scrollTop: $(targetId).offset().top - 50 // 상단 여백 50px 추가
-            }, 500);
-        });
-
-        // **[추가 기능] 리뷰 별점 선택**
-        $('.rating-star').on('click', function() {
-            const rating = $(this).data('rating');
-            $('#rating-value').val(rating);
-            $('#selected-rating').text(rating);
-
-            // 별 아이콘 상태 업데이트
-            $('.rating-star').each(function() {
-                if ($(this).data('rating') <= rating) {
-                    $(this).removeClass('far').addClass('fas');
-                } else {
-                    $(this).removeClass('fas').addClass('far');
-                }
+                    window.scrollTo({
+                        top: target.offsetTop - 60,
+                        behavior: 'smooth'
+                    });
+                });
             });
-        });
 
-        // **[추가 기능] 수량 조절 버튼**
-        $('.btn-plus').on('click', function() {
-            let qtyInput = $(this).closest('.quantity').find('input');
-            let max = parseInt(qtyInput.attr('max'));
-            let currentVal = parseInt(qtyInput.val());
-            if (currentVal < max) {
-                qtyInput.val(currentVal + 1);
+            // === 리뷰 별점 선택 ===
+            var stars = document.querySelectorAll('.rating-star');
+            var ratingValueInput = document.getElementById('rating-value');
+            var selectedRatingText = document.getElementById('selected-rating');
+
+            if (stars && ratingValueInput && selectedRatingText) {
+                stars.forEach(function (star) {
+                    star.addEventListener('click', function () {
+                        var rating = parseInt(this.dataset.rating || '0', 10);
+                        ratingValueInput.value = rating;
+                        selectedRatingText.textContent = rating.toString();
+
+                        stars.forEach(function (s) {
+                            var starRating = parseInt(s.dataset.rating || '0', 10);
+                            if (starRating <= rating) {
+                                s.classList.remove('far');
+                                s.classList.add('fas');
+                            } else {
+                                s.classList.remove('fas');
+                                s.classList.add('far');
+                            }
+                        });
+                    });
+                });
+            }
+
+            // === 수량 조절 버튼 ===
+            var plusButtons = document.querySelectorAll('.btn-plus');
+            var minusButtons = document.querySelectorAll('.btn-minus');
+
+            plusButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var qtyInput = this.closest('.quantity').querySelector('input');
+                    if (!qtyInput) return;
+                    var max = parseInt(qtyInput.getAttribute('max') || '99', 10);
+                    var currentVal = parseInt(qtyInput.value || '1', 10);
+                    if (currentVal < max) {
+                        qtyInput.value = currentVal + 1;
+                    }
+                });
+            });
+
+            minusButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var qtyInput = this.closest('.quantity').querySelector('input');
+                    if (!qtyInput) return;
+                    var min = parseInt(qtyInput.getAttribute('min') || '1', 10);
+                    var currentVal = parseInt(qtyInput.value || '1', 10);
+                    if (currentVal > min) {
+                        qtyInput.value = currentVal - 1;
+                    }
+                });
+            });
+
+            // === 리뷰 서머리 타이핑 효과 ===
+            var summaryEl = document.getElementById('review-summary-text');
+            var cursorEl = document.getElementById('review-summary-cursor');
+
+            if (summaryEl) {
+                var fullText = summaryEl.dataset.text || '';
+                var index = 0;
+                var typingSpeed = 40; // ms
+
+                summaryEl.textContent = '';
+
+                function typeChar() {
+                    if (index <= fullText.length) {
+                        summaryEl.textContent = fullText.slice(0, index);
+                        index++;
+                        setTimeout(typeChar, typingSpeed);
+                    } else if (cursorEl) {
+                        // 타이핑이 끝난 후에도 커서는 계속 반짝이게 둠 (원하면 여기서 숨길 수 있음)
+                    }
+                }
+
+                typeChar();
             }
         });
+    </script>
+</th:block>
 
-        $('.btn-minus').on('click', function() {
-            let qtyInput = $(this).closest('.quantity').find('input');
-            let min = parseInt(qtyInput.attr('min'));
-            let currentVal = parseInt(qtyInput.val());
-            if (currentVal > min) {
-                qtyInput.val(currentVal - 1);
-            }
-        });
-    });
-</script>
 </body>
-
 </html>

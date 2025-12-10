@@ -1,123 +1,160 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{fragments/base}">
+      layout:decorate="~{base}">
 
 <head>
     <meta charset="utf-8">
     <title>Trillion-Shop | My Page - 개인정보 수정</title>
+
+    <th:block layout:fragment="head">
+        <!-- 필요하면 여기에 이 페이지 전용 CSS 추가 -->
+        <style>
+            .mypage-menu .list-group-item {
+                border-radius: 6px;
+                margin-bottom: 6px;
+            }
+            .mypage-menu .list-group-item.active {
+                font-weight: 600;
+            }
+        </style>
+    </th:block>
 </head>
 
 <body>
-<div class="container-fluid">
-    <div class="row px-xl-5">
-        <!-- 왼쪽 MY 메뉴 -->
-        <div class="col-lg-3 col-md-4">
-            <h5 class="section-title position-relative text-uppercase mb-3">
-                <span class="bg-secondary pr-3">MY 메뉴</span>
-            </h5>
+<div layout:fragment="content">
 
-            <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
-                <!-- 회원 정보 관리 -->
-                <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'profile'} ? ' active'"
-                   th:href="@{/my-page/profile}">
-                    개인정보 수정
-                </a>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'reviews'} ? ' active'"
-                   th:href="@{/my-page/reviews}">
-                    마이 리뷰
-                </a>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'addresses'} ? ' active'"
-                   th:href="@{/my-page/addresses}">
-                    배송 주소록 관리
-                </a>
-                <hr class="my-3">
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <!-- 왼쪽 MY 메뉴 -->
+            <div class="col-lg-3 col-md-4">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">MY 메뉴</span>
+                </h5>
 
-                <!-- 주문 내역 -->
-                <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'orders'} ? ' active'"
-                   th:href="@{/my-page/orders}">
-                    주문/배송 조회
-                </a>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'history'} ? ' active'"
-                   th:href="@{/my-page/history}">
-                    취소/반품 내역
-                </a>
+                <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
+                    <!-- 회원 정보 관리 -->
+                    <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'profile'} ? ' active'"
+                       th:href="@{/my-page/profile}">
+                        개인정보 수정
+                    </a>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'reviews'} ? ' active'"
+                       th:href="@{/my-page/reviews}">
+                        마이 리뷰
+                    </a>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'addresses'} ? ' active'"
+                       th:href="@{/my-page/addresses}">
+                        배송 주소록 관리
+                    </a>
+                    <hr class="my-3">
 
-                <hr class="my-3">
+                    <!-- 주문 내역 -->
+                    <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'orders'} ? ' active'"
+                       th:href="@{/my-page/orders}">
+                        주문/배송 조회
+                    </a>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'history'} ? ' active'"
+                       th:href="@{/my-page/history}">
+                        취소/반품 내역
+                    </a>
 
-                <!-- 회원 탈퇴 -->
-                <a th:href="@{/my-page/withdraw}" class="list-group-item list-group-item-action text-danger">
-                    회원 탈퇴
-                </a>
+                    <hr class="my-3">
+
+                    <!-- 회원 탈퇴 -->
+                    <a th:href="@{/my-page/withdraw}"
+                       class="list-group-item list-group-item-action text-danger">
+                        회원 탈퇴
+                    </a>
+                </div>
             </div>
-        </div>
 
+            <!-- 오른쪽: 개인정보 수정 폼 -->
+            <div class="col-lg-9 col-md-8">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">개인정보 수정</span>
+                </h5>
 
-        <div class="col-lg-9 col-md-8">
-            <h5 class="section-title position-relative text-uppercase mb-3">
-                <span class="bg-secondary pr-3">개인정보 수정</span>
-            </h5>
-
-            <div class="bg-light p-5">
-                <form th:action="@{/api/members/info}" method="post" th:object="${member}">
-                    <div class="form-group">
-                        <label>이름</label>
-                        <input class="form-control" type="text"
-                               th:field="*{name}" placeholder="이름을 입력하세요">
+                <div class="bg-light p-5">
+                    <!-- member가 없을 경우 방어 -->
+                    <div th:if="${member == null}" class="text-center py-5">
+                        <p class="text-muted mb-3">
+                            회원 정보를 불러올 수 없습니다. 다시 로그인 후 이용해 주세요.
+                        </p>
+                        <a th:href="@{/api/auth/login}" class="btn btn-primary btn-sm">
+                            로그인 페이지로 이동
+                        </a>
                     </div>
 
-                    <div class="form-group">
-                        <label>이메일</label>
-                        <input class="form-control" type="email"
-                               th:value="*{email}" readonly>
-                    </div>
+                    <form th:if="${member != null}"
+                          th:action="@{/api/members/info}"
+                          method="post"
+                          th:object="${member}">
 
-                    <div class="form-group">
-                        <label>비밀번호</label>
-                        <div class="d-flex">
-                            <input class="form-control mr-5" type="text"
-                                   value="********" readonly>
-                            <a th:href="@{/api/members/password}"
-                               class="btn btn-sm btn-outline-secondary text-dark mr-2 text-sm-center">
-                                비밀번호 변경
-                            </a>
+                        <!-- 이름 -->
+                        <div class="form-group">
+                            <label>이름</label>
+                            <input class="form-control" type="text"
+                                   th:field="*{name}" placeholder="이름을 입력하세요">
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label>연락처</label>
-                        <input class="form-control" type="text"
-                               th:field="*{phoneNumber}" placeholder="010-0000-0000">
-                    </div>
+                        <!-- 이메일 (수정 불가) -->
+                        <div class="form-group">
+                            <label>이메일</label>
+                            <input class="form-control" type="email"
+                                   th:value="${member.email}" readonly>
+                        </div>
 
-                    <div class="form-group">
-                        <label>생일</label>
-                        <input class="form-control" type="date"
-                               th:field="*{birthday}"
-                               th:value="${member.birthday != null ? #temporals.format(member.birthday, 'yyyy-MM-dd') : ''}">
-                        <small class="form-text text-muted">
-                            생일 정보를 기준으로 생일 쿠폰 등 맞춤 서비스를 제공할 수 있습니다.
-                        </small>
-                    </div>
+                        <!-- 비밀번호 변경 링크 -->
+                        <div class="form-group">
+                            <label>비밀번호</label>
+                            <div class="d-flex">
+                                <input class="form-control mr-3" type="text"
+                                       value="********" readonly>
+                                <a th:href="@{/api/members/password}"
+                                   class="btn btn-sm btn-outline-secondary text-dark">
+                                    비밀번호 변경
+                                </a>
+                            </div>
+                        </div>
 
-                    <div class="text-right mt-4">
-                        <button type="submit" class="btn btn-primary px-4">
-                            수정하기
-                        </button>
-                    </div>
-                </form>
+                        <!-- 연락처 -->
+                        <div class="form-group">
+                            <label>연락처</label>
+                            <input class="form-control" type="text"
+                                   th:field="*{phoneNumber}" placeholder="010-0000-0000">
+                        </div>
+
+                        <!-- 생일 -->
+                        <div class="form-group">
+                            <label>생일</label>
+                            <input class="form-control" type="date"
+                                   th:field="*{birthday}"
+                                   th:value="${member.birthday != null ? #temporals.format(member.birthday, 'yyyy-MM-dd') : ''}">
+                            <small class="form-text text-muted">
+                                생일 정보를 기준으로 생일 쿠폰 등 맞춤 서비스를 제공할 수 있습니다.
+                            </small>
+                        </div>
+
+                        <div class="text-right mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                수정하기
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
             </div>
-
         </div>
     </div>
+
 </div>
 </body>
 </html>

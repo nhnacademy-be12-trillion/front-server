@@ -1,148 +1,184 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{fragments/base}">
+      layout:decorate="~{base}">
 
 <head>
   <meta charset="utf-8">
-  <title>Trillion-Shop | My Page - 취소/반품 내역</title>
+  <title>Trillion-Shop | My Page - 주문/배송 조회</title>
+
+  <th:block layout:fragment="head">
+    <style>
+      /* 반품 버튼 */
+      .btn-return {
+        color: #b88600 !important;
+        border: 1px solid #e0b200 !important;
+        background-color: #fffbea !important;
+      }
+      .btn-return:hover {
+        background-color: #ffe08a !important;
+        border-color: #d4a300 !important;
+      }
+
+      /* 파손 접수 버튼 */
+      .btn-damage {
+        color: #b00020 !important;
+        border: 1px solid #d32f2f !important;
+        background-color: #fff5f5 !important;
+      }
+      .btn-damage:hover {
+        background-color: #ffcccc !important;
+        border-color: #c62828 !important;
+      }
+
+      /* left menu 스타일 통일 */
+      .mypage-menu .list-group-item {
+        border-radius: 6px;
+        margin-bottom: 6px;
+      }
+      .mypage-menu .list-group-item.active {
+        font-weight: 600;
+      }
+    </style>
+  </th:block>
 </head>
 
 <body>
-<div class="container-fluid">
-  <div class="row px-xl-5">
 
-    <!-- 왼쪽 MY 메뉴 (공통) -->
-    <div class="col-lg-3 col-md-4">
-      <h5 class="section-title position-relative text-uppercase mb-3">
-        <span class="bg-secondary pr-3">MY 메뉴</span>
-      </h5>
+<div layout:fragment="content">
 
-      <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
-        <!-- 회원 정보 관리 -->
-        <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
-        <a class="list-group-item list-group-item-action"
-           th:classappend="${activeTab == 'profile'} ? ' active'"
-           th:href="@{/my-page/profile}">
-          개인정보 수정
-        </a>
-        <a class="list-group-item list-group-item-action"
-           th:classappend="${activeTab == 'reviews'} ? ' active'"
-           th:href="@{/my-page/reviews}">
-          마이 리뷰
-        </a>
-        <a class="list-group-item list-group-item-action"
-           th:classappend="${activeTab == 'addresses'} ? ' active'"
-           th:href="@{/my-page/addresses}">
-          배송 주소록 관리
-        </a>
-        <hr class="my-3">
+  <div class="container-fluid">
+    <div class="row px-xl-5">
 
-        <!-- 주문 내역 -->
-        <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
-        <a class="list-group-item list-group-item-action"
-           th:classappend="${activeTab == 'orders'} ? ' active'"
-           th:href="@{/my-page/orders}">
-          주문/배송 조회
-        </a>
-        <a class="list-group-item list-group-item-action"
-           th:classappend="${activeTab == 'history'} ? ' active'"
-           th:href="@{/my-page/history}">
-          취소/반품 내역
-        </a>
+      <!-- ==========================
+           좌측 MY 메뉴
+      =========================== -->
+      <div class="col-lg-3 col-md-4">
 
-        <hr class="my-3">
+        <h5 class="section-title position-relative text-uppercase mb-3">
+          <span class="bg-secondary pr-3">MY 메뉴</span>
+        </h5>
 
-        <!-- 회원 탈퇴 -->
-        <a th:href="@{/my-page/withdraw}" class="list-group-item list-group-item-action text-danger">
-          회원 탈퇴
-        </a>
+        <div class="nav flex-column nav-pills mypage-menu">
+          <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
+
+          <a th:href="@{/my-page/profile}"
+             class="list-group-item list-group-item-action"
+             th:classappend="${activeTab == 'profile'} ? ' active'">
+            개인정보 수정
+          </a>
+
+          <a th:href="@{/my-page/reviews}"
+             class="list-group-item list-group-item-action"
+             th:classappend="${activeTab == 'reviews'} ? ' active'">
+            마이 리뷰
+          </a>
+
+          <a th:href="@{/my-page/addresses}"
+             class="list-group-item list-group-item-action"
+             th:classappend="${activeTab == 'addresses'} ? ' active'">
+            배송 주소록 관리
+          </a>
+
+          <hr class="my-3">
+
+          <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
+
+          <a th:href="@{/my-page/orders}"
+             class="list-group-item list-group-item-action"
+             th:classappend="${activeTab == 'orders'} ? ' active'">
+            주문/배송 조회
+          </a>
+
+          <a th:href="@{/my-page/history}"
+             class="list-group-item list-group-item-action"
+             th:classappend="${activeTab == 'history'} ? ' active'">
+            취소/반품 내역
+          </a>
+
+          <hr class="my-3">
+
+          <a th:href="@{/my-page/withdraw}"
+             class="list-group-item list-group-item-action text-danger">
+            회원 탈퇴
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- 위 공통 메뉴 붙이고 activeTab == 'history' 세팅 -->
+      <!-- ==========================
+           오른쪽: 주문/배송 조회
+      =========================== -->
+      <div class="col-lg-9 col-md-8">
 
-    <!-- 오른쪽: 취소/반품 내역 -->
-    <div class="col-lg-9 col-md-8">
-      <h5 class="section-title position-relative text-uppercase mb-3">
-        <span class="bg-secondary pr-3">취소/반품 내역</span>
-      </h5>
+        <h5 class="section-title position-relative text-uppercase mb-3">
+          <span class="bg-secondary pr-3">주문 조회 / 변경 / 취소</span>
+        </h5>
 
-      <!-- 상단 서브 탭 (주문 취소 / 상품 반품) 그대로 유지해도 되고,
-           필요 없으면 그냥 두 개의 섹션으로 나눠도 됨 -->
+        <!-- 주문 내역 있음 -->
+        <div th:if="${orders != null and !#lists.isEmpty(orders.content)}">
 
-      <ul class="nav nav-tabs" id="historySubTab" role="tablist">
-        <li class="nav-item">
-          <a class="nav-link active" data-toggle="tab" href="#cancel-history" role="tab">
-            주문 취소 내역
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#return-history" role="tab">
-            상품 반품 내역
-          </a>
-        </li>
-      </ul>
+          <div th:each="order : ${orders.content}" class="card mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+              <div>
+                <span class="font-weight-bold">주문일:</span>
+                <span class="ml-2"
+                      th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">
+                                    2025-12-25
+                                </span>
+              </div>
 
-      <div class="tab-content" id="historySubTabContent">
-        <!-- 주문 취소 내역 -->
-        <div class="tab-pane fade show active" id="cancel-history" role="tabpanel">
-          <div class="bg-light p-4 mt-3">
-            <div class="table-responsive">
-              <table class="table table-bordered mb-0 text-center">
-                <thead style="background-color:#f3fcff;">
-                <tr>
-                  <th style="width:20%;">주문일</th>
-                  <th style="width:40%;">주문번호</th>
-                  <th style="width:25%;">취소 금액</th>
-                  <th style="width:15%;">상태</th>
-                </tr>
-                </thead>
-                <tbody>
-                <!-- th:each="order : ${cancelledOrders}" ... 기존 코드 그대로 -->
-                <tr th:if="${cancelledOrders == null or #lists.isEmpty(cancelledOrders)}">
-                  <td colspan="4" class="py-5 text-muted">
-                    주문을 취소한 내역이 없습니다.
-                  </td>
-                </tr>
-                </tbody>
-              </table>
+              <a th:href="@{/orders/{orderId}(orderId=${order.orderId})}"
+                 class="btn btn-sm btn-outline-dark">
+                주문 상세 보기
+              </a>
             </div>
-          </div>
+
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                  <tbody>
+                  <tr th:each="item : ${order.orderItems}">
+                    <td style="width: 55%;">
+                      <div class="d-flex align-items-center">
+                        <img th:src="${item.thumbnailUrl != null ? item.thumbnailUrl : '/img/product-1.jpg'}"
+                             alt="Book Thumbnail"
+                             style="width: 40px; aspect-ratio: 1/1.4; object-fit: cover; margin-right: 10px;">
+                        <span th:text="${item.bookName}">상품명</span>
+                      </div>
+                    </td>
+
+                    <td class="align-middle"
+                        th:text="${#numbers.formatInteger(item.price, 0, 'COMMA')} + '원 × ' + ${item.quantity} + '개'">
+                      15,000원 × 1개
+                    </td>
+
+                    <td class="align-middle">
+                                            <span class="badge badge-primary"
+                                                  th:text="${item.orderItemStatus}">
+                                                PREPARING
+                                            </span>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div><!-- card end -->
+
         </div>
 
-        <!-- 상품 반품 내역 -->
-        <div class="tab-pane fade" id="return-history" role="tabpanel">
-          <div class="bg-light p-4 mt-3">
-            <div class="table-responsive">
-              <table class="table table-bordered mb-0 text-center">
-                <thead style="background-color:#f3fcff;">
-                <tr>
-                  <th style="width:15%;">반품 신청일</th>
-                  <th style="width:40%;">상품 정보</th>
-                  <th style="width:15%;">반품 금액</th>
-                  <th style="width:15%;">수량</th>
-                  <th style="width:15%;">상태</th>
-                </tr>
-                </thead>
-                <tbody>
-                <!-- th:each="item : ${returnedItems}" ... 기존 코드 그대로 -->
-                <tr th:if="${returnedItems == null or #lists.isEmpty(returnedItems)}">
-                  <td colspan="5" class="py-5 text-muted">
-                    상품을 반품한 내역이 없습니다.
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <!-- 주문 내역 없음 -->
+        <div th:if="${orders == null or #lists.isEmpty(orders.content)}"
+             class="bg-light p-4 text-center">
+          <p class="text-muted my-5">조회 가능한 주문 내역이 없습니다.</p>
         </div>
 
-      </div><!-- /tab-content -->
-    </div><!-- /col-lg-9 -->
-
-  </div>
+      </div><!-- /col -->
+    </div><!-- /row -->
+  </div><!-- /container -->
 </div>
+
 </body>
 </html>
