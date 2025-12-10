@@ -17,32 +17,21 @@ public interface CartClient {
      * POST /api/carts
      */
     @PostMapping
-    ResponseEntity<Long> addToCart(
-            @RequestHeader(value = "X-User-Id", required = false) Long memberId,
-            @RequestHeader(value = "Cookie", required = false) String cookie,
-            @RequestBody CartCreateRequestDto request
-    );
+    ResponseEntity<Long> addToCart(@RequestBody CartCreateRequestDto request);
 
     /**
      * [장바구니 목록 조회]
      * GET /api/carts
      */
     @GetMapping
-    ResponseEntity<List<CartResponseDto>> getCartItems(
-            @RequestHeader(value = "X-User-Id", required = false) Long memberId,
-            @RequestHeader(value = "Cookie", required = false) String cookie
-    );
+    ResponseEntity<List<CartResponseDto>> getCartItems();
 
     /**
      * [수량 변경]
      * PUT /api/carts/{bookId}
      */
     @PutMapping("/{bookId}")
-    ResponseEntity<Void> updateCartItem(
-            @RequestHeader(value = "X-User-Id", required = false) Long memberId,
-            @RequestHeader(value = "Cookie", required = false) String cookie,
-            @PathVariable("bookId") Long bookId,
-            @RequestBody CartUpdateRequestDto request
+    ResponseEntity<Void> updateCartItem(@PathVariable("bookId") Long bookId, @RequestBody CartUpdateRequestDto request
     );
 
     /**
@@ -50,39 +39,26 @@ public interface CartClient {
      * DELETE /api/carts/{bookId}
      */
     @DeleteMapping("/{bookId}")
-    ResponseEntity<Void> removeCartItem(
-            @RequestHeader(value = "X-User-Id", required = false) Long memberId,
-            @RequestHeader(value = "Cookie", required = false) String cookie,
-            @PathVariable("bookId") Long bookId
-    );
+    ResponseEntity<Void> removeCartItem(@PathVariable("bookId") Long bookId);
 
     /**
      * [장바구니 전체 비우기]
      * DELETE /api/carts
      */
     @DeleteMapping
-    ResponseEntity<Void> clearCart(
-            @RequestHeader(value = "X-User-Id", required = false) Long memberId,
-            @RequestHeader(value = "Cookie", required = false) String cookie
-    );
+    ResponseEntity<Void> clearCart();
 
     /**
      * [장바구니 개수 조회]
      * GET /api/carts/count
      */
     @GetMapping("/count")
-    ResponseEntity<Long> countCartItems(
-            @RequestHeader(value = "X-User-Id", required = false) Long memberId,
-            @RequestHeader(value = "Cookie", required = false) String cookie
-    );
+    ResponseEntity<Long> countCartItems();
 
     /**
      * [장바구니 병합]
      * POST /api/carts/merge
      */
     @PostMapping("/merge")
-    ResponseEntity<Void> mergeCart(
-            @RequestHeader("X-User-Id") Long memberId,
-            @RequestHeader("Cookie") String guestCookie
-    );
+    ResponseEntity<Void> mergeCart();
 }
