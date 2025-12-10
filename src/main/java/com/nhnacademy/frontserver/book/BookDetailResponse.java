@@ -15,7 +15,10 @@ package com.nhnacademy.frontserver.book;
 import java.time.LocalDate;
 
 public record BookDetailResponse(
+        Long bookId,
+        String isbn,
         String bookName,
+        String bookAuthor,
         String bookDescription,
         String bookPublisher,
         LocalDate bookPublicationDate,
@@ -25,6 +28,7 @@ public record BookDetailResponse(
         int bookStock,
         int bookRegularPrice,
         int bookSalePrice,
+        int discountRate,
         double bookReviewRate,
         String bookImage,
         int viewCount

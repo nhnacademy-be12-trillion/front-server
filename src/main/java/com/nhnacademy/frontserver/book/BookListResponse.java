@@ -13,13 +13,14 @@
 package com.nhnacademy.frontserver.book;
 
 public record BookListResponse(
+        Long bookId,    // 상세 페이지 이동용
         String bookName,
+        String bookAuthor,
         String bookPublisher,
-        boolean bookPackaging,
         BookState bookState,
-        int bookStock,
         int bookRegularPrice,
         int bookSalePrice,
+        int discountRate,
         double bookReviewRate,
         String bookImage
 ) {}
