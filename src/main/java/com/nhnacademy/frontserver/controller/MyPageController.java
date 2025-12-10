@@ -1,6 +1,6 @@
 package com.nhnacademy.frontserver.controller;
 
-import com.nhnacademy.frontserver.controller.order.OrderClient;
+import com.nhnacademy.frontserver.order.OrderClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/my-page")
 public class MyPageController {
 
-    private final OrderClient orderClient;
+//    private final OrderClient orderClient;
 
     @GetMapping
     public String myPage(Model model) {

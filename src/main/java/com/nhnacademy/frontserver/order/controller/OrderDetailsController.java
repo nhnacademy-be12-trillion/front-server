@@ -53,11 +53,19 @@ public class OrderDetailsController {
         return "redirect:/orders/" + orderId;
     }
 
-    @PostMapping("/non-members")
-    public String getOrderDetailForNonMember(@RequestBody NonMemberOrderGetRequest request, Model model) {
+    @GetMapping("/non-members")
+    public String getOrderDetailForNonMember(@RequestParam String orderNumber,
+                                             @RequestParam String password,
+                                             Model model) {
+        NonMemberOrderGetRequest request = new NonMemberOrderGetRequest(orderNumber, password);
         OrderResponse order = orderClient.getOrderByNonMember(request);
         model.addAttribute("order", order);
 
         return "order-detail";
+    }
+
+    @GetMapping("/non-member-orders")
+    public String showNonMemberOrderPage() {
+        return "non-member-order";
     }
 }

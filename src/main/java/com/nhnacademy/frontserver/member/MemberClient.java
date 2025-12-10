@@ -17,10 +17,10 @@ public interface MemberClient {
     @GetMapping("/api/members/addresses")
     List<AddressResponse> getAddresses();
 
-    @GetMapping("/api/members/reviews")
-    PageResponse<MemberReviewResponse> getReviews(@RequestParam("page") int page,
-                                                  @RequestParam("size") int size,
-                                                  @RequestParam(name = "sort", defaultValue = "reviewId,desc") String sort);
+//    @GetMapping("/api/members/reviews")
+//    PageResponse<MemberReviewResponse> getReviews(@RequestParam("page") int page,
+//                                                  @RequestParam("size") int size,
+//                                                  @RequestParam(name = "sort", defaultValue = "reviewId,desc") String sort);
 
     //TODO 멤버 업데이트 시 업데이트 된 유저정보 반환 필요
     @PostMapping("/api/members")

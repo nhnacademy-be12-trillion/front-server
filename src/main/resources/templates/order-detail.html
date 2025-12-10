@@ -158,7 +158,7 @@
                     <div class="card-header bg-light">
                         <h5 class="m-0">최종 결제 정보</h5>
                     </div>
-                    <div class="card-body" th:with="discountAmount = (order.originPrice + order.deliveryFee) - order.totalPrice">
+                    <div class="card-body" th:with="discountAmount=${(order.originPrice() + order.deliveryFee()) - order.totalPrice()}">
                         <div class="border-bottom pt-3 pb-2">
                             <div class="d-flex justify-content-between mb-3">
                                 <h6 class="text-dark">상품 금액</h6>
@@ -218,11 +218,11 @@
                                 <tbody>
                                 <tr>
                                     <th class="w-25 bg-light">이름</th>
-                                    <td th:text="${order.ordererInfo.name}"></td>
+                                    <td th:text="${order.ordererInfo.ordererName()}"></td>
                                 </tr>
                                 <tr>
                                     <th class="w-25 bg-light">연락처</th>
-                                    <td th:text="${order.ordererInfo.phoneNumber}"></td>
+                                    <td th:text="${order.ordererInfo.ordererContact()}"></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -236,15 +236,15 @@
                                 <tbody>
                                 <tr>
                                     <th class="w-25 bg-light">이름</th>
-                                    <td th:text="${order.receiverInfo.name}"></td>
+                                    <td th:text="${order.receiverInfo.receiverName()}"></td>
                                 </tr>
                                 <tr>
                                     <th class="w-25 bg-light">연락처</th>
-                                    <td th:text="${order.receiverInfo.phoneNumber}"></td>
+                                    <td th:text="${order.receiverInfo.receiverContact()}"></td>
                                 </tr>
                                 <tr>
                                     <th class="w-25 bg-light">주소</th>
-                                    <td th:text="${'(' + order.receiverInfo.zipcode + ') ' + order.receiverInfo.address + ' ' + order.receiverInfo.addressDetail}"></td>
+                                    <td th:text="${order.receiverInfo.receiverAddress()}"></td>
                                 </tr>
                                 </tbody>
                             </table>

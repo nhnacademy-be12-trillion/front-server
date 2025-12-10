@@ -24,7 +24,7 @@ record OrderItemResponse(
         int packagingPrice,
 
         // TODO: 도서 이미지 추가 필요
-        // String thumbnailUrl,
+        String thumbnailUrl,
         OrderItemStatus orderItemStatus
 ) {
 }

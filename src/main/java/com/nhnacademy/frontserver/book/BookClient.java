@@ -13,6 +13,7 @@
 package com.nhnacademy.frontserver.book;
 
 import com.nhnacademy.frontserver.PageResponse;
+import com.nhnacademy.frontserver.review.ReviewResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
