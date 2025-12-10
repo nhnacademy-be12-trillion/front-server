@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "order-service", url = "http://localhost:10407")
+@FeignClient(name = "payment-service", url = "http://localhost:10407")
 public interface PaymentClient {
     //TODO 지훈 PaymentRequestDto 확인, API 경로 논의필요, 결제취소 amount 파라미터 논의
 //    @PostMapping("/payments")
