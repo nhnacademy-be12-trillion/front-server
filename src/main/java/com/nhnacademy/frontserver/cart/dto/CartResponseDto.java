@@ -20,8 +20,8 @@ class CartResponseDto {
     private Long memberId;   // 회원일 때만 값 있음
     private String guestId;  // 비회원일 때만 값 있음
 
-    private Long bookId;
-    private int cartQuantity;
+    Long bookId;
+    int cartQuantity;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;
 }

@@ -17,7 +17,7 @@ public interface CartClient {
      * POST /api/carts
      */
     @PostMapping
-    ResponseEntity<Long> addToCart(@RequestBody CartCreateRequestDto request);
+    ResponseEntity<Long> addToCart(CartCreateRequestDto request);
 
     /**
      * [장바구니 목록 조회]
