@@ -12,28 +12,77 @@
 
 package com.nhnacademy.frontserver.order.controller;
 
+import com.nhnacademy.frontserver.book.BookClient;
+import com.nhnacademy.frontserver.book.BookDetailResponse;
+import com.nhnacademy.frontserver.order.CartClient;
+import com.nhnacademy.frontserver.order.CartResponse;
+import com.nhnacademy.frontserver.order.CheckoutItemView;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
+@RequiredArgsConstructor
 public class CheckoutController {
 
+    private final CartClient cartClient;
+    private final BookClient bookClient;
+
     @GetMapping("/api/orders/checkout")
-    public String checkout(Model model) {
+    public String checkout(
+            @RequestParam(value = "bookId", required = false) Long bookId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
+            Model model
+    ) {
+        List<CheckoutItemView> items = new ArrayList<>();
 
-        //TODO
-//        // 1. 회원 정보 (로그인 상태) - Billing/Shipping 기본값 제공
-//        MemberResponse member = authService.getCurrentMember();
-//        model.addAttribute("member", member);
-//
-//        // 2. 장바구니 요약 정보 (결제 금액 및 상품 목록 제공)
-//        CartResponse cart = cartService.getCartSummary();
-//        model.addAttribute("cart", cart);
-//
-//        // 3. 주문 요청을 받을 빈 객체 (Binding Result용)
-//        model.addAttribute("orderRequest", new OrderRequest());
+        // 1) 즉시 결제 흐름: bookId + quantity 가 넘어온 경우
+        if (bookId != null && quantity != null) {
+            BookDetailResponse book = bookClient.getBookDetail(bookId);
 
-        return "checkout";
+            CheckoutItemView item = new CheckoutItemView(
+                    bookId,
+                    book.bookName(),
+                    book.bookImage(),
+                    book.bookSalePrice(),
+                    quantity,
+                    book.bookSalePrice() * quantity
+            );
+            items.add(item);
+        }
+        // 2) 장바구니 결제 흐름: 파라미터 없는 경우 → CartClient 사용
+        else {
+            List<CartResponse> carts = cartClient.getCarts();
+
+            for (CartResponse cart : carts) {
+                BookDetailResponse book = bookClient.getBookDetail(cart.bookId());
+
+                int qty = cart.cartQuantity();
+                int unitPrice = book.bookSalePrice();
+                CheckoutItemView item = new CheckoutItemView(
+                        cart.bookId(),
+                        book.bookName(),
+                        book.bookImage(),
+                        unitPrice,
+                        qty,
+                        unitPrice * qty
+                );
+                items.add(item);
+            }
+        }
+
+        // 총 금액 계산
+        int totalAmount = items.stream()
+                .mapToInt(CheckoutItemView::totalPrice)
+                .sum();
+
+        model.addAttribute("items", items);
+        model.addAttribute("totalAmount", totalAmount);
+
+        return "checkout";   // templates/checkout.html
     }
 }
