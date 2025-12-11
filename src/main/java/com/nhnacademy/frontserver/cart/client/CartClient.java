@@ -2,6 +2,7 @@ package com.nhnacademy.frontserver.cart.client;
 
 import com.nhnacademy.frontserver.cart.dto.CartCreateRequestDto;
 import com.nhnacademy.frontserver.cart.dto.CartResponseDto;
+import com.nhnacademy.frontserver.cart.dto.CartSummaryResponseDto;
 import com.nhnacademy.frontserver.cart.dto.CartUpdateRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "cart-service", url = "${cart.api.url}", path = "/api/carts")
+@FeignClient(name = "ORDER-SERVICE", url = "${cart.api.url}", path = "/api/carts",
+        contextId = "cartClient")
 public interface CartClient {
 
     /**
@@ -49,11 +51,11 @@ public interface CartClient {
     ResponseEntity<Void> clearCart();
 
     /**
-     * [장바구니 개수 조회]
+     * [장바구니 요약정보 조회]
      * GET /api/carts/count
      */
-    @GetMapping("/count")
-    ResponseEntity<Long> countCartItems();
+    @GetMapping("/summary")
+    ResponseEntity<CartSummaryResponseDto> getCartSummary();
 
     /**
      * [장바구니 병합]

@@ -61,13 +61,13 @@
       <!-- 비로그인 -->
       <div class="d-inline-flex align-items-center justify-content-end w-100"
            th:if="${member == null}">
-        <a th:href="@{/api/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
+        <a th:href="@{/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
           로그인
         </a>
-        <a th:href="@{/api/auth/signup}" class="btn btn-sm btn-primary mx-1">
+        <a th:href="@{/auth/signup}" class="btn btn-sm btn-primary mx-1">
           회원가입
         </a>
-        <a th:href="@{/api/orders/guest}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+        <a th:href="@{/orders/non-member-orders}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
           비회원 주문조회
         </a>
       </div>
@@ -80,10 +80,10 @@
           홍길동 님, 환영합니다
         </span>
         <div>
-          <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
+          <a th:href="@{/members/my-page}" class="btn btn-sm btn-primary mx-1">
             마이페이지
           </a>
-          <a th:href="@{/api/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+          <a th:href="@{/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
             로그아웃
           </a>
         </div>
@@ -115,7 +115,7 @@
           <!-- 카테고리 리스트가 있을 때 -->
           <th:block th:if="${categories != null and !#lists.isEmpty(categories)}">
             <a th:each="cat : ${categories}"
-               th:href="@{/api/books(categoryId=${cat.categoryId})}"
+               th:href="@{/books(categoryId=${cat.categoryId})}"
                class="nav-item nav-link"
                th:text="${cat.categoryName}">
               Category Name
@@ -144,22 +144,22 @@
             <a th:href="@{/}" class="nav-item nav-link">
               베스트
             </a>
-            <a th:href="@{/api/books?sort=new}" class="nav-item nav-link">
+            <a th:href="@{/books?sort=new}" class="nav-item nav-link">
               최근 발매
             </a>
-            <a th:href="@{/api/books/birthday}" class="nav-item nav-link">
+            <a th:href="@{/books/birthday}" class="nav-item nav-link">
               생일책
             </a>
           </div>
 
           <!-- 좋아요/장바구니 아이콘 -->
           <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
-            <a th:href="@{/api/members/likes}" class="btn px-0">
+            <a th:href="@{/members/wishlists}" class="btn px-0">
               <i class="fas fa-heart text-primary"></i>
               <span class="badge text-secondary border border-secondary rounded-circle"
                     style="padding-bottom: 2px;">0</span>
             </a>
-            <a th:href="@{/api/carts}" class="btn px-0 ml-3">
+            <a th:href="@{/carts}" class="btn px-0 ml-3">
               <i class="fas fa-shopping-cart text-primary"></i>
               <span class="badge text-secondary border border-secondary rounded-circle"
                     style="padding-bottom: 2px;">0</span>

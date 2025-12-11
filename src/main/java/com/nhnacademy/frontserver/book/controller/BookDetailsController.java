@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/books/{book_id}")
+@RequestMapping("/books/{book_id}")
 public class BookDetailsController {
 
     private final BookClient bookClient;
@@ -35,7 +35,6 @@ public class BookDetailsController {
     public String bookDetail(@PathVariable("book_id") Long bookId,
                              @RequestParam(name = "page", defaultValue = "0") int page,
                              @RequestParam(name = "size", defaultValue = "20") int size,
-                             @RequestHeader(name = "X-USER-ID" , required = false) String userId,
                              Model model) {
         String sort = "bookId,desc";
         BookDetailResponse bookDetail = bookClient.getBookDetail(bookId);
@@ -45,9 +44,6 @@ public class BookDetailsController {
         model.addAttribute("book", bookDetail);
         model.addAttribute("review", review);
         model.addAttribute("reviewSummary", reviewSummary);
-        if (userId != null) {
-            model.addAttribute("member", userId);
-        }
 
         return "book-detail";
     }

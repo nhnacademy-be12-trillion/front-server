@@ -118,17 +118,17 @@
                         <div class="product-action">
                             <!-- 장바구니 -->
                             <a class="btn btn-outline-dark btn-square"
-                               th:href="@{/api/carts/add(bookId=${book.bookId})}">
+                               th:href="@{/carts/add(bookId=${book.bookId})}">
                                 <i class="fa fa-shopping-cart"></i>
                             </a>
                             <!-- 좋아요 -->
                             <a class="btn btn-outline-dark btn-square"
-                               th:href="@{/api/members/likes/add(bookId=${book.bookId})}">
+                               th:href="@{/members/likes/add(bookId=${book.bookId})}">
                                 <i class="far fa-heart"></i>
                             </a>
                             <!-- 상세보기 -->
                             <a class="btn btn-outline-dark btn-square"
-                               th:href="@{/api/books/{id}(id=${book.bookId})}">
+                               th:href="@{/books/{id}(id=${book.bookId})}">
                                 <i class="fa fa-search"></i>
                             </a>
                         </div>
@@ -139,7 +139,7 @@
 
                         <!-- 제목 -->
                         <a class="h6 text-decoration-none text-truncate d-block mb-1"
-                           th:href="@{/api/books/{id}(id=${book.bookId})}"
+                           th:href="@{/books/{id}(id=${book.bookId})}"
                            th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">
                             도서 제목
                         </a>

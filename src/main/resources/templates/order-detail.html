@@ -31,7 +31,8 @@
             <div class="col-12">
                 <nav class="breadcrumb bg-light mb-30">
                     <a class="breadcrumb-item text-dark" th:href="@{/}">홈</a>
-                    <a class="breadcrumb-item text-dark" th:href="@{/api/members/my-page}">마이페이지</a>
+                    <a class="breadcrumb-item text-dark" th:if="${isMember}" th:href="@{/api/members/my-page}">마이페이지</a>
+                    <a class="breadcrumb-item text-dark" th:if="${!isMember}" th:href="@{/orders/non-members-form}">비회원 주문 조회</a>
                     <span class="breadcrumb-item active">주문 상세 정보</span>
                 </nav>
             </div>
@@ -60,7 +61,7 @@
                                     <th style="width: 10%;">수량</th>
                                     <th style="width: 15%;">포장비</th>
                                     <th style="width: 15%;">합계</th>
-                                    <th style="width: 15%;">관리</th>
+                                    <th style="width: 15%;" th:text="${isMember} ? '관리' : '상태'">관리</th>
                                 </tr>
                                 </thead>
 
@@ -93,58 +94,82 @@
                                     <td th:text="${#numbers.formatDecimal((item.price * item.quantity) + item.packagingPrice,
                                                 0, 'COMMA', 0, 'POINT') + '원'}"></td>
 
-                                    <!-- 상태별 버튼 -->
-                                    <td>
-                                        <!-- 취소 완료 -->
-                                        <div th:if="${item.orderItemStatus.name() == 'CANCELED'}">
-                                            <span class="text-muted font-weight-bold">취소 완료</span>
-                                        </div>
+                                    <!-- 상태별 버튼 (회원) -->
+                                    <td th:if="${isMember}" th:switch="${item.orderItemStatus.name()}">
+                                        <!-- 상품 준비중 -->
+                                        <span th:case="'PREPARING'" class="font-weight-bold">상품 준비중</span>
 
-                                        <!-- 반품 완료 -->
-                                        <div th:if="${item.orderItemStatus.name() == 'RETURNED'}">
-                                            <span class="text-muted font-weight-bold">반품 완료</span>
+                                        <!-- 배송 중 -->
+                                        <div th:case="'SHIPPED'">
+                                            <span class="d-block font-weight-bold mb-2">배송중</span>
+                                            <button class="btn btn-sm btn-info w-100">배송 조회</button>
                                         </div>
 
                                         <!-- 배송 완료 -->
-                                        <div th:if="${item.orderItemStatus.name() == 'DELIVERED'}">
+                                        <div th:case="'DELIVERED'">
                                             <form th:action="@{/orders/{orderId}/items/{itemId}/confirm(orderId=${order.orderId}, itemId=${item.orderItemId})}"
                                                   method="post" class="mb-1">
                                                 <button type="submit" class="btn btn-sm btn-primary w-100">구매 확정</button>
                                             </form>
-
-                                            <form th:action="@{/orders/{orderId}/items/{itemId}/return(orderId=${order.orderId}, itemId=${item.orderItemId})}"
-                                                  method="post" class="mb-1">
-                                                <input type="hidden" name="reason" value="CHANGE_OF_MIND">
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary w-100">단순 변심 반품</button>
-                                            </form>
-
-                                            <form th:action="@{/orders/{orderId}/items/{itemId}/return(orderId=${order.orderId}, itemId=${item.orderItemId})}"
-                                                  method="post">
-                                                <input type="hidden" name="reason" value="DAMAGED">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger w-100">상품 파손 반품</button>
+                                            <form th:action="@{/orders/{orderId}/items/{itemId}/return(orderId=${order.orderId}, itemId=${item.orderItemId})}" method="post" class="return-form">
+                                                <input type="hidden" name="reason" value="">
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        반품하기
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item return-reason-select" href="#" data-reason="CHANGE_OF_MIND">단순 변심</a>
+                                                        <a class="dropdown-item return-reason-select" href="#" data-reason="DAMAGED">상품 파손</a>
+                                                    </div>
+                                                </div>
                                             </form>
                                         </div>
 
                                         <!-- 구매 확정 -->
-                                        <div th:if="${item.orderItemStatus.name() == 'CONFIRMED'}">
+                                        <div th:case="'CONFIRMED'">
+                                            <span class="d-block font-weight-bold mb-2">구매 확정</span>
                                             <button class="btn btn-sm btn-success w-100">리뷰 작성</button>
                                         </div>
 
-                                        <!-- 배송 중 -->
-                                        <div th:if="${item.orderItemStatus.name() == 'SHIPPED'}">
-                                            <button class="btn btn-sm btn-info w-100">배송 조회</button>
-                                        </div>
+                                        <!-- 반품 요청 (단순 변심) -->
+                                        <span th:case="'RETURN_REQUESTED_CHANGE_OF_MIND'" class="text-muted">반품 요청 (단순 변심)</span>
 
-                                        <!-- 반품 처리중 -->
-                                        <div th:if="${#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')}">
-                                            <span class="text-muted">반품 처리중</span>
-                                        </div>
+                                        <!-- 반품 요청 (파손) -->
+                                        <span th:case="'RETURN_REQUESTED_DAMAGED'" class="text-muted">반품 요청 (파손)</span>
 
-                                        <!-- 나머지 (준비중 등) -->
-                                        <div th:if="${!(#lists.contains({'CANCELED','RETURNED','DELIVERED','CONFIRMED','SHIPPED'}, item.orderItemStatus.name())
-                                                        or #strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED'))}">
-                                            <span class="font-weight-bold" th:text="${item.orderItemStatus}"></span>
+                                        <!-- 반품 완료 -->
+                                        <span th:case="'RETURNED'" class="text-muted font-weight-bold">반품 완료</span>
+
+                                        <!-- 주문 취소 -->
+                                        <span th:case="'CANCELED'" class="text-muted font-weight-bold">주문 취소</span>
+                                    </td>
+
+                                    <!-- 상태 (비회원) -->
+                                    <td th:if="${!isMember}" th:switch="${item.orderItemStatus.name()}">
+                                        <span th:case="'PREPARING'" class="font-weight-bold">상품 준비중</span>
+                                        <span th:case="'SHIPPED'" class="font-weight-bold">배송중</span>
+                                        <div th:case="'DELIVERED'">
+                                            <span class="d-block font-weight-bold mb-2">배송 완료</span>
+                                            <form th:action="@{/orders/non-members/{orderId}/items/{itemId}/return(orderId=${order.orderId}, itemId=${item.orderItemId})}" method="post" class="return-form">
+                                                <input type="hidden" name="reason" value="">
+                                                <input type="hidden" name="password" th:value="${password}">
+                                                <input type="hidden" name="orderNumber" th:value="${order.orderNumber}">
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        반품하기
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item return-reason-select" href="#" data-reason="CHANGE_OF_MIND">단순 변심</a>
+                                                        <a class="dropdown-item return-reason-select" href="#" data-reason="DAMAGED">상품 파손</a>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
+                                        <span th:case="'CONFIRMED'" class="font-weight-bold">구매 확정</span>
+                                        <span th:case="'RETURN_REQUESTED_CHANGE_OF_MIND'" class="font-weight-bold">반품 요청 (단순 변심)</span>
+                                        <span th:case="'RETURN_REQUESTED_DAMAGED'" class="font-weight-bold">반품 요청 (파손)</span>
+                                        <span th:case="'RETURNED'" class="font-weight-bold">반품 완료</span>
+                                        <span th:case="'CANCELED'" class="font-weight-bold">주문 취소</span>
                                     </td>
 
                                 </tr>
@@ -161,7 +186,7 @@
                     </div>
 
                     <div class="card-body"
-                         th:with="discount = (order.originPrice + order.deliveryFee) - order.totalPrice">
+                         th:with="discount = ${(order.originPrice + order.deliveryFee) - order.totalPrice}">
 
                         <div class="border-bottom pt-3 pb-2">
                             <div class="d-flex justify-content-between mb-3">
@@ -234,12 +259,12 @@
                                 <tbody>
                                 <tr>
                                     <th class="bg-light w-25">이름</th>
-                                    <td th:text="${order.ordererInfo.name}"></td>
+                                    <td th:text="${order.ordererInfo.ordererName()}"></td>
                                 </tr>
 
                                 <tr>
                                     <th class="bg-light w-25">연락처</th>
-                                    <td th:text="${order.ordererInfo.phoneNumber}"></td>
+                                    <td th:text="${order.ordererInfo.ordererContact()}"></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -254,19 +279,17 @@
                                 <tbody>
                                 <tr>
                                     <th class="bg-light w-25">이름</th>
-                                    <td th:text="${order.receiverInfo.name}"></td>
+                                    <td th:text="${order.receiverInfo.receiverName()}"></td>
                                 </tr>
 
                                 <tr>
                                     <th class="bg-light w-25">연락처</th>
-                                    <td th:text="${order.receiverInfo.phoneNumber}"></td>
+                                    <td th:text="${order.receiverInfo.receiverContact()}"></td>
                                 </tr>
 
                                 <tr>
                                     <th class="bg-light w-25">주소</th>
-                                    <td th:text="${'(' + order.receiverInfo.zipcode + ') '
-                                                   + order.receiverInfo.address + ' '
-                                                   + order.receiverInfo.addressDetail}">
+                                    <td th:text="${order.receiverInfo().receiverAddress()}">
                                     </td>
                                 </tr>
                                 </tbody>
@@ -276,8 +299,8 @@
                     </div>
                 </div>
 
-                <!-- 주문 전체 취소 버튼 -->
-                <div th:if="${order.orderItems != null
+                <!-- 주문 전체 취소 버튼 (회원) -->
+                <div th:if="${isMember and order.orderItems != null
                              and !#lists.isEmpty(order.orderItems)
                              and #lists.size(order.orderItems.?[orderItemStatus.name() != 'PREPARING']) == 0}"
                      class="mb-3">
@@ -290,7 +313,22 @@
                     </form>
                 </div>
 
-                <a th:href="@{/api/members/my-page}"
+                <!-- 주문 전체 취소 버튼 (비회원) -->
+                <div th:if="${!isMember and order.orderItems != null
+                             and !#lists.isEmpty(order.orderItems)
+                             and #lists.size(order.orderItems.?[orderItemStatus.name() != 'PREPARING']) == 0}"
+                     class="mb-3">
+                    <form th:action="@{/orders/non-members/{orderId}/cancel(orderId=${order.orderId})}"
+                          method="post"
+                          onsubmit="return confirm('정말 주문 전체를 취소하시겠습니까?');">
+                        <input type="hidden" name="password" th:value="${password}">
+                        <button type="submit" class="btn btn-danger btn-block py-3 font-weight-bold">
+                            주문 전체 취소
+                        </button>
+                    </form>
+                </div>
+
+                <a th:href="${isMember} ? @{/api/members/my-page} : @{/orders/non-members-form}"
                    class="btn btn-primary btn-block py-3 font-weight-bold">목록으로</a>
 
             </div>
@@ -300,7 +338,28 @@
 </div>
 
 <th:block layout:fragment="script">
-    <!-- 필요 시 페이지별 스크립트 추가 가능 -->
+    <script>
+        $(document).ready(function() {
+            $('.return-reason-select').on('click', function(e) {
+                e.preventDefault(); // 링크의 기본 동작(페이지 이동)을 막습니다.
+
+                // 클릭된 항목에서 data-reason 속성 값을 가져옵니다.
+                var reason = $(this).data('reason');
+
+                // 클릭된 항목에서 가장 가까운 .return-form 클래스를 가진 부모 폼을 찾습니다.
+                var form = $(this).closest('.return-form');
+
+                // 해당 폼 안에서 name이 'reason'인 input을 찾아 값을 설정합니다.
+                form.find('input[name="reason"]').val(reason);
+
+                // 사용자에게 확인을 요청하는 대화 상자를 띄웁니다.
+                if (confirm('"' + $(this).text() + '" 사유로 반품을 진행하시겠습니까?')) {
+                    // 사용자가 '확인'을 누르면 폼을 제출합니다.
+                    form.submit();
+                }
+            });
+        });
+    </script>
 </th:block>
 
 </body>

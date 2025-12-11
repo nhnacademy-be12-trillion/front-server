@@ -32,7 +32,7 @@ public class CheckoutController {
     private final CartClient cartClient;
     private final BookClient bookClient;
 
-    @GetMapping("/api/orders/checkout")
+    @GetMapping("/checkout")
     public String checkout(
             @RequestParam(value = "bookId", required = false) Long bookId,
             @RequestParam(value = "quantity", required = false) Integer quantity,

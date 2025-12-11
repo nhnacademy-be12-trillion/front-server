@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CartCreateRequestDto {
     private Long bookId;
-
     private Integer cartQuantity;
 }

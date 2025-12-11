@@ -36,37 +36,42 @@
     <div class="auth-card bg-light p-4 p-md-5 border">
       <h4 class="mb-4 text-center">회원가입</h4>
 
-      <form th:action="@{/api/auth/signup}" method="post" th:object="${signUpRequest}">
+      <form th:action="@{/auth/signup}" method="post" th:object="${signUpRequest}">
+
         <!-- 이름 -->
         <div class="form-group">
-          <label for="name">이름</label>
-          <input id="name" type="text" class="form-control"
-                 th:field="*{name}" placeholder="이름을 입력하세요" required>
+          <label for="memberName">이름</label>
+          <input id="memberName" type="text" class="form-control"
+                 th:field="*{memberName}" placeholder="이름을 입력하세요" required>
         </div>
 
         <!-- 이메일 + 인증번호 요청 -->
         <div class="form-group">
-          <label for="email">이메일</label>
+          <label for="memberEmail">이메일</label>
           <div class="input-group">
-            <input id="email" type="email" class="form-control"
-                   th:field="*{email}" placeholder="example@email.com" required>
+            <input id="memberEmail" type="email" class="form-control"
+                   th:field="*{memberEmail}" placeholder="example@email.com" required>
             <div class="input-group-append">
               <button type="button" id="btnSendCode" class="btn btn-outline-primary">
                 인증번호 요청
               </button>
             </div>
           </div>
-          <small class="form-text text-muted small-hint">
-            주문 정보 및 안내 메일이 발송되니, 자주 사용하는 이메일을 입력해 주세요.
-          </small>
+        </div>
+
+        <!-- 이메일 인증번호 -->
+        <div class="form-group">
+          <label for="verificationCode">인증번호</label>
+          <input id="verificationCode" type="text" class="form-control"
+                 th:field="*{verificationCode}" placeholder="이메일로 전송된 인증번호 입력" required>
         </div>
 
         <!-- 비밀번호 -->
         <div class="form-row">
           <div class="form-group col-md-6">
-            <label for="password">비밀번호</label>
-            <input id="password" type="password" class="form-control"
-                   th:field="*{password}" placeholder="영문+숫자 8자 이상" required>
+            <label for="memberPassword">비밀번호</label>
+            <input id="memberPassword" type="password" class="form-control"
+                   th:field="*{memberPassword}" placeholder="영문+숫자 8자 이상" required>
           </div>
           <div class="form-group col-md-6">
             <label for="passwordConfirm">비밀번호 확인</label>
@@ -81,18 +86,27 @@
 
         <!-- 전화번호 -->
         <div class="form-group">
-          <label for="phoneNumber">전화번호</label>
-          <input id="phoneNumber" type="text" class="form-control"
-                 th:field="*{member.phoneNumber}" placeholder="010-0000-0000" required>
+          <label for="memberContact">전화번호</label>
+          <input id="memberContact" type="text" class="form-control"
+                 th:field="*{memberContact}" placeholder="010-0000-0000" required>
+        </div>
+
+        <!-- 생일 -->
+        <div class="form-group">
+          <label for="memberBirth">생일</label>
+          <input id="memberBirth" type="date" class="form-control"
+                 th:field="*{memberBirth}" required>
         </div>
 
         <!-- 주소 -->
         <div class="form-group">
           <label>주소</label>
+
           <div class="form-row">
             <div class="form-group col-md-5">
-              <input type="text" class="form-control" placeholder="우편번호"
-                     th:field="*{zipcode}" id="zipcode" readonly>
+              <input type="text" class="form-control"
+                     th:field="*{address.addressPostCode}"
+                     id="zipcode" placeholder="우편번호" readonly>
             </div>
             <div class="form-group col-md-3">
               <button type="button" class="btn btn-outline-secondary btn-block"
@@ -101,27 +115,18 @@
               </button>
             </div>
           </div>
+
           <input type="text" class="form-control mb-2"
-                 th:field="*{street}" id="street" placeholder="기본 주소" readonly>
+                 th:field="*{address.addressBase}"
+                 id="street" placeholder="기본 주소" readonly>
+
+          <input type="text" class="form-control mb-2"
+                 th:field="*{address.addressDetail}"
+                 id="detail" placeholder="상세 주소 입력">
+
           <input type="text" class="form-control"
-                 th:field="*{detail}" id="detail" placeholder="상세 주소를 입력하세요">
-        </div>
-
-        <!-- 생일 -->
-        <div class="form-group">
-          <label for="birthday">생일</label>
-          <input id="birthday" type="date" class="form-control"
-                 th:field="*{birthday}" required>
-          <small class="form-text text-muted small-hint">
-            생일 기준 맞춤 쿠폰 및 혜택이 제공됩니다.
-          </small>
-        </div>
-
-        <!-- 이메일 인증번호 -->
-        <div class="form-group">
-          <label for="emailCode">인증번호</label>
-          <input id="emailCode" type="text" class="form-control"
-                 th:field="*{emailCode}" placeholder="이메일로 전송된 인증번호 입력" required>
+                 th:field="*{address.addressAlias}"
+                 placeholder="주소 별칭 (예: 집, 회사)">
         </div>
 
         <!-- 약관 동의 -->
@@ -135,7 +140,6 @@
           </div>
         </div>
 
-        <!-- 버튼 영역 -->
         <div class="d-flex justify-content-between mt-4">
           <a th:href="@{/api/auth/login}" class="btn btn-outline-secondary">
             취소
@@ -144,19 +148,18 @@
             회원가입 완료
           </button>
         </div>
+
       </form>
     </div>
   </div>
-
 </div>
 
 <!-- 페이지 전용 JS -->
 <th:block layout:fragment="script">
-
   <script>
-    // 비밀번호 일치 체크
+    // 비밀번호 일치 검사
     function validatePasswordMatch() {
-      const pw1 = $('#password').val();
+      const pw1 = $('#memberPassword').val();
       const pw2 = $('#passwordConfirm').val();
       const help = $('#passwordHelp');
       const submit = $('#btnSignUp');
@@ -182,25 +185,24 @@
       }
     }
 
-    $('#password, #passwordConfirm').on('keyup change', validatePasswordMatch);
+    $('#memberPassword, #passwordConfirm').on('keyup change', validatePasswordMatch);
 
     // 이메일 인증번호 요청
     $('#btnSendCode').on('click', function () {
-      const email = $('#email').val();
+      const email = $('#memberEmail').val();
       if (!email) {
         alert('이메일을 먼저 입력해 주세요.');
-        $('#email').focus();
+        $('#memberEmail').focus();
         return;
       }
       alert('입력하신 이메일로 인증번호를 전송했습니다.');
     });
 
-    // 주소 검색 (추후 API 연동)
+    // 주소 검색 버튼 (추후 카카오 주소 API 연동)
     $('#btnSearchAddress').on('click', function () {
       alert('주소 검색 기능은 추후 연동 예정입니다.');
     });
   </script>
-
 </th:block>
 
 </body>
