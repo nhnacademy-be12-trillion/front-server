@@ -25,21 +25,21 @@ public class CategorySourceService {
     private static final long TTL_MINUTES = 60; // Redis 보관 기간 (1시간)
 
     /**
-     * Redis에서 가져오거나, 없으면 Book Server에서 가져와서 Redis에 굽는다.
+     * Redis에서 가져오거나, 없으면 Book Server에서 가져와서 Redis에 적재.
      */
     public List<CategoryTreeResponse> fetchCategoriesFromRemote() {
         try {
             // 1. Redis 조회
             Object cachedData = redisTemplate.opsForValue().get(REDIS_KEY);
-            if (cachedData != null) {
-                // Redis에 있는 데이터 리턴 (ObjectMapper로 변환)
+            if (cachedData != null) { //캐시 HIT?
+                // Redis에 있는 데이터 반환 (ObjectMapper로 변환)
                 return objectMapper.convertValue(cachedData, new TypeReference<List<CategoryTreeResponse>>() {});
             }
         } catch (Exception e) {
             log.warn("Redis connection failed, fallback to direct API call.", e);
         }
 
-        // 2. Redis에 없거나 오류나면 -> Book Server 직접 호출 (Cache Miss)
+        // 2. 캐시 MISS? (Redis에 없거나 오류나면 -> Book Server 직접 호출)
         log.info("Cache Miss! Fetching categories from Book Server...");
         List<CategoryTreeResponse> freshData = bookClient.getCategoryTree();
 

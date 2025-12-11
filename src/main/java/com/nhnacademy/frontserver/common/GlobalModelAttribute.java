@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @RequiredArgsConstructor
 public class GlobalModelAttribute {
 
-    private final CategoryLocalCache categoryLocalCache; // 위에서 만든 로컬 캐시 주입
+    private final CategoryLocalCache categoryLocalCache;
 
     @ModelAttribute("categories")
     public List<CategoryTreeResponse> categories() {
-        // 네트워크 타지 않음. 0.0001ms 소요.
+        // 네트워크 IO 대기 없음
         return categoryLocalCache.getCategories();
     }
 }
