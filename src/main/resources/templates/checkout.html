@@ -1,368 +1,167 @@
-<!--
-  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
-  ~ + * While every precaution has been taken in the preparation of this resource,  assumes no
-  ~ + responsibility for errors or omissions, or for damages resulting from the use of the information
-  ~ + contained herein
-  ~ + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
-  ~ + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
-  ~ + prior written permission.
-  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-  -->
-
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
 
 <head>
-    <meta charset="utf-8">
-    <title>Trillion-Shop | 결제</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="도서 판매 사이트, 결제, 주문" name="keywords">
-    <meta content="온라인 도서 판매 사이트 결제" name="description">
+    <meta charset="UTF-8">
+    <title>Trillion-Shop | 주문서 작성</title>
 
-    <link th:href="@{/img/favicon.ico}" rel="icon">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
-    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
-<!--    <link th:href="@{/css/style.min.css}" rel="stylesheet">-->
-    <link href="/static/css/style.min.css" rel="stylesheet">
+    <!-- base.html 에서 CSS, 기본 head 요소 포함됨 -->
+    <th:block layout:fragment="head">
+        <!-- 이 페이지 전용 추가 CSS가 필요하면 여기에 -->
+    </th:block>
 </head>
 
 <body>
-<div class="container-fluid">
-    <div class="row bg-secondary py-1 px-xl-5">
-        <div class="col-lg-6 d-none d-lg-block">
-            <div class="d-inline-flex align-items-center h-100">
-                <a class="text-body mr-3" href="">About</a>
-                <a class="text-body mr-3" href="">Contact</a>
-                <a class="text-body mr-3" href="">Help</a>
-                <a class="text-body mr-3" href="">FAQs</a>
-            </div>
-        </div>
-        <div class="col-lg-6 text-center text-lg-right">
-            <div class="d-inline-flex align-items-center d-block d-lg-none">
-                <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
-                    <i class="fas fa-heart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
-                </a>
-                <a th:href="@{/api/carts}" class="btn px-0 ml-2">
-                    <i class="fas fa-shopping-cart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle" style="padding-bottom: 2px;">0</span>
-                </a>
-            </div>
-        </div>
-    </div>
-    <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
-        <div class="col-lg-4">
-            <a th:href="@{/}" class="text-decoration-none">
-                <img src="/static/img/logo.png" alt="Book E-commerce Logo" class="img-fluid" style="background-color: #fff;">
-            </a>
-        </div>
+<div layout:fragment="content">
 
-        <div class="col-lg-4 col-6 text-left">
-            <form th:action="@{/api/books/search}" method="get">
-                <div class="input-group">
-                    <input type="text" name="keyword" class="form-control" placeholder="Search for books">
-                    <div class="input-group-append">
-                        <button type="submit" class="input-group-text bg-transparent text-primary">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- ✅ 로그인/회원가입/비회원조회 / 환영문구 + 마이페이지 영역 -->
-        <div class="col-lg-4 col-6 text-right">
-
-            <!-- 비로그인 상태 -->
-            <div class="d-inline-flex align-items-center justify-content-end w-100" th:if="${member == null}">
-                <a th:href="@{/api/auth/login}" class="btn btn-sm btn-outline-primary mx-1">
-                    로그인
-                </a>
-                <a th:href="@{/api/auth/signup}" class="btn btn-sm btn-primary mx-1">
-                    회원가입
-                </a>
-                <a th:href="@{/api/orders/guest}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
-                    비회원 주문조회
-                </a>
-            </div>
-
-            <!-- 로그인 상태 -->
-            <div class="d-inline-flex flex-column align-items-end w-100" th:unless="${member == null}">
-            <span class="small mb-2" th:text="${member.name} + ' 님, 환영합니다'">
-                홍길동 님, 환영합니다
-            </span>
-                <div>
-                    <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
-                        마이페이지
-                    </a>
-                    <a th:href="@{/api/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
-                        로그아웃
-                    </a>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-<div class="container-fluid bg-dark mb-30">
-    <div class="row px-xl-5">
-        <div class="col-lg-3 d-none d-lg-block">
-        </div>
-        <div class="col-lg-9">
-            <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                    <div class="navbar-nav mr-auto py-0">
-                        <a th:href="@{/}" class="nav-item nav-link">베스트</a>
-                        <a href="#" class="nav-item nav-link">최근 발매</a>
-                        <a href="#" class="nav-item nav-link">생일책</a>
-                    </div>
-                    <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
-                        <a th:href="@{/api/members/likes}" class="btn px-0">
-                            <i class="fas fa-heart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
-                        </a>
-                        <a th:href="@{/api/carts}" class="btn px-0 ml-3">
-                            <i class="fas fa-shopping-cart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
-                        </a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </div>
-</div>
-<div class="container-fluid">
-    <div class="row px-xl-5">
-        <div class="col-12">
-            <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">주문 도서 목록</span></h5>
-            <div class="table-responsive mb-30">
-                <table class="table table-light table-borderless table-hover text-center mb-0">
-                    <thead class="thead-dark">
-                    <tr>
-                        <th style="width: 50%;">도서</th>
-                        <th>가격</th>
-                        <th>수량</th>
-                        <th>합계</th>
-                    </tr>
-                    </thead>
-                    <tbody class="align-middle">
-                    <tr th:if="${cart.cartItems != null and !cart.cartItems.empty}" th:each="item : ${cart.cartItems}">
-                        <td class="align-middle text-left">
-                            <img th:src="${item.book.thumbnailUrl != null ? item.book.thumbnailUrl : '/img/product-1.jpg'}" alt="" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover;">
-                            <a th:href="@{/api/books/{id}(id=${item.book.id})}" class="text-dark ml-2" th:text="${item.book.title}">Book Title</a>
-                        </td>
-                        <td class="align-middle" th:text="${#numbers.formatInteger(item.book.price, 0, 'COMMA')} + '원'">12,000원</td>
-                        <td class="align-middle" th:text="${item.quantity}">2</td>
-                        <td class="align-middle" th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">24,000원</td>
-                    </tr>
-                    <tr th:if="${cart.cartItems == null or cart.cartItems.empty}">
-                        <td colspan="4" class="align-middle py-3">
-                            <h6 class="m-0 text-muted">주문할 도서가 없습니다. 장바구니를 확인해주세요.</h6>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="container-fluid">
-    <!-- 주문 전체 폼 -->
-    <form th:action="@{/api/orders}" method="post" id="orderForm" th:object="${orderRequest}">
+    <!-- 주문서 작성 시작 -->
+    <div class="container-fluid">
         <div class="row px-xl-5">
 
-            <!-- ✅ 왼쪽 : 배송주소 -->
+            <!-- ===== 좌측: 배송 정보 입력 ===== -->
             <div class="col-lg-8">
                 <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">배송주소</span>
+                    <span class="bg-secondary pr-3">배송 정보</span>
                 </h5>
+
                 <div class="bg-light p-30 mb-5">
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label>수령인 이름</label>
-                            <input class="form-control" type="text" name="recipientName"
-                                   th:value="${member != null ? member.name : ''}" placeholder="이름" required>
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>이메일</label>
-                            <input class="form-control" type="text" name="email"
-                                   th:value="${member != null ? member.email : ''}" placeholder="example@email.com" required>
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>휴대폰 번호</label>
-                            <input class="form-control" type="text" name="phoneNumber"
-                                   th:value="${member != null ? member.phoneNumber : ''}" placeholder="010-0000-0000" required>
-                        </div>
-                        <!-- 주소 (회원가입과 동일한 UI) -->
-                        <div class="col-md-12 form-group">
-                            <label>주소</label>
+                    <form th:action="@{/api/orders/complete}" method="post">
 
-                            <!-- 우편번호 + 주소검색 버튼 -->
-                            <div class="form-row">
-                                <div class="form-group col-md-5">
-                                    <input type="text" class="form-control"
-                                           name="zipcode" id="zipcode"
-                                           th:value="${member != null ? member.address.zipcode : ''}"
-                                           placeholder="우편번호" readonly required>
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <button type="button" class="btn btn-outline-secondary btn-block"
-                                            id="btnSearchAddress">
-                                        주소 검색
-                                    </button>
-                                </div>
+                        <!-- 수령인 정보 -->
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>수령인 이름</label>
+                                <input class="form-control" type="text" name="receiver"
+                                       th:value="${orderForm.receiver}">
                             </div>
-
-                            <!-- 기본 주소 + 상세 주소 -->
-                            <div class="form-group">
-                                <input type="text" class="form-control mb-2"
-                                       name="street" id="street"
-                                       th:value="${member != null ? member.address.street : ''}"
-                                       placeholder="기본 주소" readonly required>
-                                <input type="text" class="form-control"
-                                       name="detail" id="detail"
-                                       th:value="${member != null ? member.address.detail : ''}"
-                                       placeholder="상세 주소를 입력하세요" required>
+                            <div class="col-md-6 form-group">
+                                <label>연락처</label>
+                                <input class="form-control" type="text" name="phone"
+                                       th:value="${orderForm.phone}">
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <label>이메일</label>
+                                <input class="form-control" type="email" name="email"
+                                       th:value="${orderForm.email}">
                             </div>
                         </div>
 
-
-                        <div class="col-md-12 form-group">
-                            <label>배송 메모 (선택)</label>
-                            <input class="form-control" type="text" name="deliveryMemo"
-                                   placeholder="예: 문 앞에 놓아주세요.">
+                        <!-- 주소 -->
+                        <div class="row">
+                            <div class="col-md-12 form-group">
+                                <label>우편번호</label>
+                                <div class="d-flex">
+                                    <input class="form-control" type="text" name="zipcode"
+                                           th:value="${orderForm.zipcode}">
+                                    <button type="button" class="btn btn-outline-primary ml-2">주소 검색</button>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <label>기본 주소</label>
+                                <input class="form-control" type="text" name="address1"
+                                       th:value="${orderForm.address1}">
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <label>상세 주소</label>
+                                <input class="form-control" type="text" name="address2"
+                                       th:value="${orderForm.address2}">
+                            </div>
                         </div>
-                    </div>
+
+                        <!-- 배송 메모 -->
+                        <div class="form-group">
+                            <label>배송 메모</label>
+                            <textarea class="form-control" rows="2"
+                                      name="deliveryMessage"
+                                      placeholder="예: 경비실에 맡겨주세요"
+                                      th:text="${orderForm.deliveryMessage}"></textarea>
+                        </div>
+
+                        <!-- 결제 수단 -->
+                        <h5 class="section-title position-relative text-uppercase mt-4 mb-3">
+                            <span class="bg-secondary pr-3">결제 수단</span>
+                        </h5>
+
+                        <div class="bg-white p-3 border">
+                            <div class="form-group mb-2">
+                                <input type="radio" id="payment-card" name="payment" value="CARD" checked>
+                                <label for="payment-card" class="ml-2">신용/체크카드</label>
+                            </div>
+                            <div class="form-group mb-2">
+                                <input type="radio" id="payment-bank" name="payment" value="BANK">
+                                <label for="payment-bank" class="ml-2">계좌이체</label>
+                            </div>
+                            <div class="form-group mb-0">
+                                <input type="radio" id="payment-vbank" name="payment" value="VBANK">
+                                <label for="payment-vbank" class="ml-2">가상계좌</label>
+                            </div>
+                        </div>
+
+                        <!-- 숨겨진 값 (장바구니 ID 포함 등) -->
+                        <input type="hidden" name="cartId" th:value="${cart.id}">
+                    </form>
                 </div>
             </div>
 
-            <!-- ✅ 오른쪽 : 주문고객 + 주문 요약 + 결제하기 버튼 -->
+            <!-- ===== 우측: 주문 요약 ===== -->
             <div class="col-lg-4">
-
-                <!-- 주문고객 정보 -->
                 <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">주문고객</span>
+                    <span class="bg-secondary pr-3">결제 요약</span>
                 </h5>
-                <div class="bg-light p-30 mb-4">
-                    <div class="form-group">
-                        <label>이름</label>
-                        <input class="form-control" type="text" name="ordererName"
-                               th:value="${member != null ? member.name : ''}" placeholder="주문하시는 분 이름">
-                    </div>
-                    <div class="form-group">
-                        <label>휴대폰 번호</label>
-                        <input class="form-control" type="text" name="ordererPhoneNumber"
-                               th:value="${member != null ? member.phoneNumber : ''}" placeholder="010-0000-0000">
-                    </div>
-                    <div class="form-group">
-                        <label>이메일</label>
-                        <input class="form-control" type="text" name="ordererEmail"
-                               th:value="${member != null ? member.email : ''}" placeholder="example@email.com">
-                    </div>
 
-                    <!-- 🔐 비회원 주문 비밀번호 (member == null 일 때만) -->
-                    <div class="form-group" th:if="${member == null}">
-                        <label>비회원 주문 비밀번호</label>
-                        <input class="form-control" type="password" name="guestPassword"
-                               placeholder="주문 조회에 사용할 비밀번호 (4자 이상)" required>
-                        <small class="form-text text-muted">
-                            비회원 주문 조회 시 사용되며, 영문/숫자 포함 4자 이상으로 입력해주세요.
-                        </small>
-                    </div>
-
-                    <!-- 회원일 때 안내 문구만 -->
-                    <div class="form-group mb-0" th:if="${member != null}">
-                        <small class="text-muted">
-                            로그인된 회원 정보로 주문이 진행되며, 별도의 비밀번호 입력은 필요하지 않습니다.
-                        </small>
-                    </div>
-                </div>
-
-                <!-- 주문 요약 -->
-                <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">주문 요약</span>
-                </h5>
-                <div class="bg-light p-30 mb-4">
+                <div class="bg-light p-30 mb-5">
                     <div class="border-bottom pb-2">
+
+                        <!-- 상품 금액 -->
                         <div class="d-flex justify-content-between mb-3">
                             <h6>상품 금액</h6>
-                            <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">72,000원</h6>
+                            <h6 th:text="${#numbers.formatInteger(orderSummary.subTotal, 0, 'COMMA')} + '원'">
+                                72,000원
+                            </h6>
                         </div>
+
+                        <!-- 배송비 -->
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">배송비</h6>
                             <h6 class="font-weight-medium"
-                                th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">
+                                th:text="${orderSummary.shippingFee > 0 ?
+                                        #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">
                                 3,000원
                             </h6>
                         </div>
                     </div>
+
+                    <!-- 총 금액 -->
                     <div class="pt-2">
                         <div class="d-flex justify-content-between mt-2">
                             <h5>총 결제 금액</h5>
-                            <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">75,000원</h5>
+                            <h5 th:text="${#numbers.formatInteger(orderSummary.totalPrice, 0, 'COMMA')} + '원'">
+                                75,000원
+                            </h5>
                         </div>
+
+                        <!-- 결제 진행 버튼 -->
+                        <form th:action="@{/api/orders/complete}" method="post">
+                            <button type="submit"
+                                    class="btn btn-block btn-primary font-weight-bold my-3 py-3">
+                                결제하기
+                            </button>
+                        </form>
                     </div>
                 </div>
 
-                <!-- ✅ 결제 수단 없이 버튼만 -->
-                <button type="submit" class="btn btn-block btn-primary font-weight-bold py-3">
-                    결제하기
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="container-fluid bg-dark text-secondary mt-5 pt-5">
-    <div class="row px-xl-5 pt-5">
-        <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
-            <h5 class="text-secondary text-uppercase mb-4">연락처</h5>
-            <p class="mb-4">No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor. Rebum tempor no vero est magna amet no</p>
-            <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>Seoul, Korea</p>
-            <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
-            <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
-        </div>
-        <div class="col-lg-8 col-md-12">
-            <div class="row">
-                <div class="col-md-4 mb-5">
-                    <h5 class="text-secondary text-uppercase mb-4">빠른 쇼핑</h5>
-                    <div class="d-flex flex-column justify-content-start">
-                        <a class="text-secondary mb-2" th:href="@{/}"><i class="fa fa-angle-right mr-2"></i>홈</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/books}"><i class="fa fa-angle-right mr-2"></i>상품 보기</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/carts}"><i class="fa fa-angle-right mr-2"></i>장바구니</a>
-                        <a class="text-secondary mb-2" th:href="@{/api/orders}"><i class="fa fa-angle-right mr-2"></i>주문/결제</a>
-                        <a class="text-secondary" href="#"><i class="fa fa-angle-right mr-2"></i>고객 센터</a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
-    <div class="row border-top mx-xl-5 py-4" style="border-color: rgba(256, 256, 256, .1) !important;">
-        <div class="col-md-6 px-xl-0">
-            <p class="mb-md-0 text-center text-md-left text-secondary">
-                &copy; <a class="text-primary" href="#">Trillion-Shop</a>. All Rights Reserved.
-                Designed by <a class="text-primary" href="https://htmlcodex.com">HTML Codex</a>
-            </p>
-        </div>
-        <div class="col-md-6 px-xl-0 text-center text-md-right">
-            <img class="img-fluid" th:src="@{/img/payments.png}" alt="">
-        </div>
-    </div>
 </div>
-<a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
+<th:block layout:fragment="script">
+    <!-- checkout 페이지 전용 JS 가 필요하면 여기에 -->
+    <!-- <script th:src="@{/js/checkout.js}"></script> -->
+</th:block>
 
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/lib/easing/easing.min.js}"></script>
-<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
-
-<script th:src="@{/js/main.js}"></script>
 </body>
-
 </html>

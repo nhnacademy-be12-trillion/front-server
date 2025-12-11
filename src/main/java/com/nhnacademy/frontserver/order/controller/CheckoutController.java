@@ -14,8 +14,8 @@ package com.nhnacademy.frontserver.order.controller;
 
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
-import com.nhnacademy.frontserver.order.CartClient;
-import com.nhnacademy.frontserver.order.CartResponse;
+import com.nhnacademy.frontserver.cart.client.CartClient;
+import com.nhnacademy.frontserver.cart.dto.CartResponseDto;
 import com.nhnacademy.frontserver.order.CheckoutItemView;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,15 +56,15 @@ public class CheckoutController {
         }
         // 2) 장바구니 결제 흐름: 파라미터 없는 경우 → CartClient 사용
         else {
-            List<CartResponse> carts = cartClient.getCarts();
+            List<CartResponseDto> carts = cartClient.getCartItems().getBody();
 
-            for (CartResponse cart : carts) {
-                BookDetailResponse book = bookClient.getBookDetail(cart.bookId());
+            for (CartResponseDto cart : carts) {
+                BookDetailResponse book = bookClient.getBookDetail(cart.getBookId());
 
-                int qty = cart.cartQuantity();
+                int qty = cart.getCartQuantity();
                 int unitPrice = book.bookSalePrice();
                 CheckoutItemView item = new CheckoutItemView(
-                        cart.bookId(),
+                        cart.getBookId(),
                         book.bookName(),
                         book.bookImage(),
                         unitPrice,

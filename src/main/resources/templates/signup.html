@@ -1,245 +1,207 @@
-<!--
-  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
-  ~ + * While every precaution has been taken in the preparation of this resource,  assumes no
-  ~ + responsibility for errors or omissions, or for damages resulting from the use of the information
-  ~ + contained herein
-  ~ + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
-  ~ + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
-  ~ + prior written permission.
-  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-  -->
-
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{fragments/base}">
+      layout:decorate="~{base}">
 
 <head>
   <meta charset="utf-8">
   <title>Trillion-Shop | 회원가입</title>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <link th:href="@{/img/favicon.ico}" rel="icon">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-  <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
-  <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
-  <link href="/css/style.min.css" rel="stylesheet">
+  <th:block layout:fragment="head">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <style>
-    .auth-card {
-      max-width: 720px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    .small-hint {
-      font-size: 0.8rem;
-    }
-  </style>
+    <style>
+      .auth-card {
+        max-width: 720px;
+        width: 100%;
+        margin: 0 auto;
+      }
+      .auth-wrapper {
+        min-height: 70vh;
+      }
+      .small-hint {
+        font-size: 0.8rem;
+      }
+    </style>
+  </th:block>
 </head>
 
 <body>
-<div class="container-fluid">
-  <!-- 상단 회색 바 -->
-  <div class="row bg-secondary py-1 px-xl-5">
-    <div class="col-lg-6 d-none d-lg-block">
-      <div class="d-inline-flex align-items-center h-100">
-        <a class="text-body mr-3" href="">About</a>
-        <a class="text-body mr-3" href="">Contact</a>
-        <a class="text-body mr-3" href="">Help</a>
-        <a class="text-body mr-3" href="">FAQs</a>
-      </div>
-    </div>
-    <div class="col-lg-6 text-center text-lg-right">
-      <div class="d-inline-flex align-items-center d-block">
-        <span class="text-body small">Trillion-Shop 회원가입</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- 로고 영역 -->
-  <div class="row align-items-center bg-light py-3 px-xl-5">
-    <div class="col-lg-4">
-      <a th:href="@{/}" class="text-decoration-none">
-        <img src="/static/img/logo.png" alt="Book E-commerce Logo"
-             class="img-fluid" style="background-color: #fff;">
-      </a>
-    </div>
-  </div>
-</div>
+<div layout:fragment="content">
 
-<!-- 회원가입 폼 -->
-<div class="container auth-wrapper d-flex align-items-center justify-content-center py-5">
-  <div class="auth-card bg-light p-4 p-md-5 border">
-    <h4 class="mb-4 text-center">회원가입</h4>
+  <!-- 회원가입 폼 -->
+  <div class="container auth-wrapper d-flex align-items-center justify-content-center py-5">
+    <div class="auth-card bg-light p-4 p-md-5 border">
+      <h4 class="mb-4 text-center">회원가입</h4>
 
-    <form th:action="@{/api/auth/signup}" method="post" th:object="${signUpRequest}">
-      <!-- 이름 -->
-      <div class="form-group">
-        <label for="name">이름</label>
-        <input id="name" type="text" class="form-control"
-               th:field="*{name}" placeholder="이름을 입력하세요" required>
-      </div>
-
-      <!-- 이메일 + 인증번호 요청 -->
-      <div class="form-group">
-        <label for="email">이메일</label>
-        <div class="input-group">
-          <input id="email" type="email" class="form-control"
-                 th:field="*{email}" placeholder="example@email.com" required>
-          <div class="input-group-append">
-            <button type="button" id="btnSendCode" class="btn btn-outline-primary">
-              인증번호 요청
-            </button>
-          </div>
-        </div>
-        <small class="form-text text-muted small-hint">
-          주문 정보 및 각종 안내 메일이 발송되니, 자주 사용하는 이메일을 입력해 주세요.
-        </small>
-      </div>
-
-      <!-- 비밀번호 -->
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label for="password">비밀번호</label>
-          <input id="password" type="password" class="form-control"
-                 th:field="*{password}" placeholder="비밀번호 (영문+숫자 8자 이상)" required>
-        </div>
-        <div class="form-group col-md-6">
-          <label for="passwordConfirm">비밀번호 확인</label>
-          <input id="passwordConfirm" type="password" class="form-control"
-                 placeholder="다시 한 번 입력" required>
-        </div>
-      </div>
-      <small id="passwordHelp" class="form-text small-hint mb-2">
-        비밀번호와 확인 비밀번호가 일치해야 합니다.
-      </small>
-
-      <!-- 전화번호 -->
-      <div class="form-group">
-        <label for="phoneNumber">전화번호</label>
-        <input id="phoneNumber" type="text" class="form-control"
-               th:field="*{member.phoneNumber}" placeholder="010-0000-0000" required>
-      </div>
-
-      <!-- 주소 -->
-      <div class="form-group">
-        <label>주소</label>
-        <div class="form-row">
-          <div class="form-group col-md-5">
-            <input type="text" class="form-control" placeholder="우편번호"
-                   th:field="*{zipcode}" id="zipcode" readonly>
-          </div>
-          <div class="form-group col-md-3">
-            <button type="button" class="btn btn-outline-secondary btn-block"
-                    id="btnSearchAddress">
-              주소 검색
-            </button>
-          </div>
-        </div>
+      <form th:action="@{/api/auth/signup}" method="post" th:object="${signUpRequest}">
+        <!-- 이름 -->
         <div class="form-group">
+          <label for="name">이름</label>
+          <input id="name" type="text" class="form-control"
+                 th:field="*{name}" placeholder="이름을 입력하세요" required>
+        </div>
+
+        <!-- 이메일 + 인증번호 요청 -->
+        <div class="form-group">
+          <label for="email">이메일</label>
+          <div class="input-group">
+            <input id="email" type="email" class="form-control"
+                   th:field="*{email}" placeholder="example@email.com" required>
+            <div class="input-group-append">
+              <button type="button" id="btnSendCode" class="btn btn-outline-primary">
+                인증번호 요청
+              </button>
+            </div>
+          </div>
+          <small class="form-text text-muted small-hint">
+            주문 정보 및 안내 메일이 발송되니, 자주 사용하는 이메일을 입력해 주세요.
+          </small>
+        </div>
+
+        <!-- 비밀번호 -->
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="password">비밀번호</label>
+            <input id="password" type="password" class="form-control"
+                   th:field="*{password}" placeholder="영문+숫자 8자 이상" required>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="passwordConfirm">비밀번호 확인</label>
+            <input id="passwordConfirm" type="password" class="form-control"
+                   placeholder="다시 입력하세요" required>
+          </div>
+        </div>
+
+        <small id="passwordHelp" class="form-text small-hint mb-2">
+          비밀번호와 확인 비밀번호가 일치해야 합니다.
+        </small>
+
+        <!-- 전화번호 -->
+        <div class="form-group">
+          <label for="phoneNumber">전화번호</label>
+          <input id="phoneNumber" type="text" class="form-control"
+                 th:field="*{member.phoneNumber}" placeholder="010-0000-0000" required>
+        </div>
+
+        <!-- 주소 -->
+        <div class="form-group">
+          <label>주소</label>
+          <div class="form-row">
+            <div class="form-group col-md-5">
+              <input type="text" class="form-control" placeholder="우편번호"
+                     th:field="*{zipcode}" id="zipcode" readonly>
+            </div>
+            <div class="form-group col-md-3">
+              <button type="button" class="btn btn-outline-secondary btn-block"
+                      id="btnSearchAddress">
+                주소 검색
+              </button>
+            </div>
+          </div>
           <input type="text" class="form-control mb-2"
                  th:field="*{street}" id="street" placeholder="기본 주소" readonly>
           <input type="text" class="form-control"
                  th:field="*{detail}" id="detail" placeholder="상세 주소를 입력하세요">
         </div>
-      </div>
 
-      <!-- 생일 -->
-      <div class="form-group">
-        <label for="birthday">생일</label>
-        <input id="birthday" type="date" class="form-control"
-               th:field="*{birthday}" required>
-        <small class="form-text text-muted small-hint">
-          생일 정보를 기준으로 생일 쿠폰 등 맞춤 서비스를 제공할 수 있습니다.
-        </small>
-      </div>
-
-      <!-- 이메일 인증번호 -->
-      <div class="form-group">
-        <label for="emailCode">인증번호</label>
-        <input id="emailCode" type="text" class="form-control"
-               th:field="*{emailCode}" placeholder="이메일로 전송된 인증번호를 입력하세요" required>
-      </div>
-
-      <!-- 약관 동의 (선택/예시) -->
-      <div class="form-group">
-        <div class="custom-control custom-checkbox">
-          <input type="checkbox" class="custom-control-input" id="termsAgree" required>
-          <label class="custom-control-label" for="termsAgree">
-            <a href="#" class="text-primary">이용약관</a> 및
-            <a href="#" class="text-primary">개인정보 처리방침</a>에 동의합니다. (필수)
-          </label>
+        <!-- 생일 -->
+        <div class="form-group">
+          <label for="birthday">생일</label>
+          <input id="birthday" type="date" class="form-control"
+                 th:field="*{birthday}" required>
+          <small class="form-text text-muted small-hint">
+            생일 기준 맞춤 쿠폰 및 혜택이 제공됩니다.
+          </small>
         </div>
-      </div>
 
-      <!-- 버튼 영역 -->
-      <div class="d-flex justify-content-between mt-4">
-        <a th:href="@{/api/auth/login}" class="btn btn-outline-secondary">
-          취소
-        </a>
-        <button type="submit" id="btnSignUp" class="btn btn-primary">
-          회원가입 완료
-        </button>
-      </div>
-    </form>
+        <!-- 이메일 인증번호 -->
+        <div class="form-group">
+          <label for="emailCode">인증번호</label>
+          <input id="emailCode" type="text" class="form-control"
+                 th:field="*{emailCode}" placeholder="이메일로 전송된 인증번호 입력" required>
+        </div>
+
+        <!-- 약관 동의 -->
+        <div class="form-group">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="termsAgree" required>
+            <label class="custom-control-label" for="termsAgree">
+              <a href="#" class="text-primary">이용약관</a> 및
+              <a href="#" class="text-primary">개인정보 처리방침</a>에 동의합니다. (필수)
+            </label>
+          </div>
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="d-flex justify-content-between mt-4">
+          <a th:href="@{/api/auth/login}" class="btn btn-outline-secondary">
+            취소
+          </a>
+          <button type="submit" id="btnSignUp" class="btn btn-primary">
+            회원가입 완료
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
+
 </div>
 
-<a href="#" class="btn btn-primary back-to-top">
-  <i class="fa fa-angle-double-up"></i>
-</a>
+<!-- 페이지 전용 JS -->
+<th:block layout:fragment="script">
 
-<script th:src="@{/js/main.js}"></script>
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/lib/easing/easing.min.js}"></script>
-<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
-
-<script>
-  // 비밀번호 일치 여부 체크 (프론트 쪽 1차 검증)
-  $(function () {
+  <script>
+    // 비밀번호 일치 체크
     function validatePasswordMatch() {
-      var pw1 = $('#password').val();
-      var pw2 = $('#passwordConfirm').val();
-      var help = $('#passwordHelp');
-      var submitBtn = $('#btnSignUp');
+      const pw1 = $('#password').val();
+      const pw2 = $('#passwordConfirm').val();
+      const help = $('#passwordHelp');
+      const submit = $('#btnSignUp');
 
       if (!pw1 || !pw2) {
-        help.text('비밀번호를 입력해주세요.').removeClass('text-success').addClass('text-muted');
-        submitBtn.prop('disabled', false);
+        help.text('비밀번호를 입력해주세요.')
+                .removeClass('text-success text-danger')
+                .addClass('text-muted');
+        submit.prop('disabled', false);
         return;
       }
 
       if (pw1 === pw2) {
-        help.text('비밀번호가 일치합니다.').removeClass('text-muted').removeClass('text-danger').addClass('text-success');
-        submitBtn.prop('disabled', false);
+        help.text('비밀번호가 일치합니다.')
+                .removeClass('text-muted text-danger')
+                .addClass('text-success');
+        submit.prop('disabled', false);
       } else {
-        help.text('비밀번호가 일치하지 않습니다.').removeClass('text-muted').removeClass('text-success').addClass('text-danger');
-        submitBtn.prop('disabled', true);
+        help.text('비밀번호가 일치하지 않습니다.')
+                .removeClass('text-muted text-success')
+                .addClass('text-danger');
+        submit.prop('disabled', true);
       }
     }
 
     $('#password, #passwordConfirm').on('keyup change', validatePasswordMatch);
 
-    // 이메일 인증번호 요청 버튼 클릭 (백엔드 연동은 나중에)
+    // 이메일 인증번호 요청
     $('#btnSendCode').on('click', function () {
-      var email = $('#email').val();
+      const email = $('#email').val();
       if (!email) {
         alert('이메일을 먼저 입력해 주세요.');
         $('#email').focus();
         return;
       }
-      // TODO: Ajax로 /api/auth/email-code 같은 곳에 요청
       alert('입력하신 이메일로 인증번호를 전송했습니다.');
     });
 
-    // 주소 검색 버튼 (추후 카카오/다음 주소 API 연동용 placeholder)
+    // 주소 검색 (추후 API 연동)
     $('#btnSearchAddress').on('click', function () {
       alert('주소 검색 기능은 추후 연동 예정입니다.');
     });
-  });
-</script>
+  </script>
+
+</th:block>
+
 </body>
 </html>

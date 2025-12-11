@@ -15,6 +15,7 @@
   <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
   <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
   <link href="/static/css/style.min.css" rel="stylesheet">
+  <link th:href="@{/css/style.min.css}" rel="stylesheet">
 
   <style>
     body {
@@ -59,15 +60,11 @@
         <span class="bg-secondary pr-3">관리 메뉴</span>
       </h5>
       <div class="nav flex-column nav-pills" id="admin-tab" role="tablist" aria-orientation="vertical">
-        <a class="nav-link active" id="orders-tab" data-toggle="pill" href="#orders-content" role="tab">
-          최근 주문 관리 (200건)
-        </a>
-        <a class="nav-link" id="policy-tab" data-toggle="pill" href="#policy-content" role="tab">
-          정책 설정
-        </a>
-        <a class="nav-link" id="member-tab" data-toggle="pill" href="#member-content" role="tab">
-          회원 관리
-        </a>
+        <a class="nav-link active" id="orders-tab" data-toggle="pill" href="#orders-content" role="tab">최근 주문 관리 (200건)</a>
+        <a class="nav-link" id="policy-tab" data-toggle="pill" href="#policy-content" role="tab">정책 설정</a>
+        <a class="nav-link" id="member-tab" data-toggle="pill" href="#member-content" role="tab">회원 관리</a>
+          <a class="nav-link" id="coupon-policy-tab" data-toggle="pill" th:href="@{admin/coupon-policies}" role="tab">쿠폰 정책 설정</a>
+          <a class="nav-link" id="coupon-tab" data-toggle="pill" th:href="@{admin/coupons}" role="tab">쿠폰 설정</a>
       </div>
     </div>
 

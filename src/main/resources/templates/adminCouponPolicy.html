@@ -56,7 +56,8 @@
                 <a class="nav-link" id="orders-tab" data-toggle="pill" href="#orders-content" role="tab">최근 주문 관리 (200건)</a>
                 <a class="nav-link" id="policy-tab" data-toggle="pill" href="#policy-content" role="tab">상품 정책 설정</a>
                 <a class="nav-link" id="member-tab" data-toggle="pill" href="#member-content" role="tab">회원 관리</a>
-                <a class="nav-link" id="coupon-policy-tab" data-toggle="pill" th:href="@{admin/coupon-policies}" role="tab">쿠폰 정책 설정</a>
+                <a class="nav-link" id="coupon-policy-tab" data-toggle="pill" th:href="@{/admin/coupon-policies}">쿠폰 정책 설정</a>
+                <a class="nav-link" id="coupon-tab" data-toggle="pill" th:href="@{/admin/coupons}">쿠폰 설정</a>
             </div>
         </div>
         <div class="col-lg-9 col-md-8">
@@ -73,6 +74,7 @@
                                 <th>최대할인금액</th>
                                 <th>할인금액</th>
                                 <th>쿠폰타입</th>
+                                <th>쿠폰생성</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -82,6 +84,7 @@
                                 <td th:text="${content.maxDiscountPrice==null?'없음':#numbers.formatInteger(content.maxDiscountPrice,0,'COMMA') + '원'}">15,000원</td>
                                 <td th:text="${content.couponDiscountType== 'FIXED_AMOUNT' ? #numbers.formatInteger(content.discountValue,0,'COMMA') +'원':content.discountValue+'%'}">15,000원</td>
                                 <td th:text="${content.couponDiscountType== 'FIXED_AMOUNT' ? '금액 할인 (정액)' : '퍼센트 할인 (정률)'}">2025-12-01</td>
+                                <td><a th:href="@{coupon-policies/{coupon-policy-id}(coupon-policy-id=${content.id})}">쿠폰생성</a></td>
                             </tr>
                             </tbody>
                         </table>
