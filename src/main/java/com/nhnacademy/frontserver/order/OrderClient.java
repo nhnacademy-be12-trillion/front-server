@@ -1,10 +1,11 @@
 package com.nhnacademy.frontserver.order;
 
 import com.nhnacademy.frontserver.PageResponse;
+import com.nhnacademy.frontserver.infra.FeignOkHttpConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "order-service", url = "http://localhost:10407")
+@FeignClient(name = "order-service", configuration = FeignOkHttpConfig.class, url = "http://localhost:10407")
 public interface OrderClient {
 
     // 주문 전체 조회 (관리자)
@@ -46,9 +47,9 @@ public interface OrderClient {
     void cancelOrderByMember(@PathVariable Long orderId);
 
     // 주문 취소 (비회원)
-//    @DeleteMapping("/api/orders/non-members/{orderId}")
-//    void cancelOrderByNonMember(@PathVariable Long orderId,
-//                                @RequestBody NonMemberOrderCancelRequest request);
+    @PostMapping("/api/orders/non-members/{orderId}/cancel")
+    void cancelOrderByNonMember(@PathVariable Long orderId,
+                                @RequestBody NonMemberOrderCancelRequest request);
 
 
 

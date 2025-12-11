@@ -14,7 +14,7 @@ package com.nhnacademy.frontserver.order;
 
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 
-record NonMemberOrderItemStatusPatchRequest(
+public record NonMemberOrderItemStatusPatchRequest(
         //TODO 정책 보완 필요
     String nonMemberPassword,
     OrderItemStatus status
