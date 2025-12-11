@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "ORDER-SERVICE", url = "${cart.api.url}", path = "/api/carts",
+@FeignClient(name = "gateway-cart",
+        url = "${gateway.url}",
+        path = "/api/carts",
         contextId = "cartClient")
 public interface CartClient {
 

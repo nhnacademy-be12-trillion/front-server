@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "couponClient",url="http://localhost:14017",path = "/admin/coupons")
+@FeignClient(name = "gateway-coupon",
+        url = "${gateway.url}",
+        path = "/admin/coupons")
 public interface CouponClient {
     @PostMapping()
     void createCoupon(@RequestBody CouponCreateRequest request);

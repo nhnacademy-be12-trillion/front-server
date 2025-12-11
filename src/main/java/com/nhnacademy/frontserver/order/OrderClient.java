@@ -1,11 +1,11 @@
 package com.nhnacademy.frontserver.order;
 
 import com.nhnacademy.frontserver.PageResponse;
-import com.nhnacademy.frontserver.infra.FeignOkHttpConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "ORDER-SERVICE", url = "http://localhost:10407",
+@FeignClient(name = "gateway-order",
+        url = "${gateway.url}",
         contextId = "orderClient")
 public interface OrderClient {
 

@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "gateway", url = "http://localhost:10403")
+@FeignClient(name = "gateway-member",
+        url = "${gateway.url}")
 public interface MemberClient {
 
     @GetMapping("/api/members")

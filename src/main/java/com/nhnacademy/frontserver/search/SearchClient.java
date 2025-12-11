@@ -6,7 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "searchClient", url = "https://localhost:10416")
+@FeignClient(name = "gateway-search",
+        url = "${gateway.url}")
 interface SearchClient {
 
     @GetMapping("/api/books/search")
