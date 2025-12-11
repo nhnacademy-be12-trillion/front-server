@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <th:block th:fragment="topbar">
   <!-- 회색 상단바 -->
   <div class="row bg-secondary py-1 px-xl-5">
@@ -34,7 +34,6 @@
     <!-- 로고 -->
     <div class="col-lg-4">
       <a th:href="@{/}" class="text-decoration-none">
-        <!-- static/img/logo.png 기준 -->
         <img th:src="@{/img/logo.png}"
              alt="Trillion-Shop Logo"
              class="img-fluid"
@@ -76,10 +75,10 @@
       <!-- 로그인 -->
       <div class="d-inline-flex flex-column align-items-end w-100"
            th:unless="${member == null}">
-                <span class="small mb-2"
-                      th:text="${member.name} + ' 님, 환영합니다'">
-                    홍길동 님, 환영합니다
-                </span>
+        <span class="small mb-2"
+              th:text="${member.name} + ' 님, 환영합니다'">
+          홍길동 님, 환영합니다
+        </span>
         <div>
           <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
             마이페이지
@@ -98,31 +97,33 @@
   <div class="row px-xl-5">
     <!-- 왼쪽 카테고리(접히는 메뉴) -->
     <div class="col-lg-3 d-none d-lg-block">
-      <a class="btn d-flex align-items-center justify-content-between bg-primary w-100"
-         data-toggle="collapse" href="#navbar-vertical"
+      <a id="btn-category-toggle"
+         class="btn d-flex align-items-center justify-content-between bg-primary w-100"
+         href="javascript:void(0)"
          style="height: 65px; padding: 0 30px;">
         <h6 class="text-dark m-0">
           <i class="fa fa-bars mr-2"></i>Categories
         </h6>
         <i class="fa fa-angle-down text-dark"></i>
       </a>
-      <nav class="collapse position-absolute navbar navbar-vertical navbar-light
-                        align-items-start p-0 bg-light"
-           id="navbar-vertical"
+
+      <nav id="navbar-vertical"
+           class="collapse position-absolute navbar navbar-vertical navbar-light
+                  align-items-start p-0 bg-light"
            style="width: calc(100% - 30px); z-index: 999;">
         <div class="navbar-nav w-100">
-          <!-- 실제 카테고리 트리 (필요 시 간단 버전으로 교체 가능) -->
-          <th:block th:if="${categories != null and !categories.empty}">
+          <!-- 카테고리 리스트가 있을 때 -->
+          <th:block th:if="${categories != null and !#lists.isEmpty(categories)}">
             <a th:each="cat : ${categories}"
-               th:href="@{/api/books(categoryId=${cat.id})}"
+               th:href="@{/api/books(categoryId=${cat.categoryId})}"
                class="nav-item nav-link"
-               th:text="${cat.name}">
+               th:text="${cat.categoryName}">
               Category Name
             </a>
           </th:block>
 
-          <!-- fallback -->
-          <th:block th:unless="${categories != null and !categories.empty}">
+          <!-- 카테고리가 비어 있을 때 fallback -->
+          <th:block th:unless="${categories != null and !#lists.isEmpty(categories)}">
             <a href="javascript:void(0)" class="nav-item nav-link">국내도서</a>
             <a href="javascript:void(0)" class="nav-item nav-link">외국도서</a>
           </th:block>
