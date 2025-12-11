@@ -13,7 +13,7 @@
 package com.nhnacademy.frontserver.book;
 
 import com.nhnacademy.frontserver.PageResponse;
-import com.nhnacademy.frontserver.review.ReviewResponse;
+import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,24 +39,11 @@ public interface BookClient {
                                             @RequestParam("size") int size,
                                             @RequestParam("sort") String sort);
 
-    //TODO category 뎁스를 노출하는 추천로직 @은해
-    /*
-    *public CategoryTreeResponse toTreeDto(Category category) {
-    return new CategoryTreeResponse(
-            category.getCategoryId(),
-            category.getCategoryName(),
-            category.getChildren().stream()
-                    .map(this::toTreeDto)
-                    .toList()
-    );
-}
-
-    * @OneToMany(mappedBy = "parent")
-private List<Category> children = new ArrayList<>();
-    *
-    *
-     */
-
     @GetMapping("/api/categories")
-    CategoryTreeResponse getCategoryTree();
+    List<CategoryTreeResponse> getCategoryTree();
+
+    @GetMapping("/api/books/reviews/me")
+    PageResponse<ReviewResponse> getReviewsMe(@RequestParam("page") int page,
+                                              @RequestParam("size") int size,
+                                              @RequestParam("sort") String sort);
 }

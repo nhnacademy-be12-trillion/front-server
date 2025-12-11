@@ -11,8 +11,11 @@
  */
 
 package com.nhnacademy.frontserver;
+import com.nhnacademy.frontserver.book.BookClient;
+import com.nhnacademy.frontserver.book.BookListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -21,8 +24,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class HomeController {
 
+    private final BookClient bookClient;
+
     @GetMapping
-    public String home() {
+    public String home(Model model) {
+        PageResponse<BookListResponse> books = bookClient.getBooks(0, 20, "bookId,desc");
+        model.addAttribute("books", books);
         return "index";
     }
 }

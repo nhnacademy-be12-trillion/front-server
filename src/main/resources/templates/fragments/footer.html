@@ -75,5 +75,20 @@
     <script th:src="@{/lib/easing/easing.min.js}"></script>
     <script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
     <script th:src="@{/js/main.js}"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('btn-category-toggle');
+            var nav = document.getElementById('navbar-vertical');
+
+            if (!btn || !nav) {
+                return;
+            }
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                nav.classList.toggle('show');      // .collapse + .show → 표시 / 숨김
+            });
+        });
+    </script>
 </th:block>
 </html>

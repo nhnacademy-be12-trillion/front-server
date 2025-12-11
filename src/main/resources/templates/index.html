@@ -12,7 +12,6 @@
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="Book Store, E-commerce" name="keywords">
         <meta content="Online Book Store" name="description">
-        <!-- 메인 전용 추가 CSS 있으면 여기 -->
     </th:block>
 </head>
 
@@ -96,62 +95,18 @@
         </div>
     </div>
 
-    <!-- ============ 카테고리 섹션 ============ -->
-    <div class="container-fluid pt-5">
-        <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4">
-            <span class="bg-secondary pr-3">카테고리</span>
-        </h2>
-
-        <!-- categories: List<CategoryTreeResponse> -->
-        <div class="row px-xl-5 pb-3"
-             th:if="${categories != null and !#lists.isEmpty(categories)}">
-            <!-- 1depth 카테고리만 그리드로 노출 -->
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1"
-                 th:each="cat : ${categories}">
-                <a class="text-decoration-none"
-                   th:href="@{/api/books/category/{id}(id=${cat.categoryId})}">
-                    <div class="cat-item d-flex align-items-center mb-4">
-                        <div class="overflow-hidden"
-                             style="width: 100px; height: 100px;">
-                            <!-- 이미지 정보가 없으니 기본 카테고리 이미지로 처리 -->
-                            <img class="img-fluid"
-                                 th:src="@{/img/cat-1.jpg}"
-                                 alt="카테고리 이미지">
-                        </div>
-                        <div class="flex-fill pl-3">
-                            <h6 th:text="${cat.categoryName != null ? cat.categoryName : '카테고리 이름 없음'}">
-                                카테고리 이름
-                            </h6>
-                            <small class="text-body">
-                                <!-- children 수를 간단히 서브 카테고리 개수로 표시 (없으면 0개) -->
-                                <span th:text="${cat.children != null ? #lists.size(cat.children) : 0}">0</span>개의 하위 카테고리
-                            </small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- 카테고리가 없을 때 -->
-        <div class="row px-xl-5 pb-3"
-             th:if="${categories == null or #lists.isEmpty(categories)}">
-            <div class="col-12 text-center py-5">
-                <h4 class="text-muted mb-0">카테고리가 준비 중입니다.</h4>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============ 추천 도서 / 메인 도서 리스트 ============ -->
+    <!-- ============ 추천 도서 (PageResponse<BookListResponse>) ============ -->
     <div class="container-fluid pt-5 pb-3">
         <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4">
             <span class="bg-secondary pr-3">추천 도서</span>
         </h2>
 
-        <!-- books: List<BookListResponse> -->
+        <!-- books: PageResponse<BookListResponse> -->
         <div class="row px-xl-5"
-             th:if="${books != null and !#lists.isEmpty(books)}">
+             th:if="${books != null and books.content != null and !#lists.isEmpty(books.content)}">
+
             <div class="col-lg-3 col-md-4 col-sm-6 pb-1"
-                 th:each="book : ${books}">
+                 th:each="book : ${books.content}">
                 <div class="product-item bg-light mb-4">
 
                     <!-- 도서 이미지 -->
@@ -160,20 +115,17 @@
                              th:src="${book.bookImage} != null ? ${book.bookImage} : '/img/product-1.jpg'"
                              alt="도서 이미지"
                              style="aspect-ratio: 1/1.4; object-fit: cover;">
-
                         <div class="product-action">
                             <!-- 장바구니 -->
                             <a class="btn btn-outline-dark btn-square"
                                th:href="@{/api/carts/add(bookId=${book.bookId})}">
                                 <i class="fa fa-shopping-cart"></i>
                             </a>
-
                             <!-- 좋아요 -->
                             <a class="btn btn-outline-dark btn-square"
                                th:href="@{/api/members/likes/add(bookId=${book.bookId})}">
                                 <i class="far fa-heart"></i>
                             </a>
-
                             <!-- 상세보기 -->
                             <a class="btn btn-outline-dark btn-square"
                                th:href="@{/api/books/{id}(id=${book.bookId})}">
@@ -235,7 +187,6 @@
                         <!-- 평점 -->
                         <div class="d-flex align-items-center justify-content-center mt-2">
                             <div class="text-warning mr-1">
-                                <!-- 단순 별 아이콘 / 점수 출력 -->
                                 <i class="fa fa-star"></i>
                             </div>
                             <small class="text-muted">
@@ -244,7 +195,7 @@
                             </small>
                         </div>
 
-                        <!-- 상태 (새 책, 품절 등) -->
+                        <!-- 상태 -->
                         <div class="mt-2">
                             <span class="badge badge-info"
                                   th:if="${book.bookState != null}"
@@ -264,7 +215,7 @@
 
         <!-- 도서가 없을 때 -->
         <div class="row px-xl-5"
-             th:if="${books == null or #lists.isEmpty(books)}">
+             th:if="${books == null or books.content == null or #lists.isEmpty(books.content)}">
             <div class="col-12 text-center py-5">
                 <h4 class="text-muted mb-0">현재 표시할 도서가 없습니다.</h4>
                 <p class="text-muted mt-2 mb-0">
@@ -302,9 +253,8 @@
 
 </div>
 
-<!-- 이 페이지 전용 스크립트가 필요하면 여기에 -->
 <th:block layout:fragment="script">
-    <!-- 예: 메인 캐러셀 커스터마이징 JS 등 -->
+    <!-- 메인 전용 JS 필요하면 여기 -->
 </th:block>
 
 </body>
