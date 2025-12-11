@@ -26,10 +26,10 @@ public class CartWebController {
         List<CartResponseDto> cartItems = cartClient.getCartItems().getBody();
 
         // 총 개수 조회 (배지 표기용 - AJAX 안 쓰므로 여기서 같이 호출)
-        Long count = cartClient.countCartItems().getBody();
+        CartSummaryResponseDto cartSummary = cartClient.getCartSummary().getBody();
 
         model.addAttribute("cartItems", cartItems);
-        model.addAttribute("cartCount", count); // 타임리프용 변수 추가
+        model.addAttribute("cartSummary", cartSummary);
 
         return "cart/list";
     }

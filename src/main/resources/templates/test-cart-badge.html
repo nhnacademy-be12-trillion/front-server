@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>장바구니 기능 테스트</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 50px; text-align: center; background-color: #f0f2f5; }
+        .box {
+            border: 1px solid #ddd;
+            padding: 30px;
+            display: inline-block;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .badge-area { font-size: 24px; margin: 20px 0; position: relative; display: inline-block;}
+        .badge {
+            background-color: #ff4757; color: white;
+            padding: 4px 10px; border-radius: 50px; font-weight: bold; font-size: 14px;
+            position: absolute; top: -10px; right: -20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        button {
+            padding: 12px 24px; font-size: 16px; cursor: pointer; margin: 5px;
+            border: none; border-radius: 8px;
+            transition: background 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        button.add { background-color: #2ed573; color: white; }
+        button.clear { background-color: #ff6b81; color: white; }
+        button.refresh { background-color: #70a1ff; color: white; }
+
+        .debug { margin-top: 20px; color: #57606f; font-family: monospace; text-align: left; background: #f1f2f6; padding: 15px; border-radius: 8px;}
+
+        /* [추가된 설명 박스 스타일] */
+        .note {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: left;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>🛒 Header Badge Test</h1>
+
+    <div class="badge-area" th:object="${cartSummary}">
+        <span style="font-size: 50px;">🛒</span>
+
+        <span id="ui-badge" class="badge"
+              th:if="*{totalQuantity > 0}"
+              th:text="*{totalQuantity}">0</span>
+    </div>
+
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div>
+        <button class="add" onclick="addToCart()">+ 상품 담기 (Mock)</button>
+        <button class="clear" onclick="clearCart()">🗑️ 비우기</button>
+        <button class="refresh" onclick="location.reload()">🔄 새로고침</button>
+    </div>
+
+    <div class="note">
+        <strong>ℹ️ 테스트 로직 안내 (Mock Logic)</strong><br>
+        이 버튼은 실제 DB를 통하지 않고 <strong>가짜 데이터</strong>를 쿠키에 굽습니다.<br>
+        <ul>
+            <li><strong>종류(Line Count):</strong> 버튼 클릭 시 <u>1개씩</u> 증가</li>
+            <li><strong>총수량(Total Qty):</strong> 종류 × 2 (항상 <u>2배수</u>로 증가)</li>
+        </ul>
+        <small>* 테스트 목적: 종류와 수량이 다를 때 UI가 깨지지 않는지 확인용</small>
+    </div>
+
+    <div class="debug" th:object="${cartSummary}">
+        <strong>[Server Side Data Check]</strong><br>
+        - Line Count (종류 수): <span id="debug-count" th:text="*{lineCount}">0</span><br>
+        - Total Qty (전체 수량): <span th:text="*{totalQuantity}">0</span>
+    </div>
+</div>
+
+<script>
+    function getCurrentCount() {
+        const el = document.getElementById('debug-count');
+        return el ? parseInt(el.innerText) : 0;
+    }
+
+    function addToCart() {
+        const current = getCurrentCount();
+
+        // UX: 버튼 누르자마자 약간의 지연 후 갱신
+        fetch('/test/cart/badge/add?currentCount=' + current, { method: 'POST' })
+            .then(res => {
+                if(res.ok) {
+                    location.reload();
+                } else {
+                    alert('서버 응답 오류 (로그 확인 필요)');
+                }
+            });
+    }
+
+    function clearCart() {
+        fetch('/test/cart/badge/clear', { method: 'POST' })
+            .then(res => {
+                if(res.ok) location.reload();
+            });
+    }
+</script>
+</body>
+</html>

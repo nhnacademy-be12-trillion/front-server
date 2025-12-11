@@ -4,6 +4,7 @@ import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import java.util.List;
 
+import com.nhnacademy.frontserver.cart.dto.CartSummaryResponseDto;
 import com.nhnacademy.frontserver.common.cache.CategoryLocalCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

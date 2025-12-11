@@ -2,6 +2,7 @@ package com.nhnacademy.frontserver.cart.client;
 
 import com.nhnacademy.frontserver.cart.dto.CartCreateRequestDto;
 import com.nhnacademy.frontserver.cart.dto.CartResponseDto;
+import com.nhnacademy.frontserver.cart.dto.CartSummaryResponseDto;
 import com.nhnacademy.frontserver.cart.dto.CartUpdateRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -49,11 +50,11 @@ public interface CartClient {
     ResponseEntity<Void> clearCart();
 
     /**
-     * [장바구니 개수 조회]
+     * [장바구니 요약정보 조회]
      * GET /api/carts/count
      */
-    @GetMapping("/count")
-    ResponseEntity<Long> countCartItems();
+    @GetMapping("/summary")
+    ResponseEntity<CartSummaryResponseDto> getCartSummary();
 
     /**
      * [장바구니 병합]
