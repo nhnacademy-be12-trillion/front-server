@@ -1,6 +1,6 @@
 package com.nhnacademy.frontserver.member;
 
-record LoginRequest(
+public record LoginRequest(
         String memberEmail,
         String memberPassword
 ) {}

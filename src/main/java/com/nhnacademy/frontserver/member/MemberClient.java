@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "member-service", url = "http://localhost:10403")
+@FeignClient(name = "gateway", url = "http://localhost:10403")
 public interface MemberClient {
 
     @GetMapping("/api/members")
@@ -31,5 +31,8 @@ public interface MemberClient {
 
     @PostMapping("/api/members/findEmail")
     String findId(@RequestBody String email);
+
+    @PostMapping("/api/members/signup")
+    String signup(@RequestBody MemberSignupRequest memberSignupRequest);
 
 }

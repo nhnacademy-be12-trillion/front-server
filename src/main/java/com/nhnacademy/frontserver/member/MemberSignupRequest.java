@@ -2,7 +2,7 @@ package com.nhnacademy.frontserver.member;
 
 import java.time.LocalDate;
 
-record MemberSignupRequest(
+public record MemberSignupRequest(
         String memberEmail,
         String verificationCode,
         String memberPassword,
