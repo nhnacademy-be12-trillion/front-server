@@ -328,7 +328,7 @@
                     </form>
                 </div>
 
-                <a th:href="${isMember} ? @{/api/members/my-page} : @{/orders/non-members-form}"
+                <a th:href="${isMember} ? @{/members/orders} : @{/orders/non-members-form}"
                    class="btn btn-primary btn-block py-3 font-weight-bold">목록으로</a>
 
             </div>
