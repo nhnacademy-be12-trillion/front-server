@@ -3,6 +3,8 @@ package com.nhnacademy.frontserver.common;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import java.util.List;
+
+import com.nhnacademy.frontserver.common.cache.CategoryLocalCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,19 +15,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @RequiredArgsConstructor
 public class GlobalModelAttribute {
 
-    private final BookClient bookClient;
+    private final CategoryLocalCache categoryLocalCache; // 위에서 만든 로컬 캐시 주입
 
-//    @ModelAttribute("categories")
-//    public List<CategoryTreeResponse> categories() {
-//        try {
-//            List<CategoryTreeResponse> result = bookClient.getCategoryTree();
-//            log.debug(">>> categories size = {}", (result != null ? result.size() : null));
-//            return (result != null) ? result : List.of();   // null 방어
-//        } catch (Exception e) {
-//            log.debug(">>> categories load failed: {}", e.getMessage(), e);
-//            // 여기서 로깅만 하고, 절대 예외를 밖으로 던지지 않는다
-//            // log.warn("Fail to load categories", e);
-//            return List.of(); // 실패 시 빈 리스트
-//        }
-//    }
+    @ModelAttribute("categories")
+    public List<CategoryTreeResponse> categories() {
+        // 네트워크 타지 않음. 0.0001ms 소요.
+        return categoryLocalCache.getCategories();
+    }
 }
