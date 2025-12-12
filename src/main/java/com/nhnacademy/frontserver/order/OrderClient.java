@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "ORDER-SERVICE", url = "http://localhost:10407",
-        contextId = "orderClient")
+        contextId = "orderClient", configuration = FeignOkHttpConfig.class)
 public interface OrderClient {
 
     // 주문 전체 조회 (관리자)
