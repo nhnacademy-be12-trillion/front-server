@@ -63,7 +63,6 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            NGINX_SERVICE="nginx"
             SERVICE_NAME_1="front-server"
 
             mkdir -p ${{ env.DEPLOY_DIR }}
@@ -71,11 +70,6 @@ jobs:
 
             echo "Docker Registry 로그인"
             echo ${{ secrets.GHCR_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ env.REGISTRY_OWNER }} --password-stdin
-
-            echo "Nginx 업데이트 시작..."
-            docker compose pull ${NGINX_SERVICE}
-            docker compose up -d --no-deps --force-recreate ${NGINX_SERVICE}
-            echo "Nginx 업데이트 완료!"
 
             echo "Front-server 업데이트 시작..."
             docker compose pull ${SERVICE_NAME_1}
