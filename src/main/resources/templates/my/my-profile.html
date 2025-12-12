@@ -38,17 +38,17 @@
                     <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
                     <a class="list-group-item list-group-item-action"
                        th:classappend="${activeTab == 'profile'} ? ' active'"
-                       th:href="@{/my-page/profile}">
+                       th:href="@{/members/profile}">
                         개인정보 수정
                     </a>
                     <a class="list-group-item list-group-item-action"
                        th:classappend="${activeTab == 'reviews'} ? ' active'"
-                       th:href="@{/my-page/reviews}">
+                       th:href="@{/members/reviews}">
                         마이 리뷰
                     </a>
                     <a class="list-group-item list-group-item-action"
                        th:classappend="${activeTab == 'addresses'} ? ' active'"
-                       th:href="@{/my-page/addresses}">
+                       th:href="@{/members/addresses}">
                         배송 주소록 관리
                     </a>
                     <hr class="my-3">
@@ -57,20 +57,20 @@
                     <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
                     <a class="list-group-item list-group-item-action"
                        th:classappend="${activeTab == 'orders'} ? ' active'"
-                       th:href="@{/my-page/orders}">
+                       th:href="@{/members/orders}">
                         주문/배송 조회
                     </a>
                     <a class="list-group-item list-group-item-action"
                        th:classappend="${activeTab == 'history'} ? ' active'"
-                       th:href="@{/my-page/history}">
+                       th:href="@{/members/history}">
                         취소/반품 내역
                     </a>
 
                     <hr class="my-3">
 
+
                     <!-- 회원 탈퇴 -->
-                    <a th:href="@{/my-page/withdraw}"
-                       class="list-group-item list-group-item-action text-danger">
+                    <a th:href="@{/members/withdraw}" class="list-group-item list-group-item-action text-danger">
                         회원 탈퇴
                     </a>
                 </div>
@@ -88,13 +88,13 @@
                         <p class="text-muted mb-3">
                             회원 정보를 불러올 수 없습니다. 다시 로그인 후 이용해 주세요.
                         </p>
-                        <a th:href="@{/api/auth/login}" class="btn btn-primary btn-sm">
+                        <a th:href="@{/auth/login}" class="btn btn-primary btn-sm">
                             로그인 페이지로 이동
                         </a>
                     </div>
 
                     <form th:if="${member != null}"
-                          th:action="@{/api/members/info}"
+                          th:action="@{/members/info}"
                           method="post"
                           th:object="${member}">
 
@@ -102,14 +102,14 @@
                         <div class="form-group">
                             <label>이름</label>
                             <input class="form-control" type="text"
-                                   th:field="*{name}" placeholder="이름을 입력하세요">
+                                   th:field="*{memberName}" placeholder="이름을 입력하세요">
                         </div>
 
                         <!-- 이메일 (수정 불가) -->
                         <div class="form-group">
                             <label>이메일</label>
                             <input class="form-control" type="email"
-                                   th:value="${member.email}" readonly>
+                                   th:value="${memberEmail}" readonly>
                         </div>
 
                         <!-- 비밀번호 변경 링크 -->
@@ -118,7 +118,7 @@
                             <div class="d-flex">
                                 <input class="form-control mr-3" type="text"
                                        value="********" readonly>
-                                <a th:href="@{/api/members/password}"
+                                <a th:href="@{/members/password}"
                                    class="btn btn-sm btn-outline-secondary text-dark">
                                     비밀번호 변경
                                 </a>
@@ -129,15 +129,15 @@
                         <div class="form-group">
                             <label>연락처</label>
                             <input class="form-control" type="text"
-                                   th:field="*{phoneNumber}" placeholder="010-0000-0000">
+                                   th:field="*{memberContact}" placeholder="010-0000-0000">
                         </div>
 
                         <!-- 생일 -->
                         <div class="form-group">
                             <label>생일</label>
                             <input class="form-control" type="date"
-                                   th:field="*{birthday}"
-                                   th:value="${member.birthday != null ? #temporals.format(member.birthday, 'yyyy-MM-dd') : ''}">
+                                   th:field="*{memberBirth}"
+                                   th:value="${member.memberBirth != null ? #temporals.format(member.memberBirth, 'yyyy-MM-dd') : ''}">
                             <small class="form-text text-muted">
                                 생일 정보를 기준으로 생일 쿠폰 등 맞춤 서비스를 제공할 수 있습니다.
                             </small>

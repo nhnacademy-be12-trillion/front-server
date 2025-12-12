@@ -59,41 +59,57 @@
                         </tr>
                         </thead>
                         <tbody class="align-middle">
+
                         <!-- 장바구니에 담긴 도서가 있을 때 -->
-                        <tr th:if="${cartItems != null and !cartItems.empty}"
-                            th:each="item : ${cartItems}">
+                        <tr th:if="${carts != null and !carts.empty}"
+                            th:each="cart : ${carts}"
+                            th:with="book=${books[cart.bookId]}">
+
+                            <!-- 상품정보 -->
                             <td class="align-middle text-left">
-                                <img th:src="${item.book.thumbnailUrl != null ? item.book.thumbnailUrl : '/img/product-1.jpg'}"
+                                <img th:src="${book != null and book.bookImage != null ? book.bookImage : '/img/product-1.jpg'}"
                                      alt="" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover;">
-                                <a th:href="@{/books/{id}(id=${item.book.id})}"
+
+                                <a th:href="@{/books/{id}(id=${book.bookId})}"
                                    class="text-dark ml-2"
-                                   th:text="${item.book.title}">
+                                   th:text="${book.bookName}">
                                     도서 제목
                                 </a>
+                                <div class="small text-muted ml-2">
+                                    <span th:text="${book.bookAuthor}">저자</span>
+                                    ·
+                                    <span th:text="${book.bookPublisher}">출판사</span>
+                                </div>
                             </td>
+
+                            <!-- 가격(할인가 기준) -->
                             <td class="align-middle"
-                                th:text="${#numbers.formatInteger(item.book.price, 0, 'COMMA')} + '원'">
+                                th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">
                                 12,000원
                             </td>
 
+                            <!-- 수량 -->
                             <td class="align-middle">
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
                                     <div class="input-group-btn">
                                         <form th:action="@{/carts/update}" method="post" style="display:inline;">
-                                            <input type="hidden" name="cartItemId" th:value="${item.id}">
-                                            <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
+                                            <input type="hidden" name="bookId" th:value="${cart.bookId}">
+                                            <input type="hidden" name="quantity"
+                                                   th:value="${cart.cartQuantity > 1 ? cart.cartQuantity - 1 : 1}">
                                             <button type="submit" class="btn btn-sm btn-primary btn-minus">
                                                 <i class="fa fa-minus"></i>
                                             </button>
                                         </form>
                                     </div>
+
                                     <input type="text"
                                            class="form-control form-control-sm bg-secondary border-0 text-center"
-                                           th:value="${item.quantity}" readonly>
+                                           th:value="${cart.cartQuantity}" readonly>
+
                                     <div class="input-group-btn">
-                                        <form th:action="@{/api/carts/update}" method="post" style="display:inline;">
-                                            <input type="hidden" name="cartItemId" th:value="${item.id}">
-                                            <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
+                                        <form th:action="@{/carts/update}" method="post" style="display:inline;">
+                                            <input type="hidden" name="bookId" th:value="${cart.bookId}">
+                                            <input type="hidden" name="quantity" th:value="${cart.cartQuantity + 1}">
                                             <button type="submit" class="btn btn-sm btn-primary btn-plus">
                                                 <i class="fa fa-plus"></i>
                                             </button>
@@ -101,32 +117,37 @@
                                     </div>
                                 </div>
                             </td>
+
+                            <!-- 합계 -->
                             <td class="align-middle"
-                                th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">
+                                th:text="${#numbers.formatInteger(book.bookSalePrice * cart.cartQuantity, 0, 'COMMA')} + '원'">
                                 24,000원
                             </td>
+
+                            <!-- 삭제 (일단 bookId 기반으로 맞추는 걸 추천) -->
                             <td class="align-middle">
-                                <form th:action="@{/api/carts/{id}/remove(id=${item.id})}"
-                                      method="post"
-                                      style="display:inline;">
-                                    <input type="hidden" name="_method" value="delete">
+                                <form th:action="@{/carts/remove}" method="post" style="display:inline;">
+                                    <input type="hidden" name="bookId" th:value="${cart.bookId}">
                                     <button type="submit" class="btn btn-sm btn-danger">
                                         <i class="fa fa-times"></i>
                                     </button>
                                 </form>
                             </td>
+
                         </tr>
 
                         <!-- 장바구니가 비어 있을 때 -->
-                        <tr th:if="${cartItems == null or cartItems.empty}">
+                        <tr th:if="${carts == null or carts.empty}">
                             <td colspan="5" class="align-middle py-5 text-center">
                                 <h5 class="m-0 text-muted">장바구니에 담긴 도서가 없습니다.</h5>
-                                <a th:href="@{/api/books}" class="btn btn-sm btn-primary mt-3">
+                                <a th:href="@{/books}" class="btn btn-sm btn-primary mt-3">
                                     도서 둘러보기
                                 </a>
                             </td>
                         </tr>
+
                         </tbody>
+
                     </table>
                 </div>
             </div>
@@ -134,6 +155,7 @@
             <!-- 오른쪽: 쿠폰 + 요약 -->
             <div class="col-lg-4">
                 <!-- 쿠폰 적용 -->
+<!--                TODO coupon 정책에 맞게 수정 필요 -->
                 <form class="mb-30" th:action="@{/api/coupons/apply}" method="post">
                     <h5 class="section-title position-relative text-uppercase mb-3">
                         <span class="bg-secondary pr-3">쿠폰 적용</span>
@@ -166,13 +188,6 @@
                                 72,000원
                             </h6>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <h6 class="font-weight-medium">배송비</h6>
-                            <h6 class="font-weight-medium"
-                                th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">
-                                3,000원
-                            </h6>
-                        </div>
                     </div>
                     <div class="pt-2">
                         <div class="d-flex justify-content-between mt-2">
@@ -182,7 +197,7 @@
                             </h5>
                         </div>
 
-                        <a th:href="@{/api/orders/checkout}"
+                        <a th:href="@{/orders/checkout}"
                            class="btn btn-block btn-primary font-weight-bold my-3 py-3">
                             주문서 작성하기
                         </a>

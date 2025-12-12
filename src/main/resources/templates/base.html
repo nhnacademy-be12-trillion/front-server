@@ -16,6 +16,49 @@
   <link th:href="@{/css/style.min.css}" rel="stylesheet">
 
   <th:block layout:fragment="head"></th:block>
+
+  <style>
+    /* PC에서만 hover로 드롭다운 열기 */
+    /* ===== Vertical Category Dropdown Fix ===== */
+    @media (min-width: 992px) {
+
+      /* 1depth hover 시 열기 */
+      #navbar-vertical .dropdown:hover > .dropdown-menu {
+        display: block;
+      }
+
+      /* 1depth dropdown 메뉴 폭 확보 */
+      #navbar-vertical .dropdown-menu {
+        min-width: 220px;      /* 핵심 */
+        margin-top: 0;
+      }
+
+      /* 2depth submenu 위치 조정 */
+      #navbar-vertical .dropdown-submenu {
+        position: relative;
+      }
+
+      #navbar-vertical .dropdown-submenu > .dropdown-menu {
+        top: 0;
+        left: 100%;            /* 기본은 오른쪽 */
+        min-width: 220px;      /* 핵심 */
+        margin-left: 0;
+        display: none;
+      }
+
+      /* hover 시 2depth 표시 */
+      #navbar-vertical .dropdown-submenu:hover > .dropdown-menu {
+        display: block;
+      }
+
+      /* 오른쪽 화면을 넘어갈 경우 대비(안전장치) */
+      #navbar-vertical {
+        overflow: visible;
+      }
+    }
+
+  </style>
+
 </head>
 
 <body>

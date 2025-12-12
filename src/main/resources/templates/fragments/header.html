@@ -1,29 +1,32 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+
 <th:block th:fragment="topbar">
   <!-- 회색 상단바 -->
   <div class="row bg-secondary py-1 px-xl-5">
     <div class="col-lg-6 d-none d-lg-block">
       <div class="d-inline-flex align-items-center h-100">
-        <a class="text-body mr-3" href="">About</a>
-        <a class="text-body mr-3" href="">Contact</a>
-        <a class="text-body mr-3" href="">Help</a>
-        <a class="text-body mr-3" href="">FAQs</a>
+        <a class="text-body mr-3" href="javascript:void(0)">About</a>
+        <a class="text-body mr-3" href="javascript:void(0)">Contact</a>
+        <a class="text-body mr-3" href="javascript:void(0)">Help</a>
+        <a class="text-body mr-3" href="javascript:void(0)">FAQs</a>
       </div>
     </div>
 
     <div class="col-lg-6 text-center text-lg-right">
       <!-- 모바일: 좋아요 / 장바구니 -->
       <div class="d-inline-flex align-items-center d-block d-lg-none">
-        <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
+        <a th:href="@{/members/likes}" class="btn px-0 ml-2">
           <i class="fas fa-heart text-dark"></i>
           <span class="badge text-dark border border-dark rounded-circle"
-                style="padding-bottom: 2px;">0</span>
+                style="padding-bottom: 2px;"
+                th:text="${likeCount != null ? likeCount : 0}">0</span>
         </a>
-        <a th:href="@{/api/carts}" class="btn px-0 ml-2">
+        <a th:href="@{/carts}" class="btn px-0 ml-2">
           <i class="fas fa-shopping-cart text-dark"></i>
           <span class="badge text-dark border border-dark rounded-circle"
-                style="padding-bottom: 2px;">0</span>
+                style="padding-bottom: 2px;"
+                th:text="${cartCount != null ? cartCount : 0}">0</span>
         </a>
       </div>
     </div>
@@ -43,10 +46,9 @@
 
     <!-- 검색 -->
     <div class="col-lg-4 col-6 text-left">
-      <form th:action="@{/api/books/search}" method="get">
+      <form th:action="@{/search}" method="get">
         <div class="input-group">
-          <input type="text" name="keyword" class="form-control"
-                 placeholder="도서를 검색해 보세요">
+          <input type="text" name="keyword" class="form-control" placeholder="도서를 검색해 보세요">
           <div class="input-group-append">
             <button type="submit" class="input-group-text bg-transparent text-primary">
               <i class="fa fa-search"></i>
@@ -58,6 +60,7 @@
 
     <!-- 로그인 / 회원 / 마이페이지 -->
     <div class="col-lg-4 col-6 text-right">
+
       <!-- 비로그인 -->
       <div class="d-inline-flex align-items-center justify-content-end w-100"
            th:if="${member == null}">
@@ -76,25 +79,32 @@
       <div class="d-inline-flex flex-column align-items-end w-100"
            th:unless="${member == null}">
         <span class="small mb-2"
-              th:text="${member.name} + ' 님, 환영합니다'">
+              th:text="${member.memberName} + ' 님, 환영합니다'">
           홍길동 님, 환영합니다
         </span>
         <div>
-          <a th:href="@{/members/my-page}" class="btn btn-sm btn-primary mx-1">
+          <a th:href="@{/members}" class="btn btn-sm btn-primary mx-1">
             마이페이지
           </a>
-          <a th:href="@{/auth/logout}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
-            로그아웃
-          </a>
+
+          <!-- ✅ 로그아웃 POST -->
+          <form th:action="@{/auth/logout}" method="post" style="display:inline;">
+            <button type="submit" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+              로그아웃
+            </button>
+          </form>
         </div>
       </div>
+
     </div>
   </div>
 </th:block>
 
+
 <th:block th:fragment="navbar">
   <!-- base.html 에서 container-fluid bg-dark 가 감싸고 있음 -->
   <div class="row px-xl-5">
+
     <!-- 왼쪽 카테고리(접히는 메뉴) -->
     <div class="col-lg-3 d-none d-lg-block">
       <a id="btn-category-toggle"
@@ -111,22 +121,75 @@
            class="collapse position-absolute navbar navbar-vertical navbar-light
                   align-items-start p-0 bg-light"
            style="width: calc(100% - 30px); z-index: 999;">
+
         <div class="navbar-nav w-100">
-          <!-- 카테고리 리스트가 있을 때 -->
+
+          <!-- ✅ 카테고리 리스트 있을 때 (CategoryTreeResponse) -->
           <th:block th:if="${categories != null and !#lists.isEmpty(categories)}">
-            <a th:each="cat : ${categories}"
-               th:href="@{/books(categoryId=${cat.categoryId})}"
-               class="nav-item nav-link"
-               th:text="${cat.categoryName}">
-              Category Name
-            </a>
+            <th:block th:each="c1 : ${categories}">
+
+              <!-- 1depth (children 있으면 dropdown) -->
+              <div class="nav-item dropdown" th:if="${c1.children != null and !#lists.isEmpty(c1.children)}">
+                <a href="javascript:void(0)"
+                   class="nav-link dropdown-toggle"
+                   data-toggle="dropdown"
+                   th:text="${c1.categoryName}">
+                  대분류
+                </a>
+
+                <div class="dropdown-menu position-absolute bg-secondary border-0 rounded-0 w-100 m-0">
+
+                  <th:block th:each="c2 : ${c1.children}">
+
+                    <!-- 2depth (children 있으면 submenu) -->
+                    <div class="dropdown-submenu"
+                         th:if="${c2.children != null and !#lists.isEmpty(c2.children)}">
+                      <a class="dropdown-item dropdown-toggle"
+                         href="javascript:void(0)"
+                         th:text="${c2.categoryName}">
+                        중분류
+                      </a>
+
+                      <div class="dropdown-menu bg-secondary border-0 rounded-0">
+                        <a class="dropdown-item"
+                           th:each="c3 : ${c2.children}"
+                           th:href="@{/books(categoryId=${c3.categoryId})}"
+                           th:text="${c3.categoryName}">
+                          소분류
+                        </a>
+                      </div>
+                    </div>
+
+                    <!-- 2depth (leaf면 바로 링크) -->
+                    <a class="dropdown-item"
+                       th:if="${c2.children == null or #lists.isEmpty(c2.children)}"
+                       th:href="@{/books(categoryId=${c2.categoryId})}"
+                       th:text="${c2.categoryName}">
+                      중분류
+                    </a>
+
+                  </th:block>
+                </div>
+              </div>
+
+              <!-- 1depth leaf면 바로 링크 -->
+              <a class="nav-item nav-link"
+                 th:if="${c1.children == null or #lists.isEmpty(c1.children)}"
+                 th:href="@{/books(categoryId=${c1.categoryId})}"
+                 th:text="${c1.categoryName}">
+                Category Name
+              </a>
+
+            </th:block>
           </th:block>
 
-          <!-- 카테고리가 비어 있을 때 fallback -->
+
+          <!-- ✅ 카테고리가 비어 있을 때 fallback -->
           <th:block th:unless="${categories != null and !#lists.isEmpty(categories)}">
             <a href="javascript:void(0)" class="nav-item nav-link">국내도서</a>
             <a href="javascript:void(0)" class="nav-item nav-link">외국도서</a>
           </th:block>
+
         </div>
       </nav>
     </div>
@@ -138,36 +201,34 @@
                 data-toggle="collapse" data-target="#navbarCollapse">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse justify-content-between"
-             id="navbarCollapse">
+
+        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
           <div class="navbar-nav mr-auto py-0">
-            <a th:href="@{/}" class="nav-item nav-link">
-              베스트
-            </a>
-            <a th:href="@{/books?sort=new}" class="nav-item nav-link">
-              최근 발매
-            </a>
-            <a th:href="@{/books/birthday}" class="nav-item nav-link">
-              생일책
-            </a>
+            <a th:href="@{/}" class="nav-item nav-link">베스트</a>
+            <a th:href="@{/books(sort='new')}" class="nav-item nav-link">최근 발매</a>
+            <a th:href="@{/books/birthday}" class="nav-item nav-link">생일책</a>
           </div>
 
           <!-- 좋아요/장바구니 아이콘 -->
           <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
-            <a th:href="@{/members/wishlists}" class="btn px-0">
+            <a th:href="@{/members/likes}" class="btn px-0">
               <i class="fas fa-heart text-primary"></i>
               <span class="badge text-secondary border border-secondary rounded-circle"
-                    style="padding-bottom: 2px;">0</span>
+                    style="padding-bottom: 2px;"
+                    th:text="${likeCount != null ? likeCount : 0}">0</span>
             </a>
             <a th:href="@{/carts}" class="btn px-0 ml-3">
               <i class="fas fa-shopping-cart text-primary"></i>
               <span class="badge text-secondary border border-secondary rounded-circle"
-                    style="padding-bottom: 2px;">0</span>
+                    style="padding-bottom: 2px;"
+                    th:text="${cartCount != null ? cartCount : 0}">0</span>
             </a>
           </div>
         </div>
       </nav>
     </div>
+
   </div>
 </th:block>
+
 </html>

@@ -123,32 +123,37 @@
                         <div class="product-item bg-light mb-4">
                             <div class="product-img position-relative overflow-hidden">
                                 <img class="img-fluid w-100"
-                                     th:src="${book.thumbnailUrl} != null ? ${book.thumbnailUrl} : '/img/product-1.jpg'"
+                                     th:src="${book.bookImage} != null ? ${book.bookImage} : '/img/product-1.jpg'"
                                      alt="책 표지"
                                      style="aspect-ratio: 1/1.4; object-fit: cover;">
                                 <div class="product-action">
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/api/carts/add(bookId=${book.id})}">
-                                        <i class="fa fa-shopping-cart"></i>
-                                    </a>
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/api/members/likes/add(bookId=${book.id})}">
-                                        <i class="fa fa-heart"></i>
-                                    </a>
+                                    <form th:action="@{/carts}" method="post" style="display:inline;">
+                                        <input type="hidden" name="bookId" th:value="${book.bookId}">
+                                        <input type="hidden" name="cartQuantity" value="1">
+                                        <button type="submit" class="btn btn-outline-dark btn-square">
+                                            <i class="fa fa-shopping-cart"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/members/likes}" method="post" style="display:inline;">
+                                        <input type="hidden" name="bookId" th:value="${book.bookId}">
+                                        <button type="submit" class="btn btn-outline-dark btn-square">
+                                            <i class="fa fa-heart"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                             <div class="text-center py-4 px-3">
                                 <!-- 도서 제목 -->
                                 <a class="h6 text-decoration-none text-truncate d-block mb-2"
-                                   th:href="@{/api/books/{id}(id=${book.id})}"
-                                   th:text="${book.title != null ? book.title : '제목 정보 없음'}">
+                                   th:href="@{/books/{id}(id=${book.bookId})}"
+                                   th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">
                                     도서 제목
                                 </a>
 
                                 <!-- 저자명 -->
                                 <small class="text-body d-block">
                                     <strong>저자</strong>
-                                    <span th:text="${book.author != null ? book.author : '저자 정보 없음'}">
+                                    <span th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 정보 없음'}">
                                         저자명
                                     </span>
                                 </small>
@@ -166,7 +171,7 @@
                                 <!-- 출판사 -->
                                 <small class="text-body d-block">
                                     <strong>출판사</strong>
-                                    <span th:text="${book.publisher != null ? book.publisher : '출판사 정보 없음'}">
+                                    <span th:text="${book.bookPublisher != null ? book.bookPublisher : '출판사 정보 없음'}">
                                         출판사명
                                     </span>
                                 </small>
@@ -194,7 +199,7 @@
                                 <tbody>
                                 <tr th:each="book : ${books}">
                                     <td class="align-middle">
-                                        <a th:href="@{/api/books/{id}(id=${book.id})}">
+                                        <a th:href="@{/api/books/{id}(id=${book.bookId})}">
                                             <img th:src="${book.thumbnailUrl} != null ? ${book.thumbnailUrl} : '/img/product-1.jpg'"
                                                  alt="책 표지"
                                                  style="width: 45px; aspect-ratio: 1/1.4; object-fit: cover;">
@@ -202,13 +207,13 @@
                                     </td>
                                     <td class="align-middle text-left">
                                         <a class="text-dark font-weight-medium"
-                                           th:href="@{/api/books/{id}(id=${book.id})}"
-                                           th:text="${book.title != null ? book.title : '제목 정보 없음'}">
+                                           th:href="@{/api/books/{id}(id=${book.bookId})}"
+                                           th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">
                                             도서 제목
                                         </a>
                                     </td>
                                     <td class="align-middle">
-                                        <span th:text="${book.author != null ? book.author : '저자 정보 없음'}">
+                                        <span th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 정보 없음'}">
                                             저자명
                                         </span>
                                     </td>
@@ -225,20 +230,25 @@
                                         -
                                     </td>
                                     <td class="align-middle">
-                                        <span th:text="${book.publisher != null ? book.publisher : '출판사 정보 없음'}">
+                                        <span th:text="${book.bookPublisher != null ? book.bookPublisher : '출판사 정보 없음'}">
                                             출판사명
                                         </span>
                                     </td>
                                     <td class="align-middle">
                                         <div class="btn-group-vertical btn-group-sm">
-                                            <a class="btn btn-outline-dark mb-1"
-                                               th:href="@{/api/carts/add(bookId=${book.id})}">
-                                                장바구니
-                                            </a>
-                                            <a class="btn btn-outline-dark"
-                                               th:href="@{/api/members/likes/add(bookId=${book.id})}">
-                                                좋아요
-                                            </a>
+                                            <form th:action="@{/carts}" method="post">
+                                                <input type="hidden" name="bookId" th:value="${book.bookId}">
+                                                <input type="hidden" name="cartQuantity" value="1">
+                                                <button type="submit" class="btn btn-outline-dark mb-1">
+                                                    장바구니
+                                                </button>
+                                            </form>
+                                            <form th:action="@{/members/likes}" method="post">
+                                                <input type="hidden" name="bookId" th:value="${book.bookId}">
+                                                <button type="submit" class="btn btn-outline-dark">
+                                                    좋아요
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

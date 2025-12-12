@@ -65,6 +65,7 @@
           <input id="verificationCode" type="text" class="form-control"
                  th:field="*{verificationCode}" placeholder="이메일로 전송된 인증번호 입력" required>
         </div>
+<!--        TODO 이메일 인증번호 구현-->
 
         <!-- 비밀번호 -->
         <div class="form-row">
@@ -141,7 +142,7 @@
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <a th:href="@{/api/auth/login}" class="btn btn-outline-secondary">
+          <a th:href="@{/auth/login}" class="btn btn-outline-secondary">
             취소
           </a>
           <button type="submit" id="btnSignUp" class="btn btn-primary">

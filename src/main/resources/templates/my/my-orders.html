@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/base}">
@@ -7,303 +7,175 @@
 <head>
     <meta charset="utf-8">
     <title>Trillion-Shop | My Page - 주문/배송 조회</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Book Store, MyPage, Member" name="keywords">
-    <meta content="Online Book Store My Page" name="description">
 
-    <link th:href="@{/img/favicon.ico}" rel="icon">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
-    <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
-    <link href="/static/css/style.min.css" rel="stylesheet">
+    <!-- base.html에 기본 head(css 등) 있음 -->
+    <th:block layout:fragment="head">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="Book Store, MyPage, Member" name="keywords">
+        <meta content="Online Book Store My Page" name="description">
 
-    <style>
-        /* 반품(노랑) 버튼 */
-        .btn-return {
-            color: #b88600 !important;
-            border: 1px solid #e0b200 !important;
-            background-color: #fffbea !important;
-        }
+        <style>
+            /* 반품(노랑) 버튼 */
+            .btn-return {
+                color: #b88600 !important;
+                border: 1px solid #e0b200 !important;
+                background-color: #fffbea !important;
+            }
+            .btn-return:hover {
+                background-color: #ffe08a !important;
+                border-color: #d4a300 !important;
+            }
 
-        .btn-return:hover {
-            background-color: #ffe08a !important;
-            border-color: #d4a300 !important;
-        }
+            /* 파손(빨강) 버튼 */
+            .btn-damage {
+                color: #b00020 !important;
+                border: 1px solid #d32f2f !important;
+                background-color: #fff5f5 !important;
+            }
+            .btn-damage:hover {
+                background-color: #ffcccc !important;
+                border-color: #c62828 !important;
+            }
 
-        /* 파손(빨강) 버튼 */
-        .btn-damage {
-            color: #b00020 !important;
-            border: 1px solid #d32f2f !important;
-            background-color: #fff5f5 !important;
-        }
-
-        .btn-damage:hover {
-            background-color: #ffcccc !important;
-            border-color: #c62828 !important;
-        }
-        .mypage-menu .list-group-item {
-            margin-top: 10px;
-            margin-bottom: 8px;   /* 탭 버튼 간 간격 */
-            border-radius: 6px;   /* 버튼 둥글림 옵션 (선택) */
-        }
-
-        .mypage-menu .list-group-item.active {
-            margin-bottom: 8px;
-        }
-
-    </style>
+            .mypage-menu .list-group-item {
+                margin-top: 10px;
+                margin-bottom: 8px;
+                border-radius: 6px;
+            }
+            .mypage-menu .list-group-item.active {
+                margin-bottom: 8px;
+            }
+        </style>
+    </th:block>
 </head>
 
 <body>
-<!-- 상단 바 / 헤더 -->
-<div class="container-fluid">
-    <!-- 상단 회색 바 -->
-    <div class="row bg-secondary py-1 px-xl-5">
-        <div class="col-lg-6 d-none d-lg-block">
-            <div class="d-inline-flex align-items-center h-100">
-                <a class="text-body mr-3" href="">About</a>
-                <a class="text-body mr-3" href="">Contact</a>
-                <a class="text-body mr-3" href="">Help</a>
-                <a class="text-body mr-3" href="">FAQs</a>
-            </div>
-        </div>
-        <div class="col-lg-6 text-center text-lg-right">
-            <!-- 데스크톱: 환영 문구 -->
-            <div class="d-inline-flex align-items-center d-none d-lg-inline-flex">
-        <span class="text-body small"
-              th:text="${member.name} + ' 님, 마이페이지에 오신 것을 환영합니다.'">
-          홍길동 님, 마이페이지에 오신 것을 환영합니다.
-        </span>
-            </div>
+<div layout:fragment="content">
 
-            <!-- 모바일: 좋아요 / 장바구니 아이콘 -->
-            <div class="d-inline-flex align-items-center d-block d-lg-none">
-                <a th:href="@{/api/members/likes}" class="btn px-0 ml-2">
-                    <i class="fas fa-heart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle"
-                          style="padding-bottom: 2px;">0</span>
-                </a>
-                <a th:href="@{/api/carts}" class="btn px-0 ml-2">
-                    <i class="fas fa-shopping-cart text-dark"></i>
-                    <span class="badge text-dark border border-dark rounded-circle"
-                          style="padding-bottom: 2px;">0</span>
-                </a>
-            </div>
-        </div>
-    </div>
+    <div class="container-fluid">
+        <div class="row px-xl-5">
 
-    <!-- 로고 / 검색 / 마이페이지 영역 -->
-    <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
-        <div class="col-lg-4">
-            <a th:href="@{/}" class="text-decoration-none">
-                <img src="/static/img/logo.png" alt="Book E-commerce Logo"
-                     class="img-fluid" style="background-color: #fff;">
-            </a>
-        </div>
+            <!-- 왼쪽 MY 메뉴 -->
+            <div class="col-lg-3 col-md-4">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">MY 메뉴</span>
+                </h5>
 
-        <div class="col-lg-4 col-6 text-left">
-            <form th:action="@{/api/books/search}" method="get">
-                <div class="input-group">
-                    <input type="text" name="keyword" class="form-control"
-                           placeholder="Search for books">
-                    <div class="input-group-append">
-                        <button type="submit" class="input-group-text bg-transparent text-primary">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+                <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
+                    <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
 
-        <!-- 로그인 전제: 환영 문구 + 마이페이지 / 로그아웃 -->
-        <div class="col-lg-4 col-6 text-right">
-            <div class="d-inline-flex flex-column align-items-end w-100">
-        <span class="small mb-2"
-              th:text="${member.name} + ' 님, 환영합니다'">
-          홍길동 님, 환영합니다
-        </span>
-                <div>
-                    <a th:href="@{/api/members/my-page}" class="btn btn-sm btn-primary mx-1">
-                        마이페이지
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'profile'} ? ' active'"
+                       th:href="@{/members/profile}">
+                        개인정보 수정
                     </a>
-                    <a th:href="@{/api/auth/logout}" class="btn btn-sm btn-outline-secondary mx-1 text-dark">
-                        로그아웃
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'reviews'} ? ' active'"
+                       th:href="@{/members/reviews}">
+                        마이 리뷰
+                    </a>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'addresses'} ? ' active'"
+                       th:href="@{/members/addresses}">
+                        배송 주소록 관리
+                    </a>
+
+                    <hr class="my-3">
+
+                    <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'orders'} ? ' active'"
+                       th:href="@{/members/orders}">
+                        주문/배송 조회
+                    </a>
+                    <a class="list-group-item list-group-item-action"
+                       th:classappend="${activeTab == 'history'} ? ' active'"
+                       th:href="@{/members/history}">
+                        취소/반품 내역
+                    </a>
+
+                    <hr class="my-3">
+
+                    <a th:href="@{/members/withdraw}"
+                       class="list-group-item list-group-item-action text-danger">
+                        회원 탈퇴
                     </a>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- 상단 네비게이션 -->
-<div class="container-fluid bg-dark mb-30">
-    <div class="row px-xl-5">
-        <div class="col-lg-3 d-none d-lg-block">
-            <a class="btn d-flex align-items-center justify-content-between bg-primary w-100"
-               data-toggle="collapse" href="#navbar-vertical"
-               style="height: 65px; padding: 0 30px;">
-                <h6 class="text-dark m-0"><i class="fa fa-bars mr-2"></i>Categories</h6>
-                <i class="fa fa-angle-down text-dark"></i>
-            </a>
-            <nav class="collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light"
-                 id="navbar-vertical"
-                 style="width: calc(100% - 30px); z-index: 999;">
-                <div class="navbar-nav w-100">
-                    <th:block th:if="${categories != null and !categories.empty}">
-                        <a th:each="cat : ${categories}"
-                           th:href="@{/api/books/category/{id}(id=${cat.id})}"
-                           class="nav-item nav-link" th:text="${cat.name}">
-                            Category Name
-                        </a>
-                    </th:block>
-                    <th:block th:unless="${categories != null and !categories.empty}">
-                        <a href="#" class="nav-item nav-link">국내도서</a>
-                        <a href="#" class="nav-item nav-link">외국도서</a>
-                        <a href="#" class="nav-item nav-link">E-Book</a>
-                    </th:block>
-                </div>
-            </nav>
-        </div>
+            <!-- 오른쪽: 주문/배송 조회 내용 -->
+            <div class="col-lg-9 col-md-8">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">주문 조회/변경/취소</span>
+                </h5>
 
-        <div class="col-lg-9">
-            <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                    <div class="navbar-nav mr-auto py-0">
-                        <a th:href="@{/}" class="nav-item nav-link">Home</a>
-                        <a th:href="@{/api/books}" class="nav-item nav-link">Shop</a>
-                        <a th:href="@{/api/carts}" class="nav-item nav-link">Cart</a>
-                    </div>
-                    <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
-                        <a th:href="@{/api/members/likes}" class="btn px-0">
-                            <i class="fas fa-heart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle"
-                                  style="padding-bottom: 2px;">0</span>
-                        </a>
-                        <a th:href="@{/api/carts}" class="btn px-0 ml-3">
-                            <i class="fas fa-shopping-cart text-primary"></i>
-                            <span class="badge text-secondary border border-secondary rounded-circle"
-                                  style="padding-bottom: 2px;">0</span>
-                        </a>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </div>
-</div>
-<div class="container-fluid">
-    <div class="row px-xl-5">
-        <!-- 왼쪽 MY 메뉴 -->
-        <div class="col-lg-3 col-md-4">
-            <h5 class="section-title position-relative text-uppercase mb-3">
-                <span class="bg-secondary pr-3">MY 메뉴</span>
-            </h5>
+                <!-- 주문 내역 있을 때 -->
+                <div th:if="${orders != null and !#lists.isEmpty(orders.content)}">
+                    <div th:each="order : ${orders.content}" class="card mb-4">
 
-            <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
-                <!-- 회원 정보 관리 -->
-                <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'profile'} ? ' active'"
-                   th:href="@{/my-page/profile}">
-                    개인정보 수정
-                </a>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'reviews'} ? ' active'"
-                   th:href="@{/my-page/reviews}">
-                    마이 리뷰
-                </a>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'addresses'} ? ' active'"
-                   th:href="@{/my-page/addresses}">
-                    배송 주소록 관리
-                </a>
-                <hr class="my-3">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="font-weight-bold">주문일:</span>
+                                <span class="ml-2"
+                                      th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">
+                                    2025-12-25
+                                </span>
+                            </div>
 
-                <!-- 주문 내역 -->
-                <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'orders'} ? ' active'"
-                   th:href="@{/my-page/orders}">
-                    주문/배송 조회
-                </a>
-                <a class="list-group-item list-group-item-action"
-                   th:classappend="${activeTab == 'history'} ? ' active'"
-                   th:href="@{/my-page/history}">
-                    취소/반품 내역
-                </a>
-
-                <hr class="my-3">
-
-                <!-- 회원 탈퇴 -->
-                <a th:href="@{/my-page/withdraw}" class="list-group-item list-group-item-action text-danger">
-                    회원 탈퇴
-                </a>
-            </div>
-        </div>
-
-
-        <!-- 오른쪽: 주문/배송 조회 내용 -->
-        <div class="col-lg-9 col-md-8">
-            <h5 class="section-title position-relative text-uppercase mb-3">
-                <span class="bg-secondary pr-3">주문 조회/변경/취소</span>
-            </h5>
-
-            <!-- 주문 내역 있을 때: 카드 리스트 형태 -->
-            <div th:if="${orders != null and !#lists.isEmpty(orders.content)}">
-                <div th:each="order : ${orders.content}" class="card mb-4">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="font-weight-bold">주문일:</span>
-                            <span class="ml-2"
-                                  th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">
-                2025-12-25
-              </span>
+                            <a th:href="@{/orders/{orderId}(orderId=${order.orderId})}"
+                               class="btn btn-sm btn-outline-dark">
+                                주문 상세 보기
+                            </a>
                         </div>
-                        <a th:href="@{/orders/{orderId}(orderId=${order.orderId})}"
-                           class="btn btn-sm btn-outline-dark">
-                            주문 상세 보기
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm mb-0">
-                                <tbody>
-                                <tr th:each="item : ${order.orderItems}">
-                                    <td style="width: 60%;">
-                                        <div class="d-flex align-items-center">
-                                            <img th:src="${item.thumbnailUrl != null ? item.thumbnailUrl : '/img/product-1.jpg'}"
-                                                 alt="Book Thumbnail"
-                                                 style="width: 40px; aspect-ratio: 1/1.4; object-fit: cover; margin-right: 10px;">
-                                            <span th:text="${item.bookName}">상품명</span>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle"
-                                        th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '원 x ' + ${item.quantity} + '개'">
-                                        15,000원 x 1개
-                                    </td>
-                                    <td class="align-middle">
-                    <span class="badge badge-primary"
-                          th:text="${item.orderItemStatus}">
-                      PREPARING
-                    </span>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                    <tr th:each="item : ${order.orderItems}">
+                                        <td style="width: 60%;">
+                                            <div class="d-flex align-items-center">
+                                                <img th:src="${item.thumbnailUrl != null ? item.thumbnailUrl : '/img/product-1.jpg'}"
+                                                     alt="Book Thumbnail"
+                                                     style="width: 40px; aspect-ratio: 1/1.4; object-fit: cover; margin-right: 10px;">
+                                                <span th:text="${item.bookName}">상품명</span>
+                                            </div>
+                                        </td>
+
+                                        <td class="align-middle"
+                                            th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '원 x ' + ${item.quantity} + '개'">
+                                            15,000원 x 1개
+                                        </td>
+
+                                        <td class="align-middle">
+                                            <span class="badge badge-primary"
+                                                  th:text="${item.orderItemStatus}">
+                                                PREPARING
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                     </div>
                 </div>
-            </div>
 
-            <!-- 주문 내역 없을 때 -->
-            <div th:if="${orders == null or #lists.isEmpty(orders.content)}"
-                 class="bg-light p-4 text-center">
-                <p class="text-muted my-5">조회 가능한 주문 내역이 없습니다.</p>
+                <!-- 주문 내역 없을 때 -->
+                <div th:if="${orders == null or #lists.isEmpty(orders.content)}"
+                     class="bg-light p-4 text-center">
+                    <p class="text-muted my-5">조회 가능한 주문 내역이 없습니다.</p>
+                </div>
+
             </div>
         </div>
     </div>
+
 </div>
+
+<!-- 페이지 전용 script가 필요하면 여기에 -->
+<th:block layout:fragment="script"></th:block>
+
 </body>
 </html>

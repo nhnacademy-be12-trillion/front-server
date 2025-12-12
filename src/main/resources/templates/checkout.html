@@ -28,19 +28,19 @@
                 </h5>
 
                 <div class="bg-light p-30 mb-5">
-                    <form th:action="@{/api/orders}" method="post">
+                    <form th:action="@{/orders}" method="post">
 
                         <!-- 수령인 정보 -->
                         <div class="row">
                             <div class="col-md-6 form-group">
                                 <label>수령인 이름</label>
                                 <input class="form-control" type="text" name="receiver"
-                                       th:value="${orderForm.receiver}">
+                                       th:value="${orderForm.receiverName}">
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>연락처</label>
                                 <input class="form-control" type="text" name="phone"
-                                       th:value="${orderForm.phone}">
+                                       th:value="${orderForm.receiverContact}">
                             </div>
                             <div class="col-md-12 form-group">
                                 <label>이메일</label>
@@ -55,14 +55,14 @@
                                 <label>우편번호</label>
                                 <div class="d-flex">
                                     <input class="form-control" type="text" name="zipcode"
-                                           th:value="${orderForm.zipcode}">
+                                           th:value="${orderForm.receiverPostCode}">
                                     <button type="button" class="btn btn-outline-primary ml-2">주소 검색</button>
                                 </div>
                             </div>
                             <div class="col-md-12 form-group">
                                 <label>기본 주소</label>
                                 <input class="form-control" type="text" name="address1"
-                                       th:value="${orderForm.address1}">
+                                       th:value="${orderForm.receiverAddress}">
                             </div>
                             <div class="col-md-12 form-group">
                                 <label>상세 주소</label>
@@ -79,7 +79,7 @@
                                       placeholder="예: 경비실에 맡겨주세요"
                                       th:text="${orderForm.deliveryMessage}"></textarea>
                         </div>
-
+<!--TODO request에 상품 정보 등 등록해야하는 부분이 있는데 설계에서 빠져있음. 보완 필요 || receiverAddress 주소 하나로 퉁칠건지? 주소 api 적용 시 기본주소, 상세주소로 나뉘게 적용될것 같음-->
 <!--                        &lt;!&ndash; 결제 수단 &ndash;&gt;-->
 <!--                        <h5 class="section-title position-relative text-uppercase mt-4 mb-3">-->
 <!--                            <span class="bg-secondary pr-3">결제 수단</span>-->

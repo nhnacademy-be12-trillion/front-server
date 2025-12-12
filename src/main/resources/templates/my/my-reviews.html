@@ -35,43 +35,44 @@
           <span class="bg-secondary pr-3">MY 메뉴</span>
         </h5>
 
-        <div class="nav flex-column nav-pills mypage-menu">
-
+        <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
+          <!-- 회원 정보 관리 -->
           <h6 class="text-dark mb-2">👤 회원 정보 관리</h6>
           <a class="list-group-item list-group-item-action"
-             th:href="@{/my-page/profile}"
-             th:classappend="${activeTab == 'profile'} ? ' active'">
+             th:classappend="${activeTab == 'profile'} ? ' active'"
+             th:href="@{/members/profile}">
             개인정보 수정
           </a>
           <a class="list-group-item list-group-item-action"
-             th:href="@{/my-page/reviews}"
-             th:classappend="${activeTab == 'reviews'} ? ' active'">
+             th:classappend="${activeTab == 'reviews'} ? ' active'"
+             th:href="@{/members/reviews}">
             마이 리뷰
           </a>
           <a class="list-group-item list-group-item-action"
-             th:href="@{/my-page/addresses}"
-             th:classappend="${activeTab == 'addresses'} ? ' active'">
+             th:classappend="${activeTab == 'addresses'} ? ' active'"
+             th:href="@{/members/addresses}">
             배송 주소록 관리
           </a>
-
           <hr class="my-3">
 
+          <!-- 주문 내역 -->
           <h6 class="text-dark mb-2 mt-4">📦 주문 내역</h6>
           <a class="list-group-item list-group-item-action"
-             th:href="@{/my-page/orders}"
-             th:classappend="${activeTab == 'orders'} ? ' active'">
+             th:classappend="${activeTab == 'orders'} ? ' active'"
+             th:href="@{/members/orders}">
             주문/배송 조회
           </a>
           <a class="list-group-item list-group-item-action"
-             th:href="@{/my-page/history}"
-             th:classappend="${activeTab == 'history'} ? ' active'">
+             th:classappend="${activeTab == 'history'} ? ' active'"
+             th:href="@{/members/history}">
             취소/반품 내역
           </a>
 
           <hr class="my-3">
 
-          <a class="list-group-item list-group-item-action text-danger"
-             th:href="@{/my-page/withdraw}">
+
+          <!-- 회원 탈퇴 -->
+          <a th:href="@{/members/withdraw}" class="list-group-item list-group-item-action text-danger">
             회원 탈퇴
           </a>
         </div>
@@ -91,11 +92,10 @@
             <table class="table table-bordered mb-0 text-center">
               <thead style="background-color:#f3fcff;">
               <tr>
-                <th style="width:15%;">주문번호</th>
                 <th style="width:15%;">작성일자</th>
                 <th style="width:20%;">상품</th>
                 <th style="width:35%;">내용</th>
-                <th style="width:15%;">상태</th>
+                <th style="width:15%;">평점</th>
               </tr>
               </thead>
 
@@ -103,33 +103,26 @@
               <tbody th:if="${reviews != null and !#lists.isEmpty(reviews)}">
               <tr th:each="review : ${reviews}">
                 <td class="align-middle">
-                  <a th:href="@{/api/members/{orderId}(orderId=${review.orderId})}"
-                     class="text-primary"
-                     th:text="${review.orderNumber}">
-                    주문번호
-                  </a>
-                </td>
-                <td class="align-middle">
                                     <span th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd')}">
                                         2024-01-01
                                     </span>
                 </td>
                 <td class="align-middle text-left">
-                  <a th:href="@{/api/books/{id}(id=${review.bookId})}"
+                  <a th:href="@{/books/{id}(id=${review.bookId})}"
                      class="text-dark"
-                     th:text="${review.bookTitle}">
+                     th:text="${review.bookName}">
                     도서 제목
                   </a>
                 </td>
                 <td class="align-middle text-left">
                                     <span class="d-inline-block text-truncate"
                                           style="max-width: 100%;"
-                                          th:text="${review.content}">
+                                          th:text="${review.reviewContents}">
                                         리뷰 내용
                                     </span>
                 </td>
                 <td class="align-middle">
-                  <span th:text="${review.status}">노출중</span>
+                  <span th:text="${review.reviewRate}">평점없음</span>
                 </td>
               </tr>
               </tbody>
