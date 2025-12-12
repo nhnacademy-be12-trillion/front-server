@@ -73,15 +73,13 @@ jobs:
             echo ${{ secrets.GHCR_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ env.REGISTRY_OWNER }} --password-stdin
 
             echo "Nginx 업데이트 시작..."
-            docker compose rm -f trillion-nginx
             docker compose pull ${NGINX_SERVICE}
-            docker compose up -d --no-deps ${NGINX_SERVICE}
+            docker compose up -d --no-deps --force-recreate ${NGINX_SERVICE}
             echo "Nginx 업데이트 완료!"
 
             echo "Front-server 업데이트 시작..."
-            docker compose rm -f ${SERVICE_NAME_1}
             docker compose pull ${SERVICE_NAME_1}
-            docker compose up -d --no-deps ${SERVICE_NAME_1}
+            docker compose up -d --no-deps --force-recreate ${SERVICE_NAME_1}
             echo "Front-server 업데이트 완료!"
 
             echo "Docker Registry 로그아웃..."
