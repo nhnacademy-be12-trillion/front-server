@@ -13,6 +13,24 @@
         <meta content="Book Store, E-commerce" name="keywords">
         <meta content="Online Book Store" name="description">
     </th:block>
+    <style>
+        /* 공통 썸네일 크기 고정 (그리드 카드용) */
+        .book-thumb {
+            display: block;
+            width: 100%;
+            height: 240px;          /* 여기 숫자로 전체 크기 조절 */
+            object-fit: cover;
+            background: #f3f3f3;    /* 로딩 중/깨짐 시 회색 배경 */
+        }
+
+        /* 기존 레이아웃이 aspect-ratio를 쓰고 있으면 높이를 여기서 통일하는 게 더 안정적 */
+        .product-img .book-thumb,
+        .book-card .book-thumb {
+            height: 240px;
+        }
+
+    </style>
+
 </head>
 
 <body>
@@ -110,12 +128,11 @@
                 <div class="product-item bg-light mb-4">
 
                     <!-- 도서 이미지 -->
-                    <div class="product-img position-relative overflow-hidden">
-                        <img class="img-fluid w-100"
-                             th:src="${book.bookImage} != null ? ${book.bookImage} : '/img/product-1.jpg'"
-                             alt="도서 이미지"
-                             style="aspect-ratio: 1/1.4; object-fit: cover;">
-                        <div class="product-action">
+                    <img class="img-fluid w-100 book-thumb"
+                         th:src="${!#strings.isEmpty(book.bookImage) ? book.bookImage : '/img/default-book.png'}"
+                         th:attr="onerror=|this.onerror=null;this.src='/img/default-book.png';|"
+                         alt="이미지가 준비중입니다."
+                         loading="lazy">
                             <!-- 장바구니 -->
                             <a class="btn btn-outline-dark btn-square"
                                th:href="@{/carts/add(bookId=${book.bookId})}">
