@@ -40,7 +40,7 @@ public interface BookClient {
                                             @RequestParam("size") int size,
                                             @RequestParam("sort") String sort);
 
-    @GetMapping("/api/categories")
+    @GetMapping("/api/books/categories")
     List<CategoryTreeResponse> getCategoryTree();
 
     @GetMapping("/api/books/reviews/me")

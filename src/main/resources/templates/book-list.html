@@ -78,11 +78,13 @@
                         <div class="book-card">
 
                             <!-- 썸네일: 없으면 fallback 이미지 -->
-                            <img class="img-fluid w-100 book-thumb"
-                                 th:src="${!#strings.isEmpty(book.bookImage) ? book.bookImage : '/img/default-book.png'}"
-                                 th:attr="onerror=|this.onerror=null;this.src='/img/default-book.png';|"
-                                 alt="이미지가 준비중입니다."
-                                 loading="lazy">
+                            <a th:href="@{/books/{id}(id=${book.bookId})}">
+                                <img class="img-fluid w-100 book-thumb"
+                                     th:src="${!#strings.isEmpty(book.bookImage) ? book.bookImage : '/img/default-book.png'}"
+                                     th:attr="onerror=|this.onerror=null;this.src='/img/default-book.png';|"
+                                     alt="이미지가 준비중입니다."
+                                     loading="lazy">
+                            </a>
 
                             <!-- 도서명 -->
                             <div class="book-card-title"
