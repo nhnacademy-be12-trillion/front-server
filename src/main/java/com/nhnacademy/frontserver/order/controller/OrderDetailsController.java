@@ -20,11 +20,6 @@ public class OrderDetailsController {
     @GetMapping("/{orderId}")
     public String getOrderDetail(@PathVariable Long orderId, Model model) {
         OrderResponse order = orderClient.getOrderByMember(orderId);
-        
-        // 디버깅을 위한 로그 추가
-        if (order != null) {
-            log.info("OrderResponse.originPrice from Controller: {}", order.originPrice());
-        }
 
         model.addAttribute("order", order);
         model.addAttribute("isMember", true);
