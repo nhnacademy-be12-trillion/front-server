@@ -1,5 +1,7 @@
 package com.nhnacademy.frontserver.search;
 
+import java.util.List;
+
 record BookSearchResult(
         String id,
         String isbn,
@@ -9,5 +11,6 @@ record BookSearchResult(
         Integer price,
         String imageUrl,
         String editionPublishDate,
+        List<String> tags,
         Float score
 ) {}

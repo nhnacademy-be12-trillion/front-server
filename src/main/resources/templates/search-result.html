@@ -9,21 +9,15 @@
     <title>Trillion-Shop | 검색 결과</title>
 
     <th:block layout:fragment="head">
-        <!-- 이 페이지 전용 head 요소 (폰트/추가 CSS 등 필요하면 여기) -->
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="Book Store, Search, Result" name="keywords">
         <meta content="Online Book Store Search Result" name="description">
-
-        <!-- 필요하면 개별 페이지용 CSS 추가 -->
-        <!-- <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet"> -->
-        <!-- <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet"> -->
     </th:block>
 </head>
 
 <body>
 <div layout:fragment="content">
 
-    <!-- 본문: 왼쪽 카테고리 / 오른쪽 검색 결과 -->
     <div class="container-fluid pt-5">
         <div class="row px-xl-5">
             <!-- 왼쪽 카테고리 (3depth) -->
@@ -72,7 +66,7 @@
                         </h2>
                         <p class="mb-0">
                             <span class="font-weight-bold"
-                                  th:text="${keyword != null ? keyword : '검색어 없음'}">검색어</span>
+                                  th:text="${query != null ? query : '검색어 없음'}">검색어</span>
                             에 대한 검색 결과
                             <strong th:text="${totalCount != null ? totalCount : 0}">0</strong>건
                         </p>
@@ -87,11 +81,11 @@
                             </button>
                             <div class="dropdown-menu dropdown-menu-right">
                                 <a class="dropdown-item"
-                                   th:href="@{/search(keyword=${keyword}, sort='relevance')}">관련도순</a>
+                                   th:href="@{/api/search(query=${query}, sort='RELEVANCE')}">관련도순</a>
                                 <a class="dropdown-item"
-                                   th:href="@{/search(keyword=${keyword}, sort='recent')}">최신순</a>
+                                   th:href="@{/api/search(query=${query}, sort='NEW')}">최신순</a>
                                 <a class="dropdown-item"
-                                   th:href="@{/search(keyword=${keyword}, sort='popular')}">인기순</a>
+                                   th:href="@{/api/search(query=${query}, sort='POPULARITY')}">인기순</a>
                             </div>
                         </div>
 
@@ -115,7 +109,7 @@
                     </div>
                 </div>
 
-                <!-- ✅ 카드형 결과 (그리드 4열) -->
+                <!-- 카드형 결과 -->
                 <div id="resultGrid" class="row"
                      th:if="${books != null and !#lists.isEmpty(books)}">
                     <div class="col-lg-3 col-md-4 col-sm-6 pb-1"
@@ -123,7 +117,7 @@
                         <div class="product-item bg-light mb-4">
                             <div class="product-img position-relative overflow-hidden">
                                 <img class="img-fluid w-100"
-                                     th:src="${book.thumbnailUrl} != null ? ${book.thumbnailUrl} : '/img/product-1.jpg'"
+                                     th:src="${book.imageUrl != null ? book.imageUrl : '/img/product-1.jpg'}"
                                      alt="책 표지"
                                      style="aspect-ratio: 1/1.4; object-fit: cover;">
                                 <div class="product-action">
@@ -138,14 +132,12 @@
                                 </div>
                             </div>
                             <div class="text-center py-4 px-3">
-                                <!-- 도서 제목 -->
                                 <a class="h6 text-decoration-none text-truncate d-block mb-2"
                                    th:href="@{/api/books/{id}(id=${book.id})}"
                                    th:text="${book.title != null ? book.title : '제목 정보 없음'}">
                                     도서 제목
                                 </a>
 
-                                <!-- 저자명 -->
                                 <small class="text-body d-block">
                                     <strong>저자</strong>
                                     <span th:text="${book.author != null ? book.author : '저자 정보 없음'}">
@@ -153,7 +145,6 @@
                                     </span>
                                 </small>
 
-                                <!-- 태그 -->
                                 <small class="text-body d-block"
                                        th:if="${book.tags != null and !#lists.isEmpty(book.tags)}">
                                     <strong>태그</strong>
@@ -163,7 +154,6 @@
                                     </span>
                                 </small>
 
-                                <!-- 출판사 -->
                                 <small class="text-body d-block">
                                     <strong>출판사</strong>
                                     <span th:text="${book.publisher != null ? book.publisher : '출판사 정보 없음'}">
@@ -175,7 +165,7 @@
                     </div>
                 </div>
 
-                <!-- ✅ 리스트형 결과 (표 형태) -->
+                <!-- 리스트형 결과 -->
                 <div id="resultList" class="row d-none"
                      th:if="${books != null and !#lists.isEmpty(books)}">
                     <div class="col-12">
@@ -195,7 +185,7 @@
                                 <tr th:each="book : ${books}">
                                     <td class="align-middle">
                                         <a th:href="@{/api/books/{id}(id=${book.id})}">
-                                            <img th:src="${book.thumbnailUrl} != null ? ${book.thumbnailUrl} : '/img/product-1.jpg'"
+                                            <img th:src="${book.imageUrl != null ? book.imageUrl : '/img/product-1.jpg'}"
                                                  alt="책 표지"
                                                  style="width: 45px; aspect-ratio: 1/1.4; object-fit: cover;">
                                         </a>
@@ -257,7 +247,7 @@
                                 <li class="page-item"
                                     th:classappend="${page.first} ? ' disabled'">
                                     <a class="page-link"
-                                       th:href="@{/search(keyword=${keyword}, page=${page.number - 1}, sort=${sort})}">
+                                       th:href="@{/api/search(query=${query}, page=${page.number - 1}, sort=${sort})}">
                                         이전
                                     </a>
                                 </li>
@@ -266,7 +256,7 @@
                                     th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
                                     th:classappend="${p == page.number} ? ' active'">
                                     <a class="page-link"
-                                       th:href="@{/search(keyword=${keyword}, page=${p}, sort=${sort})}"
+                                       th:href="@{/api/search(query=${query}, page=${p}, sort=${sort})}"
                                        th:text="${p + 1}">
                                         1
                                     </a>
@@ -275,7 +265,7 @@
                                 <li class="page-item"
                                     th:classappend="${page.last} ? ' disabled'">
                                     <a class="page-link"
-                                       th:href="@{/search(keyword=${keyword}, page=${page.number + 1}, sort=${sort})}">
+                                       th:href="@{/api/search(query=${query}, page=${page.number + 1}, sort=${sort})}">
                                         다음
                                     </a>
                                 </li>
@@ -291,7 +281,6 @@
 </div>
 
 <th:block layout:fragment="script">
-    <!-- 카드/리스트 뷰 토글 -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const btnGrid = document.getElementById('btnGrid');
@@ -299,9 +288,7 @@
             const grid = document.getElementById('resultGrid');
             const list = document.getElementById('resultList');
 
-            if (!btnGrid || !btnList || !grid || !list) {
-                return;
-            }
+            if (!btnGrid || !btnList || !grid || !list) return;
 
             btnGrid.addEventListener('click', function () {
                 grid.classList.remove('d-none');
