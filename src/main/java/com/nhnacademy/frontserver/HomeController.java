@@ -28,9 +28,8 @@ public class HomeController {
 
     @GetMapping
     public String home(Model model) {
-        PageResponse<BookListResponse> books = bookClient.getBooks(0, 20, "bookId,desc");
+        PageResponse<BookListResponse> books = bookClient.getBooks();
         model.addAttribute("books", books);
-        model.addAttribute("proxyTest", "http://storage.java21.net:9000/trillion-book/e4d0013d-02cf-4d7a-9e90-558ab50c0c41.jpg");
         return "index";
     }
 }
