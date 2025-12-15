@@ -13,11 +13,7 @@
 package com.nhnacademy.frontserver.book.controller;
 
 import com.nhnacademy.frontserver.PageResponse;
-import com.nhnacademy.frontserver.book.BookClient;
-import com.nhnacademy.frontserver.book.BookDetailResponse;
-import com.nhnacademy.frontserver.book.ReviewResponse;
-import com.nhnacademy.frontserver.book.ReviewSummaryClient;
-import com.nhnacademy.frontserver.book.ReviewSummaryResponse;
+import com.nhnacademy.frontserver.book.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

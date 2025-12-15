@@ -1,6 +1,7 @@
 package com.nhnacademy.frontserver.order;
 
 import com.nhnacademy.frontserver.PageResponse;
+import com.nhnacademy.frontserver.infra.FeignOkHttpConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
