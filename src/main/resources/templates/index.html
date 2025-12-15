@@ -131,11 +131,9 @@
                     <div class="product-img position-relative overflow-hidden">
                         <img class="img-fluid w-100 book-thumb"
                              th:src="${!#strings.isEmpty(book.bookImage)
-                                        ? #strings.replace(book.bookImage, 'https://', 'http://')
-                                        : '/img/default-book.png'}"
-                             th:attr="onerror=|this.onerror=null;this.src='/img/default-book.png';|"
-                             alt="이미지가 준비중입니다."
-                             loading="lazy">
+                                ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                             loading="lazy"
+                             alt="이미지가 준비중입니다.">
                         <div class="product-action">
                             <!-- 장바구니 -->
                             <a class="btn btn-outline-dark btn-square"
@@ -251,7 +249,7 @@
         <div class="row px-xl-5">
             <div class="col-md-6">
                 <div class="product-offer mb-30" style="height: 300px;">
-                    <img class="img-fluid" th:src="@{proxyTest}" alt="프로모션">
+                    <img class="img-fluid" th:src="@{/img/offer-1.jpg}" alt="프로모션">
                     <div class="offer-text">
                         <h6 class="text-white text-uppercase">오늘만 이 가격</h6>
                         <h3 class="text-white mb-3">한정 수량 특가</h3>

@@ -81,11 +81,9 @@
                             <a th:href="@{/books/{id}(id=${book.bookId})}">
                                 <img class="img-fluid w-100 book-thumb"
                                      th:src="${!#strings.isEmpty(book.bookImage)
-                                        ? #strings.replace(book.bookImage, 'https://', 'http://')
-                                        : '/img/default-book.png'}"
-                                     th:attr="onerror=|this.onerror=null;this.src='/img/default-book.png';|"
-                                     alt="이미지가 준비중입니다."
-                                     loading="lazy">
+                                        ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                                     loading="lazy"
+                                     alt="이미지가 준비중입니다.">
                             </a>
 
                             <!-- 도서명 -->
