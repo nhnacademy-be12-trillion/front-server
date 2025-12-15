@@ -21,8 +21,12 @@ public class CategoryCacheScheduler {
         categoryService.refreshProcess();
     }
 
-    // 15분 주기 (이전 작업 완료 후 15분 대기)
-    @Scheduled(fixedDelay = 900000, initialDelay = 900000)
+    // 클러스터 모드 1분 주기/ 비클러스터 모드 10분 주기
+    // TODO. 문제 가능 상황: 클러스터모드에서 최대 1분(스케쥴러 주기 만큼) 동안 싱크가 안맞을 수 있음
+    @Scheduled(
+            fixedDelayString = "#{${app.cluster.enabled:false} ? 60000 : 600000}",
+            initialDelayString = "#{${app.cluster.enabled:false} ? 60000 : 600000}"
+    )
     public void scheduledRefresh() {
         log.info("Executing Scheduled Category Refresh...");
         categoryService.refreshProcess();

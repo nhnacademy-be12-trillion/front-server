@@ -13,15 +13,13 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class CategoryLocalRepository {
 
-    // 읽기 성능 최적화 (락 없이 즉시 반환을 위해 volatile 사용)
     private volatile List<CategoryTreeResponse> cachedCategories = Collections.emptyList();
-
-    // 초기화 대기용 빗장 (서버 시작 직후 데이터 보장)
     private final CountDownLatch initLatch = new CountDownLatch(1);
 
     public void saveAll(List<CategoryTreeResponse> data) {
-        this.cachedCategories = data;
-        // 데이터가 적재되면 빗장 해제
+        // 불변 리스트로 감싸서 저장 (데이터 오염 방지)
+        this.cachedCategories = Collections.unmodifiableList(data);
+
         if (initLatch.getCount() > 0) {
             initLatch.countDown();
             log.info("L1 Cache (Local) Initialized. Latch Opened.");
@@ -30,7 +28,6 @@ public class CategoryLocalRepository {
 
     public List<CategoryTreeResponse> findAll() {
         try {
-            // 서버 켜진 직후 데이터가 없을 때만 잠시 대기
             if (initLatch.getCount() > 0) {
                 boolean ready = initLatch.await(3, TimeUnit.SECONDS);
                 if (!ready) {

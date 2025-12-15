@@ -12,7 +12,7 @@ public class CartBadgeRedisRepository {
 
     private final StringRedisTemplate redisTemplate;
     private static final String KEY_PREFIX = "cart:badge:";
-    private static final Duration TTL = Duration.ofSeconds(3600); // 60분 공유
+    private static final Duration TTL = Duration.ofHours(24); // 하루 공유
 
     public Integer get(String cacheKey) {
         String val = redisTemplate.opsForValue().get(KEY_PREFIX + cacheKey);
