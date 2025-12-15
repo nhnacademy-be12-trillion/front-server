@@ -3,11 +3,13 @@ package com.nhnacademy.frontserver.order.controller;
 import com.nhnacademy.frontserver.order.*;
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -18,6 +20,12 @@ public class OrderDetailsController {
     @GetMapping("/{orderId}")
     public String getOrderDetail(@PathVariable Long orderId, Model model) {
         OrderResponse order = orderClient.getOrderByMember(orderId);
+        
+        // 디버깅을 위한 로그 추가
+        if (order != null) {
+            log.info("OrderResponse.originPrice from Controller: {}", order.originPrice());
+        }
+
         model.addAttribute("order", order);
         model.addAttribute("isMember", true);
         return "order-detail";
@@ -66,7 +74,7 @@ public class OrderDetailsController {
                                                @ModelAttribute("password") String password,
                                                Model model) {
         if (password == null || password.isEmpty()) {
-            return "redirect:/orders/non-members-form";
+            return "redirect:/orders/non-members-order-form";
         }
 
         NonMemberOrderGetRequest request = new NonMemberOrderGetRequest(orderNumber, password);
@@ -78,9 +86,9 @@ public class OrderDetailsController {
         return "order-detail";
     }
 
-    @GetMapping("/non-members-form")
+    @GetMapping("/non-members-order-form")
     public String showNonMemberOrderPage() {
-        return "non-member-order";
+        return "non-members-order-form";
     }
 
     @PostMapping("/non-members/{orderId}/cancel")
