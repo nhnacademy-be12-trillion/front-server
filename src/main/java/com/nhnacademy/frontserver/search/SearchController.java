@@ -12,7 +12,7 @@ public class SearchController {
 
     private final SearchClient searchClient;
 
-    @GetMapping("api/search")
+    @GetMapping("/search")
     public String searchPage(
             @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "RELEVANCE") BookSortOption sort,
@@ -41,7 +41,7 @@ public class SearchController {
                 res.page() == 0,
                 res.page() >= totalPages - 1));
 
-        return "search/result";
+        return "search-result";
     }
 
     record PageView(int number, boolean first, boolean last) {}
