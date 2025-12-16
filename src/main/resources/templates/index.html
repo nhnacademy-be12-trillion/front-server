@@ -54,9 +54,9 @@
             .clean-book-img-wrapper {
                 position: relative;
                 overflow: hidden;
-                box-shadow: 2px 4px 10px rgba(0,0,0,0.08); /* 부드러운 그림자 */
+                box-shadow: 2px 4px 10px rgba(0,0,0,0.08);
                 margin-bottom: 15px;
-                aspect-ratio: 1 / 1.45; /* 책 표지 비율 고정 */
+                aspect-ratio: 1 / 1.45;
                 border-radius: 4px;
             }
             .clean-book-img-wrapper img {
@@ -65,7 +65,6 @@
                 object-fit: cover;
                 transition: transform 0.3s ease;
             }
-            /* 호버 시 이미지 확대 */
             .clean-book-item:hover .clean-book-img-wrapper img {
                 transform: scale(1.05);
             }
@@ -83,7 +82,7 @@
                 margin-bottom: 5px;
                 white-space: nowrap;
                 overflow: hidden;
-                text-overflow: ellipsis; /* 말줄임표 */
+                text-overflow: ellipsis;
             }
             .clean-book-author {
                 font-size: 0.85rem;
@@ -94,25 +93,23 @@
                 display: block;
             }
         </style>
+
+        <style>
+            /* 공통 썸네일 크기 고정 (그리드 카드용) */
+            .book-thumb {
+                display: block;
+                width: 100%;
+                height: 240px;
+                object-fit: cover;
+                background: #f3f3f3;
+            }
+
+            .product-img .book-thumb,
+            .book-card .book-thumb {
+                height: 240px;
+            }
+        </style>
     </th:block>
-    <style>
-        /* 공통 썸네일 크기 고정 (그리드 카드용) */
-        .book-thumb {
-            display: block;
-            width: 100%;
-            height: 240px;          /* 여기 숫자로 전체 크기 조절 */
-            object-fit: cover;
-            background: #f3f3f3;    /* 로딩 중/깨짐 시 회색 배경 */
-        }
-
-        /* 기존 레이아웃이 aspect-ratio를 쓰고 있으면 높이를 여기서 통일하는 게 더 안정적 */
-        .product-img .book-thumb,
-        .book-card .book-thumb {
-            height: 240px;
-        }
-
-    </style>
-
 </head>
 
 <body>
@@ -193,6 +190,7 @@
     </div>
 
 
+    <!-- ===================== 인기 도서 ===================== -->
     <div class="container-fluid pt-5">
         <div class="row px-xl-5">
             <div class="col-12">
@@ -209,10 +207,16 @@
             </div>
 
             <div class="col-lg-2 col-md-4 col-6" th:each="book : ${popularBooks}">
-                <div class="clean-book-item" th:onclick="'location.href=\'/books/' + ${book.bookId} + '\''">
+                <!-- 상세 이동 -->
+                <div class="clean-book-item"
+                     th:onclick="'location.href=\'/books/' + ${book.bookId} + '\''">
 
                     <div class="clean-book-img-wrapper">
-                        <img th:src="${book.bookImage != null ? book.bookImage : '/img/default-book.png'}"
+                        <!-- ✅ MinIO 버킷 경로로 통일 -->
+                        <img th:src="${!#strings.isEmpty(book.bookImage)
+                                ? '/trillion-bucket/' + book.bookImage
+                                : '/img/default-book.png'}"
+                             loading="lazy"
                              alt="책 표지">
                     </div>
 
@@ -227,6 +231,7 @@
     </div>
 
 
+    <!-- ===================== 카테고리 추천 ===================== -->
     <div class="container-fluid pt-3 pb-5">
         <div class="row px-xl-5">
             <div class="col-12">
@@ -243,14 +248,20 @@
             </div>
 
             <div class="col-lg-2 col-md-4 col-6" th:each="book : ${categoryBooks}">
-                <div class="clean-book-item" th:onclick="'location.href=\'/books/' + ${book.bookId} + '\''">
+                <div class="clean-book-item"
+                     th:onclick="'location.href=\'/books/' + ${book.bookId} + '\''">
                     <div class="clean-book-img-wrapper">
-                        <img th:src="${book.bookImage != null ? book.bookImage : '/img/default-book.png'}"
+                        <!-- ✅ MinIO 버킷 경로로 통일 -->
+                        <img th:src="${!#strings.isEmpty(book.bookImage)
+                                ? '/trillion-bucket/' + book.bookImage
+                                : '/img/default-book.png'}"
+                             loading="lazy"
                              alt="책 표지">
                     </div>
                     <div class="clean-book-info">
                         <span class="clean-book-title" th:text="${book.bookName}">책 제목</span>
-                        <span class="clean-book-author" th:text="${book.bookAuthor}">저자명</span>
+                        <span class="clean-book-author"
+                              th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 미상'}">저자명</span>
                     </div>
                 </div>
             </div>
@@ -258,6 +269,7 @@
     </div>
 
 
+    <!-- ===================== 전체 추천 도서 ===================== -->
     <div class="container-fluid pt-5 pb-3">
         <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4">
             <span class="bg-secondary pr-3">전체 추천 도서</span>
@@ -271,11 +283,14 @@
                 <div class="product-item bg-light mb-4">
 
                     <div class="product-img position-relative overflow-hidden">
+                        <!-- ✅ MinIO 버킷 경로 -->
                         <img class="img-fluid w-100 book-thumb"
                              th:src="${!#strings.isEmpty(book.bookImage)
-                                ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                                ? '/trillion-bucket/' + book.bookImage
+                                : '/img/default-book.png'}"
                              loading="lazy"
                              alt="이미지가 준비중입니다.">
+
                         <div class="product-action">
                             <a class="btn btn-outline-dark btn-square"
                                th:href="@{/carts/add(bookId=${book.bookId})}">
@@ -285,8 +300,9 @@
                                th:href="@{/members/likes/add(bookId=${book.bookId})}">
                                 <i class="far fa-heart"></i>
                             </a>
+                            <!-- ✅ 상세 이동: /books/{book_id} -->
                             <a class="btn btn-outline-dark btn-square"
-                               th:href="@{/books/{id}(id=${book.bookId})}">
+                               th:href="@{/books/{book_id}(book_id=${book.bookId})}">
                                 <i class="fa fa-search"></i>
                             </a>
                         </div>
@@ -294,7 +310,7 @@
 
                     <div class="text-center py-4 px-2">
                         <a class="h6 text-decoration-none text-truncate d-block mb-1"
-                           th:href="@{/books/{id}(id=${book.bookId})}"
+                           th:href="@{/books/{book_id}(book_id=${book.bookId})}"
                            th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">
                             도서 제목
                         </a>
