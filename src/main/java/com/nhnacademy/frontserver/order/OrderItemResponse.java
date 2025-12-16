@@ -15,16 +15,17 @@ package com.nhnacademy.frontserver.order;
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 
 record OrderItemResponse(
-        Long orderId,
         Long orderItemId,
+        Long orderId,
         Long bookId,
         String bookName,
+        String bookImage,
         int quantity,
-        int price,
+        int unitPrice, // 단가
+        int totalItemOriginalPrice, // 총 원래 상품 가격 ((단가 + 포장비) * 수량)
+        int itemDiscountAmount, // 이 상품 라인에 적용된 할인액
+        int totalItemSalePrice, // 이 상품 라인의 최종 결제 금액 (totalItemOriginPrice - 아이템 할인액)
         int packagingPrice,
-
-        // TODO: 도서 이미지 추가 필요
-        // String thumbnailUrl,
         OrderItemStatus orderItemStatus
 ) {
 }

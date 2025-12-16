@@ -21,6 +21,18 @@ public interface OrderClient {
                                                     @RequestParam("size") int size,
                                                     @RequestParam("sort") String sort);
 
+    // 취소된 주문 전체 조회
+    @GetMapping("/api/orders/canceled")
+    PageResponse<OrderResponse> getAllCanceledOrderByMember(@RequestParam("page") int page,
+                                                            @RequestParam("size") int size,
+                                                            @RequestParam("sort") String sort);
+
+    // 환불, 환불 요청된 주문 전체 조회
+    @GetMapping("/api/order-items/refunds")
+    PageResponse<OrderResponse> getAllRefundedOrderItemsByMember(@RequestParam("page") int page,
+                                                                 @RequestParam("size") int size,
+                                                                 @RequestParam("sort") String sort);
+
     // 주문 단건 조회 (회원)
     @GetMapping("/api/orders/{orderId}")
     OrderResponse getOrderByMember(@PathVariable Long orderId);
@@ -51,7 +63,4 @@ public interface OrderClient {
     @PostMapping("/api/orders/non-members/{orderId}/cancel")
     void cancelOrderByNonMember(@PathVariable Long orderId,
                                 @RequestBody NonMemberOrderCancelRequest request);
-
-
-
 }
