@@ -6,6 +6,8 @@ import com.nhnacademy.frontserver.common.cartsummary.CartBadgeInterceptor;
 import com.nhnacademy.frontserver.infra.argumentResolver.CustomArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -34,5 +36,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "/favicon.ico", "/error", "/api/**" // API 요청 등 제외
                 );
         registry.addInterceptor(checkTimeInterceptor);
+    }
+    @Bean
+    public LayoutDialect layoutDialect() {
+        return new LayoutDialect();
     }
 }
