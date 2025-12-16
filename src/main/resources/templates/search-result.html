@@ -249,7 +249,7 @@
                         <nav>
                             <ul class="pagination justify-content-center">
                                 <li class="page-item"
-                                    th:classappend="${page.first} ? ' disabled'">
+                                    th:classappend="${page.first} ? ' disabled' : ''">
                                     <a class="page-link"
                                        th:href="@{/search(query=${query}, page=${page.number - 1}, sort=${sort}, size=${size})}">
                                         이전
@@ -258,7 +258,7 @@
 
                                 <li class="page-item"
                                     th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
-                                    th:classappend="${p == page.number} ? ' active'">
+                                    th:classappend="${p == page.number} ? ' active' : ''">
                                     <a class="page-link"
                                        th:href="@{/search(query=${query}, page=${p}, sort=${sort}, size=${size})}"
                                        th:text="${p + 1}">
@@ -267,7 +267,7 @@
                                 </li>
 
                                 <li class="page-item"
-                                    th:classappend="${page.last} ? ' disabled'">
+                                    th:classappend="${page.last} ? ' disabled' : ''">
                                     <a class="page-link"
                                        th:href="@{/search(query=${query}, page=${page.number + 1}, sort=${sort}, size=${size})}">
                                         다음
