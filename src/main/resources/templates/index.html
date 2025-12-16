@@ -42,9 +42,7 @@
                 color: #222;
                 text-decoration: none;
             }
-        </style>
 
-        <style>
             /* 공통 썸네일 크기 고정 (그리드 카드용) */
             .book-thumb {
                 display: block;
@@ -181,7 +179,7 @@
                            th:text="${book.bookName}">책 제목</a>
 
                         <div class="small text-muted mb-2">
-                            <span th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 미상'}">저자명</span>
+                            <span th:text="${book.bookAuthor == null ? '저자 미상' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>
                         </div>
 
                         <div class="d-flex align-items-center justify-content-center mt-1">
@@ -243,7 +241,7 @@
                            th:text="${book.bookName}">책 제목</a>
 
                         <div class="small text-muted mb-2">
-                            <span th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 미상'}">저자명</span>
+                            <span th:text="${book.bookAuthor == null ? '저자 미상' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>
                         </div>
 
                         <div class="d-flex align-items-center justify-content-center mt-1">
@@ -264,79 +262,79 @@
     </div>
 
 
-    <div class="container-fluid pt-5 pb-3">
-        <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4">
-            <span class="bg-secondary pr-3">전체 추천 도서</span>
-        </h2>
+<!--    <div class="container-fluid pt-5 pb-3">-->
+<!--        <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4">-->
+<!--            <span class="bg-secondary pr-3">전체 추천 도서</span>-->
+<!--        </h2>-->
 
-        <div class="row px-xl-5"
-             th:if="${books != null and books.content != null and !#lists.isEmpty(books.content)}">
+<!--        <div class="row px-xl-5"-->
+<!--             th:if="${books != null and books.content != null and !#lists.isEmpty(books.content)}">-->
 
-            <div class="col-lg-3 col-md-4 col-sm-6 pb-1"
-                 th:each="book : ${books.content}">
-                <div class="product-item bg-light mb-4">
+<!--            <div class="col-lg-3 col-md-4 col-sm-6 pb-1"-->
+<!--                 th:each="book : ${books.content}">-->
+<!--                <div class="product-item bg-light mb-4">-->
 
-                    <div class="product-img position-relative overflow-hidden">
-                        <img class="img-fluid w-100 book-thumb"
-                             th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
-                             loading="lazy"
-                             alt="도서 이미지">
+<!--                    <div class="product-img position-relative overflow-hidden">-->
+<!--                        <img class="img-fluid w-100 book-thumb"-->
+<!--                             th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"-->
+<!--                             loading="lazy"-->
+<!--                             alt="도서 이미지">-->
 
-                        <div class="product-action">
-                            <a class="btn btn-outline-dark btn-square"
-                               th:href="@{/carts/add(bookId=${book.bookId})}">
-                                <i class="fa fa-shopping-cart"></i>
-                            </a>
-                            <a class="btn btn-outline-dark btn-square"
-                               th:href="@{/members/likes/add(bookId=${book.bookId})}">
-                                <i class="far fa-heart"></i>
-                            </a>
-                            <a class="btn btn-outline-dark btn-square"
-                               th:href="@{/books/{book_id}(book_id=${book.bookId})}">
-                                <i class="fa fa-search"></i>
-                            </a>
-                        </div>
-                    </div>
+<!--                        <div class="product-action">-->
+<!--                            <a class="btn btn-outline-dark btn-square"-->
+<!--                               th:href="@{/carts/add(bookId=${book.bookId})}">-->
+<!--                                <i class="fa fa-shopping-cart"></i>-->
+<!--                            </a>-->
+<!--                            <a class="btn btn-outline-dark btn-square"-->
+<!--                               th:href="@{/members/likes/add(bookId=${book.bookId})}">-->
+<!--                                <i class="far fa-heart"></i>-->
+<!--                            </a>-->
+<!--                            <a class="btn btn-outline-dark btn-square"-->
+<!--                               th:href="@{/books/{book_id}(book_id=${book.bookId})}">-->
+<!--                                <i class="fa fa-search"></i>-->
+<!--                            </a>-->
+<!--                        </div>-->
+<!--                    </div>-->
 
-                    <div class="text-center py-4 px-2">
-                        <a class="h6 text-decoration-none text-truncate d-block mb-1"
-                           th:href="@{/books/{book_id}(book_id=${book.bookId})}"
-                           th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">
-                            도서 제목
-                        </a>
+<!--                    <div class="text-center py-4 px-2">-->
+<!--                        <a class="h6 text-decoration-none text-truncate d-block mb-1"-->
+<!--                           th:href="@{/books/{book_id}(book_id=${book.bookId})}"-->
+<!--                           th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">-->
+<!--                            도서 제목-->
+<!--                        </a>-->
 
-                        <div class="small text-muted mb-2">
-                            <span th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 정보 없음'}">저자명</span>
-                        </div>
+<!--                        <div class="small text-muted mb-2">-->
+<!--                            <span th:text="${book.bookAuthor == null ? '저자 정보 없음' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>-->
+<!--                        </div>-->
 
-                        <div class="d-flex align-items-center justify-content-center mt-1">
-                            <div th:if="${book.bookSalePrice > 0}">
-                                <h5 class="text-primary mb-0"
-                                    th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                <h6 class="text-muted ml-2 mb-0">
-                                    <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
-                                </h6>
-                            </div>
-                            <div th:if="${book.bookSalePrice == 0}">
-                                <h5 class="text-primary mb-0"
-                                    th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!--                        <div class="d-flex align-items-center justify-content-center mt-1">-->
+<!--                            <div th:if="${book.bookSalePrice > 0}">-->
+<!--                                <h5 class="text-primary mb-0"-->
+<!--                                    th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>-->
+<!--                                <h6 class="text-muted ml-2 mb-0">-->
+<!--                                    <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>-->
+<!--                                </h6>-->
+<!--                            </div>-->
+<!--                            <div th:if="${book.bookSalePrice == 0}">-->
+<!--                                <h5 class="text-primary mb-0"-->
+<!--                                    th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
-        <div class="row px-xl-5"
-             th:if="${books == null or books.content == null or #lists.isEmpty(books.content)}">
-            <div class="col-12 text-center py-5">
-                <h4 class="text-muted mb-0">현재 표시할 도서가 없습니다.</h4>
-                <p class="text-muted mt-2 mb-0">
-                    도서가 등록되면 이 영역에서 추천 도서를 확인하실 수 있어요.
-                </p>
-            </div>
-        </div>
-    </div>
+<!--        <div class="row px-xl-5"-->
+<!--             th:if="${books == null or books.content == null or #lists.isEmpty(books.content)}">-->
+<!--            <div class="col-12 text-center py-5">-->
+<!--                <h4 class="text-muted mb-0">현재 표시할 도서가 없습니다.</h4>-->
+<!--                <p class="text-muted mt-2 mb-0">-->
+<!--                    도서가 등록되면 이 영역에서 추천 도서를 확인하실 수 있어요.-->
+<!--                </p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
 
     <div class="container-fluid pt-5 pb-3">
