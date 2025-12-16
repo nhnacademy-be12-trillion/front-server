@@ -96,6 +96,9 @@
 
                                     <!-- 상태별 버튼 (회원) -->
                                     <td th:if="${isMember}" th:switch="${item.orderItemStatus.name()}">
+                                        <span th:case="'PENDING'" class="font-weight-bold">결제 대기</span>
+                                        <span th:case="'COMPLETED'" class="font-weight-bold">결제 완료</span>
+                                        <span th:case="'FAILED'" class="font-weight-bold">주문 생성 실패</span>
                                         <!-- 상품 준비중 -->
                                         <span th:case="'PREPARING'" class="font-weight-bold">상품 준비중</span>
 
@@ -142,10 +145,14 @@
 
                                         <!-- 주문 취소 -->
                                         <span th:case="'CANCELED'" class="text-muted font-weight-bold">주문 취소</span>
+                                        <span th:case="*">알 수 없음</span>
                                     </td>
 
                                     <!-- 상태 (비회원) -->
                                     <td th:if="${!isMember}" th:switch="${item.orderItemStatus.name()}">
+                                        <span th:case="'PENDING'" class="font-weight-bold">결제 대기</span>
+                                        <span th:case="'COMPLETED'" class="font-weight-bold">결제 완료</span>
+                                        <span th:case="'FAILED'" class="font-weight-bold">주문 생성 실패</span>
                                         <span th:case="'PREPARING'" class="font-weight-bold">상품 준비중</span>
                                         <span th:case="'SHIPPED'" class="font-weight-bold">배송중</span>
                                         <div th:case="'DELIVERED'">
@@ -170,6 +177,7 @@
                                         <span th:case="'RETURN_REQUESTED_DAMAGED'" class="font-weight-bold">반품 요청 (파손)</span>
                                         <span th:case="'RETURNED'" class="font-weight-bold">반품 완료</span>
                                         <span th:case="'CANCELED'" class="font-weight-bold">주문 취소</span>
+                                        <span th:case="*">알 수 없음</span>
                                     </td>
 
                                 </tr>
@@ -250,7 +258,13 @@
 
                                 <tr>
                                     <th class="bg-light w-25">주문상태</th>
-                                    <td th:text="${order.orderStatus}"></td>
+                                    <td th:switch="${order.orderStatus.name()}">
+                                        <span th:case="'PENDING'">결제 대기</span>
+                                        <span th:case="'COMPLETED'">결제 완료</span>
+                                        <span th:case="'CANCELED'">모든 상품 취소/환불</span>
+                                        <span th:case="'FAILED'">주문 생성 실패</span>
+                                        <span th:case="*">알 수 없음</span> <!-- Default case for any other status -->
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
