@@ -47,4 +47,12 @@ public interface BookClient {
     PageResponse<ReviewResponse> getReviewsMe(@RequestParam("page") int page,
                                               @RequestParam("size") int size,
                                               @RequestParam("sort") String sort);
+
+    // 인기 도서 (조회수 기준) Top 5
+    @GetMapping("/api/books/popular-books")
+    List<BookListResponse> getPopularBooks();
+
+    // 카테고리별 도서 Top 5 (카테고리 ID 파라미터)
+    @GetMapping("/api/books/categories/{categoryId}/top")
+    List<BookListResponse> getBooksByCategory(@PathVariable("categoryId") Long categoryId);
 }
