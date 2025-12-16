@@ -1,55 +1,94 @@
-/*
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * + Copyright 2025. NHN Academy Corp. All rights reserved.
- * + * While every precaution has been taken in the preparation of this resource,  assumes no
- * + responsibility for errors or omissions, or for damages resulting from the use of the information
- * + contained herein
- * + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
- * + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
- * + prior written permission.
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- */
-
 package com.nhnacademy.frontserver.cart.controller;
 
+import com.nhnacademy.frontserver.book.BookClient;
+import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.*;
 import com.nhnacademy.frontserver.common.AuthConst;
-import com.nhnacademy.frontserver.layout.cartbadge.service.CartBadgeService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Controller
 @RequestMapping("/carts")
 @RequiredArgsConstructor
-// TODO, 타 API 클라이언트 추가해서 필요한 정보 좀더 담아야함...
-// TODO, 프론트 서버가 늘어나면? => 로드밸런싱으로 인한 문제점 고려필요
 public class CartWebController {
 
     private final CartClient cartClient;
+    private final BookClient bookClient;
 
+    /**
+     * [뷰 전용 DTO] HTML 렌더링을 위해 장바구니+책정보+합계금액을 합친 객체
+     */
+    @Getter
+    @AllArgsConstructor
+    public static class CartItemDetailDto {
+        private Long id; // bookId (HTML에서 item.id로 사용)
+        private BookDetailResponse book; // 책 상세 정보
+        private int quantity; // 수량
+        private long subtotal; // 소계 (가격 * 수량)
+    }
+
+    /**
+     * [뷰 전용 DTO] 장바구니 요약 정보
+     */
+    @Getter
+    @AllArgsConstructor
+    public static class CartTotalSummaryDto {
+        private long subTotal;     // 상품 총 금액
+        private long shippingFee;  // 배송비
+        private long totalPrice;   // 최종 결제 금액
+    }
 
     /**
      * [장바구니 페이지 조회]
      */
     @GetMapping
-    public String viewCartList(Model model,
-                               @RequestHeader(value = AuthConst.HEADER_MEMBER_ID, required = false) Long memberId,
-                               @CookieValue(value = AuthConst.COOKIE_GUEST_ID, required = false) String guestId) {
+    public String viewCartList(Model model) {
 
-        // 1. 목록 조회
+        // 1. 장바구니 목록 조회 (bookId만 있음)
         List<CartResponseDto> cartItems = cartClient.getCartItems().getBody();
-        model.addAttribute("cartItems", cartItems);
 
-        // 2. 요약 정보 조회 (종류, 총 개수)
-        CartSummaryResponseDto cartSummary = cartClient.getCartSummary().getBody();
-        model.addAttribute("cartSummary", cartSummary);
+        List<CartItemDetailDto> viewItems = new ArrayList<>();
+        long totalItemPrice = 0;
+
+        // 2. 각 항목별 책 상세 정보 조회 및 가격 계산
+        if (cartItems != null) {
+            for (CartResponseDto item : cartItems) {
+                // FeignClient로 책 정보 조회
+                BookDetailResponse bookInfo = bookClient.getBookDetail(item.getBookId());
+
+                // 소계 계산 (판매가 * 수량)
+                long subTotal = (long) bookInfo.bookSalePrice() * item.getCartQuantity();
+                totalItemPrice += subTotal;
+
+                // 뷰용 객체 생성
+                viewItems.add(new CartItemDetailDto(
+                        item.getBookId(),
+                        bookInfo,
+                        item.getCartQuantity(),
+                        subTotal
+                ));
+            }
+        }
+
+        // 3. 배송비 정책 (예: 3만원 이상 무료, 아니면 5000원) -> 비즈니스 로직에 맞게 수정 필요
+        //long shippingFee = (totalItemPrice > 0 && totalItemPrice < 30000) ? 5000 : 0;
+        long shippingFee = 5000;
+        long finalPrice = totalItemPrice + shippingFee;
+
+        // 4. 모델에 담기
+        model.addAttribute("cartItems", viewItems); // 리스트
+        model.addAttribute("cart", new CartTotalSummaryDto(totalItemPrice, shippingFee, finalPrice)); // 요약 정보
 
         return "cart/list";
     }
@@ -58,26 +97,22 @@ public class CartWebController {
      * [동작] 장바구니 담기
      */
     @PostMapping("/add")
-    public String addToCart(@RequestBody CartCreateRequestDto requestDto,
-                            @RequestHeader(value = AuthConst.HEADER_MEMBER_ID, required = false) Long memberId,
-                            @CookieValue(value = AuthConst.COOKIE_GUEST_ID, required = false) String guestId) {
-
-        // (백엔드 호출)
+    public ResponseEntity<Void> addToCart(@RequestBody CartCreateRequestDto requestDto) {
         cartClient.addToCart(requestDto);
 
-        return "redirect:/carts";
+        return ResponseEntity.noContent().build();
     }
 
     /**
      * [동작] 수량 변경
      */
     @PostMapping("/update")
-    public String updateQuantity(@RequestParam Long bookId, @RequestParam Integer quantity,
-                                 @RequestHeader(value = AuthConst.HEADER_MEMBER_ID, required = false) Long memberId,
-                                 @CookieValue(value = AuthConst.COOKIE_GUEST_ID, required = false) String guestId) {
+    public String updateQuantity(@RequestParam("bookId") Long bookId,
+                                 @RequestParam("quantity") Integer quantity) {
+        // 수량은 1보다 작을 수 없음
+        if (quantity < 1) quantity = 1;
 
         cartClient.updateCartItem(bookId, new CartUpdateRequestDto(quantity));
-
         return "redirect:/carts";
     }
 
@@ -85,12 +120,8 @@ public class CartWebController {
      * [동작] 삭제
      */
     @PostMapping("/delete/{bookId}")
-    public String deleteItem(@PathVariable Long bookId,
-                             @RequestHeader(value = AuthConst.HEADER_MEMBER_ID, required = false) Long memberId,
-                             @CookieValue(value = AuthConst.COOKIE_GUEST_ID, required = false) String guestId) {
-
+    public String deleteItem(@PathVariable Long bookId) {
         cartClient.removeCartItem(bookId);
-
         return "redirect:/carts";
     }
 
@@ -98,11 +129,8 @@ public class CartWebController {
      * [동작] 비우기
      */
     @PostMapping("/clear")
-    public String clearCart(@RequestHeader(value = AuthConst.HEADER_MEMBER_ID, required = false) Long memberId,
-                            @CookieValue(value = AuthConst.COOKIE_GUEST_ID, required = false) String guestId) {
-
+    public String clearCart() {
         cartClient.clearCart();
-
         return "redirect:/carts";
     }
 }
