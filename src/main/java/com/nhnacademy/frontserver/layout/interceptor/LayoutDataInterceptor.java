@@ -13,16 +13,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.Arrays;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class LayoutDataInterceptor implements HandlerInterceptor {
 
     private final CartBadgeService cartBadgeService;
     private final CategoryService categoryService;
+
+    public LayoutDataInterceptor(@Lazy CartBadgeService cartBadgeService,
+                                 @Lazy CategoryService categoryService) {
+        this.cartBadgeService = cartBadgeService;
+        this.categoryService = categoryService;
+    }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView mv) {
