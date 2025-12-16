@@ -33,19 +33,16 @@ public class BookListController {
     }
 
     @GetMapping
-    public String getBooks(Model model,
-                           @RequestParam(name="page", defaultValue="0") int page,
-                           @RequestParam(name="size", defaultValue="20") int size,
-                           @RequestParam(name="sort", defaultValue="bookId,desc") String sort) {
+    public String getBooks(Model model) {
+        // Feign 호출
+        PageResponse<BookListResponse> bookPage =
+                bookClient.getBooks();
 
-        PageResponse<BookListResponse> bookPage = bookClient.getBooks(page, size, sort);
-
-        model.addAttribute("books", bookPage.content()); // book-list.html이 List로 쓰는 구조면 OK
-        model.addAttribute("page", bookPage);
+        model.addAttribute("books", bookPage.content());  // List<BookListResponse>
+        model.addAttribute("page", bookPage);                // Page 메타 정보
 
         return "book-list";
     }
-
 
     @GetMapping("/popularBooks")
     public List<BookListResponse> firstPageList(Model model) {
