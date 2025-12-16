@@ -3,319 +3,125 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{base}">
-
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8"/>
     <title>Trillion-Shop | 검색 결과</title>
 
     <th:block layout:fragment="head">
-        <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="Book Store, Search, Result" name="keywords">
-        <meta content="Online Book Store Search Result" name="description">
+        <style>
+            .search-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 0; }
+            .search-form { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+            .search-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:14px; }
+            .card { border:1px solid #e5e5e5; border-radius:10px; overflow:hidden; background:#fff; }
+            .card-img { width:100%; aspect-ratio: 1/1.4; object-fit:cover; background:#f5f5f5; }
+            .card-body { padding:10px 12px; }
+            .title { font-weight:700; display:block; line-height:1.2; margin-bottom:6px; }
+            .meta { font-size:12px; color:#666; margin-bottom:6px; }
+            .tags { font-size:12px; color:#444; }
+            .pager { display:flex; gap:6px; justify-content:center; margin-top:18px; flex-wrap:wrap; }
+            .btn { padding:6px 10px; border:1px solid #ddd; border-radius:8px; background:#fff; text-decoration:none; color:#222; }
+            .btn.active { font-weight:700; border-color:#222; }
+            .btn.disabled { opacity:.4; pointer-events:none; }
+            .brand { font-weight:800; font-size:18px; text-decoration:none; color:inherit; }
+            .muted { color:#666; }
+            input, select { padding:7px 10px; border:1px solid #ddd; border-radius:8px; }
+            button { padding:7px 12px; border:1px solid #222; border-radius:8px; background:#222; color:#fff; }
+        </style>
     </th:block>
 </head>
 
 <body>
-<div layout:fragment="content">
+<div layout:fragment="content" class="container" style="max-width:1100px;">
 
-    <div class="container-fluid pt-5">
-        <div class="row px-xl-5">
-            <!-- 왼쪽 카테고리 (3depth) -->
-            <div class="col-lg-3 col-md-4">
-                <h5 class="section-title position-relative text-uppercase mb-4">
-                    <span class="bg-secondary pr-3">카테고리</span>
-                </h5>
-                <div class="bg-light p-3 mb-4">
-                    <ul class="list-unstyled mb-0"
-                        th:if="${categories != null and !#lists.isEmpty(categories)}">
-                        <li class="mb-2" th:each="depth1 : ${categories}">
-                            <strong th:text="${depth1.name}">대분류</strong>
-                            <ul class="list-unstyled ml-3 mt-2"
-                                th:if="${depth1.children != null and !#lists.isEmpty(depth1.children)}">
-                                <li class="mb-1" th:each="depth2 : ${depth1.children}">
-                                    <span th:text="${depth2.name}">중분류</span>
-                                    <ul class="list-unstyled ml-3 mt-1"
-                                        th:if="${depth2.children != null and !#lists.isEmpty(depth2.children)}">
-                                        <li th:each="depth3 : ${depth2.children}">
-                                            <a th:href="@{/api/books/category/{id}(id=${depth3.id})}"
-                                               class="text-body d-block"
-                                               th:text="${depth3.name}">
-                                                소분류
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+    <!-- 상단 헤더 -->
+    <div class="search-header">
+        <a class="brand" th:href="@{/}">Trillion-Shop</a>
 
-                    <p class="text-muted small mb-0"
-                       th:if="${categories == null or #lists.isEmpty(categories)}">
-                        카테고리가 준비 중입니다.
-                    </p>
-                </div>
-            </div>
+        <!-- 검색 폼 -->
+        <form class="search-form" th:action="@{/search}" method="get">
+            <input type="text" name="query" placeholder="검색어 입력"
+                   th:value="${query}" />
 
-            <!-- 오른쪽 검색 결과 영역 -->
-            <div class="col-lg-9 col-md-8">
-                <!-- 검색 요약 -->
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-                    <div class="mb-3 mb-md-0">
-                        <h2 class="section-title position-relative text-uppercase mb-2">
-                            <span class="bg-secondary pr-3">검색 결과</span>
-                        </h2>
-                        <p class="mb-0">
-                            <span class="font-weight-bold"
-                                  th:text="${query != null ? query : '검색어 없음'}">검색어</span>
-                            에 대한 검색 결과
-                            <strong th:text="${totalCount != null ? totalCount : 0}">0</strong>건
-                        </p>
-                    </div>
+            <select name="sort">
+                <option value="RELEVANCE" th:selected="${sort == 'RELEVANCE'}">관련도</option>
+                <option value="NEW" th:selected="${sort == 'NEW'}">최신</option>
+                <option value="POPULARITY" th:selected="${sort == 'POPULARITY'}">인기</option>
+                <option value="LOW_PRICE" th:selected="${sort == 'LOW_PRICE'}">낮은 가격</option>
+                <option value="HIGH_PRICE" th:selected="${sort == 'HIGH_PRICE'}">높은 가격</option>
+                <option value="RATING" th:selected="${sort == 'RATING'}">평점</option>
+                <option value="REVIEW_COUNT" th:selected="${sort == 'REVIEW_COUNT'}">리뷰수</option>
+            </select>
 
-                    <!-- 정렬 & 뷰 타입 토글 -->
-                    <div class="d-flex align-items-center">
-                        <!-- 정렬 -->
-                        <div class="btn-group mr-2">
-                            <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">
-                                정렬
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item"
-                                   th:href="@{/search(query=${query}, sort='RELEVANCE', page=0, size=${size})}">관련도순</a>
-                                <a class="dropdown-item"
-                                   th:href="@{/search(query=${query}, sort='NEW', page=0, size=${size})}">최신순</a>
-                                <a class="dropdown-item"
-                                   th:href="@{/search(query=${query}, sort='POPULARITY', page=0, size=${size})}">인기순</a>
-                            </div>
-                        </div>
+            <select name="size">
+                <option value="10" th:selected="${size == 10}">10개</option>
+                <option value="20" th:selected="${size == 20}">20개</option>
+                <option value="50" th:selected="${size == 50}">50개</option>
+            </select>
 
-                        <!-- 카드 / 리스트 토글 -->
-                        <div>
-                            <button id="btnGrid" class="btn btn-sm btn-primary">
-                                <i class="fa fa-th-large"></i>
-                            </button>
-                            <button id="btnList" class="btn btn-sm btn-light ml-2">
-                                <i class="fa fa-bars"></i>
-                            </button>
-                        </div>
-                    </div>
+            <input type="hidden" name="page" value="0"/>
+            <button type="submit">검색</button>
+        </form>
+    </div>
+
+    <!-- 검색 요약 -->
+    <p class="muted" style="margin: 6px 0 14px;">
+        <b th:text="${query}">-</b> 검색 결과:
+        <b th:text="${totalCount}">0</b>건
+    </p>
+
+    <!-- 결과 없음 -->
+    <div th:if="${result == null or #lists.isEmpty(result)}" style="padding:40px 0; text-align:center;">
+        <h3 style="margin:0 0 8px;">검색 결과가 없습니다.</h3>
+        <p class="muted" style="margin:0;">다른 검색어로 다시 시도해 주세요.</p>
+    </div>
+
+    <!-- 카드형 결과 -->
+    <div class="search-grid" th:if="${result != null and !#lists.isEmpty(result)}">
+        <div class="card" th:each="b : ${result}">
+            <a th:href="@{/api/books/{id}(id=${b.id})}">
+                <img class="card-img"
+                     th:src="${b.imageUrl != null ? b.imageUrl : '/img/product-1.jpg'}"
+                     alt="책 표지"/>
+            </a>
+            <div class="card-body">
+                <a class="title"
+                   th:href="@{/api/books/{id}(id=${b.id})}"
+                   th:text="${b.title != null ? b.title : '제목 정보 없음'}">제목</a>
+
+                <div class="meta">
+                    <span th:text="${b.author != null ? b.author : '저자 정보 없음'}">저자</span>
+                    <span> · </span>
+                    <span th:text="${b.publisher != null ? b.publisher : '출판사 정보 없음'}">출판사</span>
                 </div>
 
-                <!-- 검색 결과 없음 -->
-                <div class="row" th:if="${result == null or #lists.isEmpty(result)}">
-                    <div class="col-12 text-center py-5">
-                        <h4>검색 결과가 없습니다.</h4>
-                        <p class="text-muted mb-0">다른 검색어로 다시 시도해 주세요.</p>
-                    </div>
+                <div class="meta" th:if="${b.price != null}">
+                    <b th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">0원</b>
                 </div>
 
-                <!--  카드형 결과 (그리드 4열) -->
-                <div id="resultGrid" class="row"
-                     th:if="${result != null and !#lists.isEmpty(result)}">
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1"
-                         th:each="search : ${result}">
-                        <div class="product-item bg-light mb-4">
-                            <div class="product-img position-relative overflow-hidden">
-                                <img class="img-fluid w-100"
-                                     th:src="${search.imageUrl != null ? search.imageUrl : '/img/product-1.jpg'}"
-                                     alt="책 표지"
-                                     style="aspect-ratio: 1/1.4; object-fit: cover;">
-                                <div class="product-action">
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/api/carts/add(bookId=${search.id})}">
-                                        <i class="fa fa-shopping-cart"></i>
-                                    </a>
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/api/members/likes/add(bookId=${search.id})}">
-                                        <i class="fa fa-heart"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="text-center py-4 px-3">
-                                <!-- 도서 제목 -->
-                                <a class="h6 text-decoration-none text-truncate d-block mb-2"
-                                   th:href="@{/api/books/{id}(id=${search.id})}"
-                                   th:text="${search.title != null ? search.title : '제목 정보 없음'}">
-                                    도서 제목
-                                </a>
-
-                                <!-- 저자명 -->
-                                <small class="text-body d-block">
-                                    <strong>저자</strong>
-                                    <span th:text="${search.author != null ? search.author : '저자 정보 없음'}">
-                                        저자명
-                                    </span>
-                                </small>
-
-                                <!-- 태그 -->
-                                <small class="text-body d-block"
-                                       th:if="${search.tags != null and !#lists.isEmpty(search.tags)}">
-                                    <strong>태그</strong>
-                                    <span th:each="tag, iter : ${search.tags}">
-                                        <span th:text="${tag}">태그</span>
-                                        <span th:if="${!iter.last}">, </span>
-                                    </span>
-                                </small>
-
-                                <!-- 출판사 -->
-                                <small class="text-body d-block">
-                                    <strong>출판사</strong>
-                                    <span th:text="${search.publisher != null ? search.publisher : '출판사 정보 없음'}">
-                                        출판사명
-                                    </span>
-                                </small>
-                            </div>
-                        </div>
-                    </div>
+                <div class="tags" th:if="${b.tags != null and !#lists.isEmpty(b.tags)}">
+          <span th:each="t, it : ${b.tags}">
+            <span th:text="${t}">tag</span><span th:if="${!it.last}"> · </span>
+          </span>
                 </div>
-
-                <!-- 리스트형 결과 (표 형태) -->
-                <div id="resultList" class="row d-none"
-                     th:if="${result != null and !#lists.isEmpty(result)}">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table table-light table-borderless table-hover mb-0">
-                                <thead class="thead-dark">
-                                <tr>
-                                    <th style="width: 8%;">표지</th>
-                                    <th style="width: 32%;">도서 제목</th>
-                                    <th style="width: 18%;">저자</th>
-                                    <th style="width: 22%;">태그</th>
-                                    <th style="width: 12%;">출판사</th>
-                                    <th style="width: 8%;">액션</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="search : ${result}">
-                                    <td class="align-middle">
-                                        <a th:href="@{/api/books/{id}(id=${search.id})}">
-                                            <img th:src="${search.imageUrl != null ? search.imageUrl : '/img/product-1.jpg'}"
-                                                 alt="책 표지"
-                                                 style="width: 45px; aspect-ratio: 1/1.4; object-fit: cover;">
-                                        </a>
-                                    </td>
-                                    <td class="align-middle text-left">
-                                        <a class="text-dark font-weight-medium"
-                                           th:href="@{/api/books/{id}(id=${search.id})}"
-                                           th:text="${search.title != null ? search.title : '제목 정보 없음'}">
-                                            도서 제목
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <span th:text="${search.author != null ? search.author : '저자 정보 없음'}">
-                                            저자명
-                                        </span>
-                                    </td>
-                                    <td class="align-middle"
-                                        th:if="${search.tags != null and !#lists.isEmpty(search.tags)}">
-                                        <span th:each="tag, iter : ${search.tags}">
-                                            <span class="badge badge-light border"
-                                                  th:text="${tag}">태그</span>
-                                            <span th:if="${!iter.last}">&nbsp;</span>
-                                        </span>
-                                    </td>
-                                    <td class="align-middle"
-                                        th:if="${search.tags == null or #lists.isEmpty(search.tags)}">
-                                        -
-                                    </td>
-                                    <td class="align-middle">
-                                        <span th:text="${search.publisher != null ? search.publisher : '출판사 정보 없음'}">
-                                            출판사명
-                                        </span>
-                                    </td>
-                                    <td class="align-middle">
-                                        <div class="btn-group-vertical btn-group-sm">
-                                            <a class="btn btn-outline-dark mb-1"
-                                               th:href="@{/api/carts/add(bookId=${search.id})}">
-                                                장바구니
-                                            </a>
-                                            <a class="btn btn-outline-dark"
-                                               th:href="@{/api/members/likes/add(bookId=${search.id})}">
-                                                좋아요
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 페이징 -->
-                <div class="row mt-4"
-                     th:if="${totalPages != null and totalPages > 1 and page != null}">
-                    <div class="col-12">
-                        <nav>
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item"
-                                    th:classappend="${page.first} ? ' disabled' : ''">
-                                    <a class="page-link"
-                                       th:href="@{/search(query=${query}, page=${page.number - 1}, sort=${sort}, size=${size})}">
-                                        이전
-                                    </a>
-                                </li>
-
-                                <li class="page-item"
-                                    th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
-                                    th:classappend="${p == page.number} ? ' active' : ''">
-                                    <a class="page-link"
-                                       th:href="@{/search(query=${query}, page=${p}, sort=${sort}, size=${size})}"
-                                       th:text="${p + 1}">
-                                        1
-                                    </a>
-                                </li>
-
-                                <li class="page-item"
-                                    th:classappend="${page.last} ? ' disabled' : ''">
-                                    <a class="page-link"
-                                       th:href="@{/search(query=${query}, page=${page.number + 1}, sort=${sort}, size=${size})}">
-                                        다음
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
 
+    <!-- 페이징 (간단) -->
+    <div th:if="${totalPages != null and totalPages > 1 and page != null}" class="pager">
+        <a class="btn" th:classappend="${page.first} ? ' disabled' : ''"
+           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${page.number - 1})}">이전</a>
+
+        <a class="btn"
+           th:each="p : ${#numbers.sequence(T(java.lang.Math).max(0, page.number - 2), T(java.lang.Math).min(totalPages - 1, page.number + 2))}"
+           th:classappend="${p == page.number} ? ' active' : ''"
+           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${p})}"
+           th:text="${p + 1}">1</a>
+
+        <a class="btn" th:classappend="${page.last} ? ' disabled' : ''"
+           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${page.number + 1})}">다음</a>
+    </div>
+
 </div>
-
-<th:block layout:fragment="script">
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const btnGrid = document.getElementById('btnGrid');
-            const btnList = document.getElementById('btnList');
-            const grid = document.getElementById('resultGrid');
-            const list = document.getElementById('resultList');
-
-            if (!btnGrid || !btnList || !grid || !list) {
-                return;
-            }
-
-            btnGrid.addEventListener('click', function () {
-                grid.classList.remove('d-none');
-                list.classList.add('d-none');
-                btnGrid.classList.remove('btn-light');
-                btnGrid.classList.add('btn-primary');
-                btnList.classList.remove('btn-primary');
-                btnList.classList.add('btn-light');
-            });
-
-            btnList.addEventListener('click', function () {
-                grid.classList.add('d-none');
-                list.classList.remove('d-none');
-                btnList.classList.remove('btn-light');
-                btnList.classList.add('btn-primary');
-                btnGrid.classList.remove('btn-primary');
-                btnGrid.classList.add('btn-light');
-            });
-        });
-    </script>
-</th:block>
-
 </body>
 </html>
