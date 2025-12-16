@@ -14,6 +14,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(performanceInterceptor)
-                .addPathPatterns("/**")// 모든 경로에 적용
+                .addPathPatterns("/**");// 모든 경로에 적용
     }
 }
