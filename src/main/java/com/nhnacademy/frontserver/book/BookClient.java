@@ -22,10 +22,12 @@ import org.springframework.web.bind.annotation.*;
         url = "${gateway.url}")
 public interface BookClient {
 
-    //TODO 현재 publisherName 호출 시 null
-    // Pageable 응답 예시
     @GetMapping("/api/books")
-    PageResponse<BookListResponse> getBooks();
+    PageResponse<BookListResponse> getBooks(
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("sort") String sort
+    );
 
     @GetMapping("/api/books/{book_id}")
     BookDetailResponse getBookDetail(@PathVariable("book_id") Long bookId);
@@ -36,7 +38,7 @@ public interface BookClient {
                                             @RequestParam("size") int size,
                                             @RequestParam("sort") String sort);
 
-    @GetMapping("/api/books/categories")
+    @GetMapping("/api/categories")
     List<CategoryTreeResponse> getCategoryTree();
 
     @GetMapping("/api/books/reviews/me")
@@ -44,11 +46,11 @@ public interface BookClient {
                                               @RequestParam("size") int size,
                                               @RequestParam("sort") String sort);
 
-    // 인기 도서 (조회수 기준) Top 5
-    @GetMapping("/api/books/popular-books")
+    // ✅ API 컨트롤러와 맞춤: /api/books/popularBooks
+    @GetMapping("/api/books/popularBooks")
     List<BookListResponse> getPopularBooks();
 
-    // 카테고리별 도서 Top 5 (카테고리 ID 파라미터)
+    // ✅ API 컨트롤러와 맞음: /api/books/categories/{categoryId}/top
     @GetMapping("/api/books/categories/{categoryId}/top")
     List<BookListResponse> getBooksByCategory(@PathVariable("categoryId") Long categoryId);
 }
