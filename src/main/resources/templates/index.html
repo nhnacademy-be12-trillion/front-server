@@ -57,7 +57,8 @@
                 box-shadow: 2px 4px 10px rgba(0,0,0,0.08);
                 margin-bottom: 15px;
                 aspect-ratio: 1 / 1.45;
-                border-radius: 4px;
+                border-radius: 6px;
+                background: #f3f3f3;
             }
             .clean-book-img-wrapper img {
                 width: 100%;
@@ -69,32 +70,85 @@
                 transform: scale(1.05);
             }
 
-            /* 텍스트 정보 (왼쪽 정렬) */
+            /* 작은 카드 텍스트 */
             .clean-book-info {
                 text-align: left;
                 padding: 0 2px;
             }
             .clean-book-title {
                 display: block;
-                font-size: 1.05rem;
-                font-weight: 700;
+                font-size: 1.02rem;
+                font-weight: 800;
                 color: #333;
-                margin-bottom: 5px;
+                margin-bottom: 4px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .clean-book-author {
-                font-size: 0.85rem;
-                color: #888;
+            .clean-book-sub {
+                font-size: 0.82rem;
+                color: #7a7a7a;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 display: block;
+                line-height: 1.25;
             }
-        </style>
 
-        <style>
+            /* 뱃지/메타 */
+            .meta-row {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-top: 6px;
+                flex-wrap: wrap;
+            }
+            .badge-pill {
+                display: inline-flex;
+                align-items: center;
+                padding: 2px 8px;
+                border-radius: 999px;
+                font-size: 0.72rem;
+                font-weight: 700;
+                background: #f0f0f0;
+                color: #444;
+            }
+            .badge-discount {
+                background: #111;
+                color: #fff;
+            }
+            .badge-state {
+                background: #fff3cd;
+                color: #856404;
+                border: 1px solid rgba(133, 100, 4, 0.25);
+            }
+            .rating {
+                font-size: 0.78rem;
+                font-weight: 700;
+                color: #444;
+            }
+            .rating .star {
+                margin-right: 2px;
+            }
+
+            /* 태그 */
+            .tag-row {
+                margin-top: 6px;
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .tag-chip {
+                font-size: 0.72rem;
+                font-weight: 600;
+                color: #444;
+                background: #f6f6f6;
+                border: 1px solid #eee;
+                border-radius: 999px;
+                padding: 2px 8px;
+                max-width: 100%;
+            }
+
             /* 공통 썸네일 크기 고정 (그리드 카드용) */
             .book-thumb {
                 display: block;
@@ -103,10 +157,20 @@
                 object-fit: cover;
                 background: #f3f3f3;
             }
-
             .product-img .book-thumb,
             .book-card .book-thumb {
                 height: 240px;
+            }
+
+            /* 큰 카드의 이미지 위 뱃지 */
+            .img-badges {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                z-index: 2;
             }
         </style>
     </th:block>
@@ -115,6 +179,7 @@
 <body>
 <div layout:fragment="content">
 
+    <!-- ===================== 상단 캐러셀 ===================== -->
     <div class="container-fluid mb-3">
         <div class="row px-xl-5">
             <div class="col-lg-8">
@@ -207,23 +272,46 @@
             </div>
 
             <div class="col-lg-2 col-md-4 col-6" th:each="book : ${popularBooks}">
-                <!-- 상세 이동 -->
+                <!-- ✅ bookId는 노출 X, 이동에만 사용 -->
                 <div class="clean-book-item"
                      th:onclick="'location.href=\'/books/' + ${book.bookId} + '\''">
 
                     <div class="clean-book-img-wrapper">
-                        <!-- ✅ MinIO 버킷 경로로 통일 -->
-                        <img th:src="${!#strings.isEmpty(book.bookImage)
-                                ? '/trillion-bucket/' + book.bookImage
-                                : '/img/default-book.png'}"
+                        <img th:src="${#strings.isEmpty(book.bookImage)
+                                ? '/img/default-book.png'
+                                : ((#strings.startsWith(book.bookImage,'http') or #strings.startsWith(book.bookImage,'/trillion-bucket/'))
+                                    ? book.bookImage
+                                    : '/trillion-bucket/' + book.bookImage)}"
                              loading="lazy"
                              alt="책 표지">
                     </div>
 
                     <div class="clean-book-info">
-                        <span class="clean-book-title" th:text="${book.bookName}">책 제목</span>
-                        <span class="clean-book-author"
-                              th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 미상'}">저자명</span>
+                        <span class="clean-book-title"
+                              th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">책 제목</span>
+
+                        <span class="clean-book-sub"
+                              th:text="${book.bookAuthor != null ? book.bookAuthor : '작가 미상'}">저자</span>
+                        <span class="clean-book-sub"
+                              th:text="${book.bookPublisher != null ? book.bookPublisher : '출판사 미상'}">출판사</span>
+
+                        <div class="meta-row">
+                            <span class="rating" th:if="${book.bookReviewRate != null}">
+                                <span class="star">★</span>
+                                <span th:text="${#numbers.formatDecimal(book.bookReviewRate, 1, 1)}">0.0</span>
+                            </span>
+
+                            <span class="badge-pill badge-discount"
+                                  th:if="${book.discountRate != null and book.discountRate > 0}"
+                                  th:text="'-' + ${book.discountRate} + '%'">-0%</span>
+                        </div>
+
+                        <div class="tag-row" th:if="${book.bookTags != null and !#lists.isEmpty(book.bookTags)}">
+                            <span class="tag-chip"
+                                  th:each="tag, iter : ${book.bookTags}"
+                                  th:if="${iter.index < 2}"
+                                  th:text="${tag}">태그</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -251,17 +339,41 @@
                 <div class="clean-book-item"
                      th:onclick="'location.href=\'/books/' + ${book.bookId} + '\''">
                     <div class="clean-book-img-wrapper">
-                        <!-- ✅ MinIO 버킷 경로로 통일 -->
-                        <img th:src="${!#strings.isEmpty(book.bookImage)
-                                ? '/trillion-bucket/' + book.bookImage
-                                : '/img/default-book.png'}"
+                        <img th:src="${#strings.isEmpty(book.bookImage)
+                                ? '/img/default-book.png'
+                                : ((#strings.startsWith(book.bookImage,'http') or #strings.startsWith(book.bookImage,'/trillion-bucket/'))
+                                    ? book.bookImage
+                                    : '/trillion-bucket/' + book.bookImage)}"
                              loading="lazy"
                              alt="책 표지">
                     </div>
+
                     <div class="clean-book-info">
-                        <span class="clean-book-title" th:text="${book.bookName}">책 제목</span>
-                        <span class="clean-book-author"
-                              th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 미상'}">저자명</span>
+                        <span class="clean-book-title"
+                              th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">책 제목</span>
+
+                        <span class="clean-book-sub"
+                              th:text="${book.bookAuthor != null ? book.bookAuthor : '작가 미상'}">저자</span>
+                        <span class="clean-book-sub"
+                              th:text="${book.bookPublisher != null ? book.bookPublisher : '출판사 미상'}">출판사</span>
+
+                        <div class="meta-row">
+                            <span class="rating" th:if="${book.bookReviewRate != null}">
+                                <span class="star">★</span>
+                                <span th:text="${#numbers.formatDecimal(book.bookReviewRate, 1, 1)}">0.0</span>
+                            </span>
+
+                            <span class="badge-pill badge-discount"
+                                  th:if="${book.discountRate != null and book.discountRate > 0}"
+                                  th:text="'-' + ${book.discountRate} + '%'">-0%</span>
+                        </div>
+
+                        <div class="tag-row" th:if="${book.bookTags != null and !#lists.isEmpty(book.bookTags)}">
+                            <span class="tag-chip"
+                                  th:each="tag, iter : ${book.bookTags}"
+                                  th:if="${iter.index < 2}"
+                                  th:text="${tag}">태그</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -283,11 +395,23 @@
                 <div class="product-item bg-light mb-4">
 
                     <div class="product-img position-relative overflow-hidden">
-                        <!-- ✅ MinIO 버킷 경로 -->
+                        <!-- 이미지 위 뱃지 -->
+                        <div class="img-badges">
+                            <span class="badge-pill badge-discount"
+                                  th:if="${book.discountRate != null and book.discountRate > 0}"
+                                  th:text="'-' + ${book.discountRate} + '%'">-0%</span>
+
+                            <span class="badge-pill badge-state"
+                                  th:if="${book.bookState != null}"
+                                  th:text="${book.bookState}">STATE</span>
+                        </div>
+
                         <img class="img-fluid w-100 book-thumb"
-                             th:src="${!#strings.isEmpty(book.bookImage)
-                                ? '/trillion-bucket/' + book.bookImage
-                                : '/img/default-book.png'}"
+                             th:src="${#strings.isEmpty(book.bookImage)
+                                ? '/img/default-book.png'
+                                : ((#strings.startsWith(book.bookImage,'http') or #strings.startsWith(book.bookImage,'/trillion-bucket/'))
+                                    ? book.bookImage
+                                    : '/trillion-bucket/' + book.bookImage)}"
                              loading="lazy"
                              alt="이미지가 준비중입니다.">
 
@@ -300,7 +424,6 @@
                                th:href="@{/members/likes/add(bookId=${book.bookId})}">
                                 <i class="far fa-heart"></i>
                             </a>
-                            <!-- ✅ 상세 이동: /books/{book_id} -->
                             <a class="btn btn-outline-dark btn-square"
                                th:href="@{/books/{book_id}(book_id=${book.bookId})}">
                                 <i class="fa fa-search"></i>
@@ -315,22 +438,42 @@
                             도서 제목
                         </a>
 
+                        <div class="small text-muted mb-1">
+                            <span th:text="${book.bookAuthor != null ? book.bookAuthor : '작가 미상'}">저자</span>
+                        </div>
                         <div class="small text-muted mb-2">
-                            <span th:text="${book.bookAuthor != null ? book.bookAuthor : '저자 정보 없음'}">저자명</span>
+                            <span th:text="${book.bookPublisher != null ? book.bookPublisher : '출판사 미상'}">출판사</span>
                         </div>
 
                         <div class="d-flex align-items-center justify-content-center mt-1">
-                            <div th:if="${book.bookSalePrice > 0}">
+                            <!-- 할인 판매가가 0이거나 정가와 같으면 정가만 -->
+                            <div th:if="${book.bookSalePrice != null and book.bookSalePrice > 0 and book.bookSalePrice < book.bookRegularPrice}">
                                 <h5 class="text-primary mb-0"
                                     th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
                                 <h6 class="text-muted ml-2 mb-0">
                                     <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
                                 </h6>
                             </div>
-                            <div th:if="${book.bookSalePrice == 0}">
+
+                            <div th:if="${book.bookSalePrice == null or book.bookSalePrice == 0 or book.bookSalePrice >= book.bookRegularPrice}">
                                 <h5 class="text-primary mb-0"
                                     th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
                             </div>
+                        </div>
+
+                        <div class="meta-row justify-content-center">
+                            <span class="rating" th:if="${book.bookReviewRate != null}">
+                                <span class="star">★</span>
+                                <span th:text="${#numbers.formatDecimal(book.bookReviewRate, 1, 1)}">0.0</span>
+                            </span>
+                        </div>
+
+                        <div class="tag-row justify-content-center"
+                             th:if="${book.bookTags != null and !#lists.isEmpty(book.bookTags)}">
+                            <span class="tag-chip"
+                                  th:each="tag, iter : ${book.bookTags}"
+                                  th:if="${iter.index < 3}"
+                                  th:text="${tag}">태그</span>
                         </div>
                     </div>
                 </div>
@@ -349,6 +492,7 @@
     </div>
 
 
+    <!-- ===================== 프로모션 ===================== -->
     <div class="container-fluid pt-5 pb-3">
         <div class="row px-xl-5">
             <div class="col-md-6">
