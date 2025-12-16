@@ -29,9 +29,9 @@ public interface OrderClient {
 
     // 환불, 환불 요청된 주문 전체 조회
     @GetMapping("/api/order-items/refunds")
-    PageResponse<OrderResponse> getAllRefundedOrderItemsByMember(@RequestParam("page") int page,
-                                                                 @RequestParam("size") int size,
-                                                                 @RequestParam("sort") String sort);
+    PageResponse<OrderItemResponse> getAllRefundedOrderItemsByMember(@RequestParam("page") int page,
+                                                                           @RequestParam("size") int size,
+                                                                           @RequestParam("sort") String sort);
 
     // 주문 단건 조회 (회원)
     @GetMapping("/api/orders/{orderId}")
