@@ -33,7 +33,7 @@ public class HomeController {
     public String home(Model model) {
 
         // 전체 도서 목록
-        PageResponse<BookListResponse> books = bookClient.getBooks(0, 20, "bookId,desc");
+        PageResponse<BookListResponse> books = bookClient.getBooks();
         model.addAttribute("books", books);
 
 

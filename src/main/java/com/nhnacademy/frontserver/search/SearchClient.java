@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
         url = "${gateway.url}")
 interface SearchClient {
 
-    @GetMapping("/api/books/search")
+    @GetMapping("/api/search")
     BookSearchResponse search(
             @RequestParam("query") String query,
             @RequestParam(value = "sort", defaultValue = "RELEVANCE") BookSortOption sort,

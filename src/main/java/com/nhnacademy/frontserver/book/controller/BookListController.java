@@ -15,6 +15,7 @@ package com.nhnacademy.frontserver.book.controller;
 import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookListResponse;
+import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,23 +33,22 @@ public class BookListController {
     }
 
     @GetMapping
-    public String getBooks(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size,
-            Model model
-    ) {
-        // 정렬은 우선 고정
-        String sort = "bookId,desc";
-
+    public String getBooks(Model model) {
         // Feign 호출
         PageResponse<BookListResponse> bookPage =
-                bookClient.getBooks(page, size, sort);
-
+                bookClient.getBooks();
 
         model.addAttribute("books", bookPage.content());  // List<BookListResponse>
         model.addAttribute("page", bookPage);                // Page 메타 정보
 
         return "book-list";
+    }
+
+    @GetMapping("/popularBooks")
+    public List<BookListResponse> firstPageList(Model model) {
+        List<BookListResponse> popularBooks = bookClient.getPopularBooks();
+        model.addAttribute("books", popularBooks);
+        return popularBooks;
     }
 }
 

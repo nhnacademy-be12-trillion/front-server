@@ -25,11 +25,7 @@ public interface BookClient {
     //TODO 현재 publisherName 호출 시 null
     // Pageable 응답 예시
     @GetMapping("/api/books")
-    PageResponse<BookListResponse> getBooks(
-            @RequestParam("page") int page,
-            @RequestParam("size") int size,
-            @RequestParam("sort") String sort
-    );
+    PageResponse<BookListResponse> getBooks();
 
     @GetMapping("/api/books/{book_id}")
     BookDetailResponse getBookDetail(@PathVariable("book_id") Long bookId);
@@ -40,7 +36,7 @@ public interface BookClient {
                                             @RequestParam("size") int size,
                                             @RequestParam("sort") String sort);
 
-    @GetMapping("/api/categories")
+    @GetMapping("/api/books/categories")
     List<CategoryTreeResponse> getCategoryTree();
 
     @GetMapping("/api/books/reviews/me")
