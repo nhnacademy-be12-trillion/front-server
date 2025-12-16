@@ -15,9 +15,7 @@ public class CartBadgeService {
 
     /**
      * 장바구니 개수 조회
-     * - 캐싱? 그런 거 없다.
-     * - 무조건 백엔드에 물어본다. (백엔드 Redis 믿고 간다)
-     * - F5 연타? Nginx 형님이 막아줄 것이다.
+     * - F5 연타... DDOS 등등... 다른데서 방어해야 한다.
      */
     public int getCartCount(Long memberId, String guestId) {
         if (memberId == null && (guestId == null || guestId.isEmpty())) return 0;
