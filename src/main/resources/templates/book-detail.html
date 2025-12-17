@@ -1,15 +1,3 @@
-<!--
-  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
-  ~ + * While every precaution has been taken in the preparation of this resource,  assumes no
-  ~ + responsibility for errors or omissions, or for damages resulting from the use of the information
-  ~ + contained herein
-  ~ + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
-  ~ + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
-  ~ + prior written permission.
-  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-  -->
-
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
@@ -18,12 +6,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Trillion-Shop | 도서 목록</title>
+    <title th:text="${book.bookName} + ' | Trillion-Shop'">도서 상세</title>
 
     <th:block layout:fragment="head">
+        <style>
+            .detail-img { width: 100%; max-height: 500px; object-fit: contain; background: #f8f9fa; }
+        </style>
     </th:block>
-    <link href="/static/css/style.min.css" rel="stylesheet">
-    <link th:href="@{/css/style.min.css}" rel="stylesheet">
 </head>
 
 <body>
@@ -31,195 +20,169 @@
 
     <div class="container-fluid">
         <div class="row px-xl-5">
-
-            <!-- ====== 왼쪽 카테고리(옵션) ====== -->
-            <div class="col-lg-3 col-md-4">
-                <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">도서 메뉴</span>
-                </h5>
-
-                <div class="nav flex-column nav-pills book-menu" role="tablist">
-                    <a class="nav-link active" data-toggle="pill" href="#tab-all">전체 도서</a>
-                    <a class="nav-link" href="#" th:href="@{/books?sort=best}">베스트</a>
-                    <a class="nav-link" href="#" th:href="@{/books?sort=new}">최근 발매</a>
-                    <a class="nav-link" href="#" th:href="@{/books/birthday}">생일책</a>
-                </div>
-            </div>
-
-            <!-- ====== 오른쪽 리스트 영역 ====== -->
-            <div class="col-lg-9 col-md-8">
-
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="section-title position-relative text-uppercase mb-0">
-                        <span class="bg-secondary pr-3">도서 목록</span>
-                    </h5>
-
-                    <!-- 카드형 / 열거형 전환 버튼 -->
-                    <div class="btn-group view-toggle-group" role="group" aria-label="View toggle">
-                        <button type="button" id="btn-grid" class="btn btn-sm btn-primary">
-                            <i class="fa fa-th-large mr-1"></i> 카드형
-                        </button>
-                        <button type="button" id="btn-list" class="btn btn-sm btn-light">
-                            <i class="fa fa-list mr-1"></i> 열거형
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ====== 카드형 뷰 ====== -->
-                <!-- ✅ 카드형 그리드 뷰 (hover 시 장바구니/좋아요 노출, CSS만 사용) -->
-                <div id="book-grid-view" class="row w-100">
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1" th:each="book : ${books}">
-                        <div class="product-item bg-light mb-4 h-100">
-                            <div class="product-img position-relative overflow-hidden">
-                                <img class="img-fluid w-100"
-                                     th:src="${book.bookImage != null ? book.bookImage : '/img/product-1.jpg'}"
-                                     alt="" style="aspect-ratio: 1/1.4; object-fit: cover;">
-
-                                <!-- 🔹 이 부분이 호버 시 나오는 버튼들 (CSS에 이미 있음) -->
-                                <div class="product-action">
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/carts/add(bookId=${book.bookId})}">
-                                        <i class="fa fa-shopping-cart"></i>
-                                    </a>
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/members/likes/add(bookId=${book.bookId})}">
-                                        <i class="far fa-heart"></i>
-                                    </a>
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/books/{id}(id=${book.bookId})}">
-                                        <i class="fa fa-search"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="text-center py-4">
-                                <a class="h6 text-decoration-none text-truncate"
-                                   th:href="@{/books/{id}(id=${book.bookId})}"
-                                   th:text="${book.bookName}"
-                                   style="display:block; max-width:90%; margin:0 auto;">
-                                    Book Title
-                                </a>
-
-                                <div class="d-flex align-items-center justify-content-center mt-2">
-                                    <h5 th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                    <h6 class="text-muted ml-2">
-                                        <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">
-                                            15,000원
-                                        </del>
-                                    </h6>
-                                </div>
-
-                                <div class="d-flex align-items-center justify-content-center mb-1">
-                                    <small class="text-muted mr-2" th:text="${book.bookAuthor}">Author</small>
-                                    <small class="text-muted" th:text="${book.bookPublisher}">Publisher</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- ✅ 리스트형 뷰 (우측에 버튼들) -->
-                <div id="book-list-view" class="d-none w-100">
-                    <div class="bg-light mb-3 p-3 d-flex align-items-stretch"
-                         th:each="book : ${books}">
-                        <!-- 썸네일 -->
-                        <div class="mr-3" style="width:120px;">
-                            <a th:href="@{/books/{id}(id=${book.bookId})}">
-                                <img class="img-fluid"
-                                     th:src="${book.bookImage != null ? book.bookImage : '/img/product-1.jpg'}"
-                                     alt="" style="aspect-ratio: 1/1.4; object-fit: cover;">
-                            </a>
-                        </div>
-
-                        <!-- 내용 -->
-                        <div class="flex-grow-1 d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <a class="h6 text-decoration-none text-dark"
-                                       th:href="@{/books/{id}(id=${book.bookId})}"
-                                       th:text="${book.bookName}">
-                                        Book Title
-                                    </a>
-                                    <div class="small text-muted" th:text="${book.bookAuthor}">Author</div>
-                                    <div class="small text-muted" th:text="${book.bookPublisher}">Publisher</div>
-                                </div>
-
-                                <div class="text-right">
-                                    <div class="font-weight-bold"
-                                         th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">
-                                        12,000원
-                                    </div>
-                                    <div class="small text-muted">
-                                        <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">
-                                            15,000원
-                                        </del>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 짧은 설명 -->
-                            <p class="mt-2 mb-2 small text-muted text-truncate"
-                               style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;"
-                               th:text="${book.shortDescription}">
-                                짧은 설명이 들어가는 영역입니다. 최대 두 줄 정도까지만 보여줍니다.
-                            </p>
-
-                            <!-- 🔹 우측 버튼들 (색상 다른 버튼) -->
-                            <div class="d-flex justify-content-end mt-auto">
-                                <a class="btn btn-sm btn-outline-dark mr-2"
-                                   th:href="@{/carts/add(bookId=${book.bookId})}">
-                                    장바구니
-                                </a>
-                                <a class="btn btn-sm btn-outline-dark mr-2"
-                                   th:href="@{/members/likes/add(bookId=${book.bookId})}">
-                                    찜
-                                </a>
-                                <a class="btn btn-sm btn-primary"
-                                   th:href="@{/books/{id}(id=${book.bookId})}">
-                                    상세보기
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <a class="breadcrumb-item text-dark" href="/">Home</a>
+                    <a class="breadcrumb-item text-dark" href="/api/books">Books</a>
+                    <span class="breadcrumb-item active" th:text="${book.bookName}">책 제목</span>
+                </nav>
             </div>
         </div>
     </div>
 
+    <div class="container-fluid pb-5">
+        <div class="row px-xl-5">
+
+            <div class="col-lg-5 mb-30">
+                <div class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner bg-light">
+                        <div class="carousel-item active">
+                            <img class="detail-img"
+                                 th:src="${book.bookImage != null ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                                 alt="Image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 h-auto mb-30">
+                <div class="h-100 bg-light p-30">
+                    <h3 th:text="${book.bookName}">도서 제목</h3>
+
+                    <div class="d-flex mb-3">
+                        <div class="text-primary mr-2">
+                            <small class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
+                                   th:classappend="${book.bookReviewRate >= i} ? 'text-primary' : 'text-secondary'"></small>
+                        </div>
+                        <small class="pt-1" th:text="'(' + ${book.viewCount} + ' Views)'">(99 Views)</small>
+                    </div>
+
+                    <h5 class="font-weight-semi-bold mb-4">
+                        <span th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</span>
+                        <del class="text-muted ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}"
+                             th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
+                    </h5>
+
+                    <p class="mb-4" th:text="${book.bookDescription}">도서 상세 설명</p>
+
+                    <ul class="list-unstyled mb-4">
+                        <li><strong>저자:</strong> <span th:text="${book.bookAuthor}">홍길동</span></li>
+                        <li><strong>출판사:</strong> <span th:text="${book.bookPublisher}">출판사</span></li>
+                        <li><strong>출판일:</strong> <span th:text="${book.bookPublicationDate}">2025-01-01</span></li>
+                        <li><strong>ISBN:</strong> <span th:text="${book.isbn}">123456789</span></li>
+                    </ul>
+
+                    <div class="d-flex align-items-center mb-4 pt-2">
+                        <div class="input-group quantity mr-3" style="width: 130px;">
+                            <div class="input-group-btn">
+                                <button class="btn btn-primary btn-minus"><i class="fa fa-minus"></i></button>
+                            </div>
+                            <input type="text" class="form-control bg-secondary border-0 text-center" id="cartQuantity" value="1">
+                            <div class="input-group-btn">
+                                <button class="btn btn-primary btn-plus"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary px-3 mr-2" id="btn-add-cart" th:data-book-id="${book.bookId}">
+                            <i class="fa fa-shopping-cart mr-1"></i> 장바구니
+                        </button>
+                        <button class="btn btn-dark px-3" onclick="alert('바로 구매 기능 구현 필요')">
+                            <i class="fa fa-credit-card mr-1"></i> 바로구매
+                        </button>
+                    </div>
+
+                    <div class="d-flex pt-2">
+                        <strong class="text-dark mr-2">Share on:</strong>
+                        <div class="d-inline-flex">
+                            <a class="text-dark px-2" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="text-dark px-2" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="text-dark px-2" href=""><i class="fab fa-linkedin-in"></i></a>
+                            <a class="text-dark px-2" href=""><i class="fab fa-pinterest"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row px-xl-5">
+            <div class="col">
+                <div class="bg-light p-30">
+                    <div class="nav nav-tabs mb-4">
+                        <a class="nav-item nav-link active" data-toggle="tab" href="#tab-pane-1">상세 설명</a>
+                        <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-2">정보</a>
+                        <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-3"
+                           th:text="'리뷰 (' + (${reviews != null ? reviews.totalElements : 0}) + ')'">리뷰 (0)</a>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-pane-1">
+                            <h4 class="mb-3">도서 소개</h4>
+                            <p th:text="${book.bookDescription}">상세 내용</p>
+                        </div>
+                        <div class="tab-pane fade" id="tab-pane-2">
+                            <h4 class="mb-3">목차</h4>
+                            <p th:text="${book.bookIndex}">목차 내용이 없습니다.</p>
+                        </div>
+                        <div class="tab-pane fade" id="tab-pane-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4 class="mb-4" th:text="${reviews != null ? reviews.totalElements + '개의 리뷰가 있습니다.' : '리뷰가 없습니다.'}"></h4>
+
+                                    <div class="media mb-4" th:if="${reviews != null}" th:each="review : ${reviews.content}">
+                                        <img src="/img/user.jpg" alt="Image" class="img-fluid mr-3 mt-1" style="width: 45px;">
+                                        <div class="media-body">
+                                            <h6 th:text="${review.writerName != null ? review.writerName : '익명'}">
+                                                User Name<small> - <i th:text="${review.createdAt}">01 Jan 2025</i></small>
+                                            </h6>
+
+                                            <div class="text-primary mb-2">
+                                                <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
+                                                   th:classappend="${review.reviewRate >= i} ? 'text-primary' : 'text-secondary'"></i>
+                                            </div>
+
+                                            <p th:text="${review.reviewContents}">리뷰 내용</p>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${reviews == null or reviews.content.isEmpty()}">
+                                        <p>작성된 리뷰가 없습니다.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4 class="mb-4">리뷰 작성</h4>
+                                    <small>상품을 구매하신 후 리뷰를 작성할 수 있습니다.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <th:block layout:fragment="script">
     <script>
-        // 뷰 전환 및 장바구니 Ajax 처리
-        (function () {
-            // 카드형 / 리스트형 토글
-            const $grid = $('#book-grid-view');
-            const $list = $('#book-list-view');
-            const $btnGrid = $('#btn-grid');
-            const $btnList = $('#btn-list');
-
-            $btnGrid.on('click', function () {
-                $grid.removeClass('d-none');
-                $list.addClass('d-none');
-
-                $btnGrid.removeClass('btn-light').addClass('btn-primary text-white');
-                $btnList.removeClass('btn-primary text-white').addClass('btn-light');
+        $(document).ready(function () {
+            // 수량 조절 버튼 로직
+            $('.quantity button').on('click', function () {
+                var button = $(this);
+                var oldValue = button.parent().parent().find('input').val();
+                var newVal;
+                if (button.hasClass('btn-plus')) {
+                    newVal = parseFloat(oldValue) + 1;
+                } else {
+                    if (oldValue > 1) {
+                        newVal = parseFloat(oldValue) - 1;
+                    } else {
+                        newVal = 1;
+                    }
+                }
+                button.parent().parent().find('input').val(newVal);
             });
 
-            $btnList.on('click', function () {
-                $grid.addClass('d-none');
-                $list.removeClass('d-none');
-
-                $btnList.removeClass('btn-light').addClass('btn-primary text-white');
-                $btnGrid.removeClass('btn-primary text-white').addClass('btn-light');
-            });
-
-            // 장바구니 Ajax 추가 (카드형 & 리스트형 공통)
-            $(document).on('click', '.btn-add-cart', function () {
+            // 장바구니 담기 AJAX
+            $('#btn-add-cart').on('click', function () {
                 const bookId = $(this).data('book-id');
-                const quantity = 1; // 리스트/카드에서 기본 1권
+                const quantity = $('#cartQuantity').val();
 
                 $.ajax({
                     url: '/carts/add',
@@ -227,28 +190,22 @@
                     contentType: 'application/json',
                     data: JSON.stringify({
                         bookId: bookId,
-                        cartQuantity: quantity
+                        cartQuantity: parseInt(quantity)
                     }),
                     success: function (res) {
-                        if (res && res.message) {
-                            alert(res.message);
-                        } else {
-                            alert('장바구니에 담았습니다.');
-                        }
-                        // TODO: 헤더 장바구니 개수 갱신 로직이 있다면 여기에서 호출
+                        alert('장바구니에 담겼습니다.');
                     },
                     error: function (xhr) {
                         if (xhr.status === 401) {
                             alert('로그인이 필요합니다.');
-                            // location.href = '/api/auth/login';
+                            location.href = '/login';
                         } else {
-                            alert('장바구니 담기 중 오류가 발생했습니다.');
+                            alert('오류가 발생했습니다: ' + xhr.responseText);
                         }
                     }
                 });
             });
-
-        })();
+        });
     </script>
 </th:block>
 
