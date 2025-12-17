@@ -40,7 +40,7 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
         // 2. 각 영역별 데이터 주입
         addCategoryMenu(mv);
         addCartBadge(request, mv);
-        addMemberInfo(request, mv);
+        //addMemberInfo(request, mv);
     }
 
     // --- 1. 카테고리 메뉴용 모델 주입  ---
