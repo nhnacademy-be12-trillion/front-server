@@ -3,14 +3,13 @@ package com.nhnacademy.frontserver.layout.interceptor;
 import com.nhnacademy.frontserver.common.AuthConst;
 import com.nhnacademy.frontserver.layout.cartbadge.service.CartBadgeService;
 import com.nhnacademy.frontserver.layout.category.service.CategoryService;
-import com.nhnacademy.frontserver.layout.member.CurrentMember;
+import com.nhnacademy.frontserver.layout.logininfo.LoginInfo;
+import com.nhnacademy.frontserver.layout.logininfo.service.LoginInfoService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.context.annotation.Lazy;
@@ -23,11 +22,14 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
 
     private final CartBadgeService cartBadgeService;
     private final CategoryService categoryService;
+    private final LoginInfoService loginInfoService;
 
     public LayoutDataInterceptor(@Lazy CartBadgeService cartBadgeService,
-                                 @Lazy CategoryService categoryService) {
+                                 @Lazy CategoryService categoryService,
+                                 @Lazy LoginInfoService loginInfoService) {
         this.cartBadgeService = cartBadgeService;
         this.categoryService = categoryService;
+        this.loginInfoService = loginInfoService;
     }
 
     @Override
@@ -55,14 +57,7 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
     }
     // --- 3. 회원 정보용 모델 주입 ---
     private void addMemberInfo(HttpServletRequest request, ModelAndView mv) {
-        String name = request.getHeader(AuthConst.HEADER_MEMBER_NAME);
-        if (!StringUtils.hasText(name)) return;
-
-        CurrentMember member = CurrentMember.builder()
-                .name(name)
-                .role(request.getHeader(AuthConst.HEADER_MEMBER_ROLE))
-                .build();
-
+        LoginInfo member = loginInfoService.getLoginInfo();
         mv.addObject("member", member);
     }
 
