@@ -12,6 +12,7 @@
 
 package com.nhnacademy.frontserver.book;
 
+import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import com.nhnacademy.frontserver.PageResponse;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -22,10 +23,19 @@ import org.springframework.web.bind.annotation.*;
         url = "${gateway.url}")
 public interface BookClient {
 
-    //TODO 현재 publisherName 호출 시 null
+    // [수정됨] 도서 목록 조회 (파라미터 지원)
     // Pageable 응답 예시
     @GetMapping("/api/books")
-    PageResponse<BookListResponse> getBooks();
+    PageResponse<BookListResponse> getBooks(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "sort", defaultValue = "bookId,desc") String sort
+    );
+
+    // [추가됨] 파라미터 없는 기본 호출을 위한 Default 메서드 (기존 코드 호환성 유지)
+    default PageResponse<BookListResponse> getBooks() {
+        return getBooks(0, 20, "bookId,desc");
+    }
 
     @GetMapping("/api/books/{book_id}")
     BookDetailResponse getBookDetail(@PathVariable("book_id") Long bookId);
@@ -51,4 +61,8 @@ public interface BookClient {
     // 카테고리별 도서 Top 5 (카테고리 ID 파라미터)
     @GetMapping("/api/books/categories/{categoryId}/top")
     List<BookListResponse> getBooksByCategory(@PathVariable("categoryId") Long categoryId);
+
+    // [신규 추가] 1차 카테고리 목록 조회 (메인 페이지 버튼용)
+    @GetMapping("/api/books/categories/roots")
+    List<CategoryTreeResponse> getRootCategories();
 }
