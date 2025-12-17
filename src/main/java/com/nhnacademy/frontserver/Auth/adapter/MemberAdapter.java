@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "gateway-service", configuration = FeignClientConfig.class)
+@FeignClient(name = "gateway-auth", url = "${gateway.url}", configuration = FeignClientConfig.class, contextId = "gateway-auth")
 public interface MemberAdapter {
 
     @PostMapping("/auth/login")
