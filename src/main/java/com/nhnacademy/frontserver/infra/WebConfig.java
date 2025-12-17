@@ -1,6 +1,7 @@
 package com.nhnacademy.frontserver.infra;
 
 
+import com.nhnacademy.frontserver.Auth.interceptor.GuestCookieInterceptor;
 import com.nhnacademy.frontserver.common.cartsummary.CartBadgeInterceptor;
 import com.nhnacademy.frontserver.infra.argumentResolver.CustomArgumentResolver;
 import java.util.List;
@@ -16,6 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final List<CustomArgumentResolver> argumentResolvers;
 
     private final CartBadgeInterceptor cartBadgeInterceptor;
+    private final GuestCookieInterceptor guestCookieInterceptor;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -30,6 +32,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns( //TODO 추후 추가적으로 제외 패턴 추가
                         "/static/**", "/css/**", "/js/**", "/images/**", // 정적 자원 제외
                         "/favicon.ico", "/error", "/api/**" // API 요청 등 제외
+                );
+        registry.addInterceptor(guestCookieInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns( //TODO 추후 추가적으로 제외 패턴 추가
+                        "/static/**", "/css/**", "/js/**", "/images/**",
+                        "/favicon.ico", "/error", "/api/**"
                 );
     }
 }

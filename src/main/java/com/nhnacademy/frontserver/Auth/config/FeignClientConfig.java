@@ -1,0 +1,36 @@
+package com.nhnacademy.frontserver.Auth.config;
+
+import feign.RequestInterceptor;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+@Slf4j
+@Configuration
+public class FeignClientConfig {
+
+    // 브라우저로 부터 받은 쿠키 꺼내서 헤더로 변경
+    @Bean
+    public RequestInterceptor requestInterceptor() {
+        return template -> {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                Cookie[] cookies = request.getCookies();
+
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        if ("accessToken".equals(cookie.getName())) {
+                            template.header("Authorization", "Bearer " + cookie.getValue());
+                        }
+                    }
+                }
+            }
+        };
+    }
+}
