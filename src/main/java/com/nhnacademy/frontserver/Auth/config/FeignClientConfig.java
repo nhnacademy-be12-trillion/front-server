@@ -28,6 +28,9 @@ public class FeignClientConfig {
                         if ("accessToken".equals(cookie.getName())) {
                             template.header("Authorization", "Bearer " + cookie.getValue());
                         }
+                        if ("guestId".equals(cookie.getName())) {
+                            template.header("Cookie", "guestId=" + cookie.getValue());
+                        }
                     }
                 }
             }
