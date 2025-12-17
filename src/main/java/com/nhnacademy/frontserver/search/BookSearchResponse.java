@@ -2,7 +2,7 @@ package com.nhnacademy.frontserver.search;
 
 import java.util.List;
 
-record BookSearchResponse(
+public record BookSearchResponse(
         List<BookSearchResult> results,
         long total,
         int page,

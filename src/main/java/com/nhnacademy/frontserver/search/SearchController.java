@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -27,19 +28,22 @@ public class SearchController {
                 : searchClient.search(q, sort, page, size);                    // :contentReference[oaicite:7]{index=7}
 
         long totalCount = res.total();
-        int totalPages = (int) Math.ceil(totalCount / (double) res.size());
 
-        // 템플릿에서 쓰는 이름으로 넣기
+        int pageSize = (res.size() <= 0 ? size : res.size());
+        int totalPages = (pageSize <= 0) ? 0 : (int) Math.ceil(totalCount / (double) pageSize);
+
+        int currentPage = Math.max(0, res.page());
+        boolean first = currentPage == 0;
+        boolean last = (totalPages == 0) || (currentPage >= totalPages - 1);
+
         model.addAttribute("query", q);
         model.addAttribute("sort", sort.name());
-        model.addAttribute("books", res.results());
+        model.addAttribute("size", pageSize);
+        model.addAttribute("result", res.results());
         model.addAttribute("totalCount", totalCount);
         model.addAttribute("totalPages", totalPages);
+        model.addAttribute("page", new PageView(currentPage, first, last));
 
-        // page.*(first/last/number) “유지”하려면 이걸 넣어줘야 함
-        model.addAttribute("page", new PageView(res.page(),
-                res.page() == 0,
-                res.page() >= totalPages - 1));
 
         return "search-result";
     }
