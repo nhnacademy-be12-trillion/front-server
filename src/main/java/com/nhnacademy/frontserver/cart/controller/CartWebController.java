@@ -1,20 +1,12 @@
-/*
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * + Copyright 2025. NHN Academy Corp. All rights reserved.
- * + * While every precaution has been taken in the preparation of this resource,  assumes no
- * + responsibility for errors or omissions, or for damages resulting from the use of the information
- * + contained herein
- * + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
- * + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
- * + prior written permission.
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- */
-
 package com.nhnacademy.frontserver.cart.controller;
 
-import com.nhnacademy.frontserver.AddResponse;
+import com.nhnacademy.frontserver.book.BookClient;
+import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.*;
+import com.nhnacademy.frontserver.common.AuthConst;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,78 +14,123 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Controller
 @RequestMapping("/carts")
 @RequiredArgsConstructor
-// TODO 1... 타 API Client 이용해서 더 많은 정보 담아야 함.
-// ToDO 2... 글로벌 헤더 (장바구니 담은 개수 or 장바구니 담은 종류) 어떻게 할건지...
 public class CartWebController {
 
     private final CartClient cartClient;
+    private final BookClient bookClient;
 
+    /**
+     * [뷰 전용 DTO] HTML 렌더링을 위해 장바구니+책정보+합계금액을 합친 객체
+     */
+    @Getter
+    @AllArgsConstructor
+    public static class CartItemDetailDto {
+        private Long id; // bookId (HTML에서 item.id로 사용)
+        private BookDetailResponse book; // 책 상세 정보
+        private int quantity; // 수량
+        private long subtotal; // 소계 (가격 * 수량)
+    }
+
+    /**
+     * [뷰 전용 DTO] 장바구니 요약 정보
+     */
+    @Getter
+    @AllArgsConstructor
+    public static class CartTotalSummaryDto {
+        private long subTotal;     // 상품 총 금액
+        private long shippingFee;  // 배송비
+        private long totalPrice;   // 최종 결제 금액
+    }
+
+    /**
+     * [장바구니 페이지 조회]
+     */
     @GetMapping
     public String viewCartList(Model model) {
+
+        // 1. 장바구니 목록 조회 (bookId만 있음)
         List<CartResponseDto> cartItems = cartClient.getCartItems().getBody();
 
-        // 총 개수 조회 (배지 표기용 - AJAX 안 쓰므로 여기서 같이 호출)
-        CartSummaryResponseDto cartSummary = cartClient.getCartSummary().getBody();
+        List<CartItemDetailDto> viewItems = new ArrayList<>();
+        long totalItemPrice = 0;
 
-        model.addAttribute("cartItems", cartItems);
-        model.addAttribute("cartSummary", cartSummary);
+        // 2. 각 항목별 책 상세 정보 조회 및 가격 계산
+        if (cartItems != null) {
+            for (CartResponseDto item : cartItems) {
+                // FeignClient로 책 정보 조회
+                BookDetailResponse bookInfo = bookClient.getBookDetail(item.getBookId());
 
-        return "cart";
+                // 소계 계산 (판매가 * 수량)
+                long subTotal = (long) bookInfo.bookSalePrice() * item.getCartQuantity();
+                totalItemPrice += subTotal;
+
+                // 뷰용 객체 생성
+                viewItems.add(new CartItemDetailDto(
+                        item.getBookId(),
+                        bookInfo,
+                        item.getCartQuantity(),
+                        subTotal
+                ));
+            }
+        }
+
+        // 3. 배송비 정책 (예: 3만원 이상 무료, 아니면 5000원) -> 비즈니스 로직에 맞게 수정 필요
+        //long shippingFee = (totalItemPrice > 0 && totalItemPrice < 30000) ? 5000 : 0;
+        long shippingFee = 5000;
+        long finalPrice = totalItemPrice + shippingFee;
+
+        // 4. 모델에 담기
+        model.addAttribute("cartItems", viewItems); // 리스트
+        model.addAttribute("cart", new CartTotalSummaryDto(totalItemPrice, shippingFee, finalPrice)); // 요약 정보
+
+        return "cart/list";
     }
 
     /**
      * [동작] 장바구니 담기
      */
-    @PostMapping
-    @ResponseBody
-    public ResponseEntity<AddResponse> addToCart(@RequestBody CartCreateRequestDto requestDto) {
-        // ORDER-SERVICE Feign 호출
+    @PostMapping("/add")
+    public ResponseEntity<Void> addToCart(@RequestBody CartCreateRequestDto requestDto) {
         cartClient.addToCart(requestDto);
 
-        // 장바구니 카운트 같이 보내고 싶으면 cartCount 같이 내려줘도 됨
-        AddResponse response = new AddResponse(true, "장바구니에 담았습니다.");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 
     /**
      * [동작] 수량 변경
      */
     @PostMapping("/update")
-    public String updateQuantity(
-            @RequestParam Long bookId,
-            @RequestParam Integer quantity
-    ) {
-        cartClient.updateCartItem(bookId, new CartUpdateRequestDto(quantity));
+    public String updateQuantity(@RequestParam("bookId") Long bookId,
+                                 @RequestParam("quantity") Integer quantity) {
+        // 수량은 1보다 작을 수 없음
+        if (quantity < 1) quantity = 1;
 
+        cartClient.updateCartItem(bookId, new CartUpdateRequestDto(quantity));
         return "redirect:/carts";
     }
 
     /**
-     * [동작] 삭제 (단건)
+     * [동작] 삭제
      */
     @PostMapping("/delete/{bookId}")
     public String deleteItem(@PathVariable Long bookId) {
         cartClient.removeCartItem(bookId);
-
         return "redirect:/carts";
     }
 
     /**
-     * [동작] 장바구니 비우기 (전체 삭제)
-     * - 타임리프 Form에서 action="/carts/clear" method="post"로 호출
+     * [동작] 비우기
      */
     @PostMapping("/clear")
     public String clearCart() {
         cartClient.clearCart();
-
         return "redirect:/carts";
     }
 }
