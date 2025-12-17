@@ -11,6 +11,23 @@
     <th:block layout:fragment="head">
         <style>
             .detail-img { width: 100%; max-height: 500px; object-fit: contain; background: #f8f9fa; }
+
+            /* 리뷰 이미지 썸네일 스타일 */
+            .review-img-thumb {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 5px;
+                cursor: pointer;
+                border: 1px solid #ddd;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                transition: 0.2s;
+            }
+            .review-img-thumb:hover {
+                opacity: 0.8;
+                border-color: #007bff;
+            }
         </style>
     </th:block>
 </head>
@@ -121,6 +138,7 @@
                             <h4 class="mb-3">목차</h4>
                             <p th:text="${book.bookIndex}">목차 내용이 없습니다.</p>
                         </div>
+
                         <div class="tab-pane fade" id="tab-pane-3">
                             <div class="row">
                                 <div class="col-md-6">
@@ -139,6 +157,16 @@
                                             </div>
 
                                             <p th:text="${review.reviewContents}">리뷰 내용</p>
+
+                                            <div th:if="${!#lists.isEmpty(review.imageUrls)}" class="d-flex flex-wrap mt-2">
+                                                <div th:each="imgUrl : ${review.imageUrls}">
+                                                    <img th:src="@{'/trillion-bucket/' + ${imgUrl}}"
+                                                         class="review-img-thumb"
+                                                         alt="리뷰 이미지"
+                                                         onclick="window.open(this.src, '_blank')">
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
 
