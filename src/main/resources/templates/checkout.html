@@ -28,24 +28,29 @@
                 </h5>
 
                 <div class="bg-light p-30 mb-5">
-                    <form th:action="@{/api/orders}" method="post">
+                    <form th:action="@{/orders}" method="post" th:object="${orderCreateRequest}">
+
+                        <!-- 주문자 정보 -->
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>주문자 이름</label>
+                                <input class="form-control" type="text" th:field="*{ordererName}">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>주문자 연락처</label>
+                                <input class="form-control" type="text" th:field="*{ordererContact}">
+                            </div>
+                        </div>
 
                         <!-- 수령인 정보 -->
                         <div class="row">
                             <div class="col-md-6 form-group">
                                 <label>수령인 이름</label>
-                                <input class="form-control" type="text" name="receiver"
-                                       th:value="${orderForm.receiver}">
+                                <input class="form-control" type="text" th:field="*{receiverName}">
                             </div>
                             <div class="col-md-6 form-group">
-                                <label>연락처</label>
-                                <input class="form-control" type="text" name="phone"
-                                       th:value="${orderForm.phone}">
-                            </div>
-                            <div class="col-md-12 form-group">
-                                <label>이메일</label>
-                                <input class="form-control" type="email" name="email"
-                                       th:value="${orderForm.email}">
+                                <label>수령인 연락처</label>
+                                <input class="form-control" type="text" th:field="*{receiverContact}">
                             </div>
                         </div>
 
@@ -54,60 +59,71 @@
                             <div class="col-md-12 form-group">
                                 <label>우편번호</label>
                                 <div class="d-flex">
-                                    <input class="form-control" type="text" name="zipcode"
-                                           th:value="${orderForm.zipcode}">
+                                    <input class="form-control" type="text" th:field="*{receiverPostCode}">
                                     <button type="button" class="btn btn-outline-primary ml-2">주소 검색</button>
                                 </div>
                             </div>
                             <div class="col-md-12 form-group">
-                                <label>기본 주소</label>
-                                <input class="form-control" type="text" name="address1"
-                                       th:value="${orderForm.address1}">
+                                <label>주소</label>
+                                <input class="form-control" type="text" name="address1" placeholder="주소">
                             </div>
                             <div class="col-md-12 form-group">
-                                <label>상세 주소</label>
-                                <input class="form-control" type="text" name="address2"
-                                       th:value="${orderForm.address2}">
+                                <label>상세주소</label>
+                                <input class="form-control" type="text" name="address2" placeholder="상세주소">
                             </div>
                         </div>
 
-                        <!-- 배송 메모 -->
-                        <div class="form-group">
-                            <label>배송 메모</label>
-                            <textarea class="form-control" rows="2"
-                                      name="deliveryMessage"
-                                      placeholder="예: 경비실에 맡겨주세요"
-                                      th:text="${orderForm.deliveryMessage}"></textarea>
+                        <!-- 희망 배송일 -->
+                        <div class="col-md-12 form-group">
+                            <label>희망 배송일</label>
+                            <input class="form-control" type="datetime-local" th:field="*{deliveryDate}">
                         </div>
 
-<!--                        &lt;!&ndash; 결제 수단 &ndash;&gt;-->
-<!--                        <h5 class="section-title position-relative text-uppercase mt-4 mb-3">-->
-<!--                            <span class="bg-secondary pr-3">결제 수단</span>-->
-<!--                        </h5>-->
+                        <!-- 비회원일 경우만 노출 -->
+                        <div class="col-md-12 form-group">
+                            <label>비회원 주문 비밀번호</label>
+                            <input class="form-control" type="password" th:field="*{nonMemberPassword}" placeholder="비회원 주문 조회 시 필요합니다.">
+                        </div>
 
-<!--                        <div class="bg-white p-3 border">-->
-<!--                            <div class="form-group mb-2">-->
-<!--                                <input type="radio" id="payment-card" name="payment" value="CARD" checked>-->
-<!--                                <label for="payment-card" class="ml-2">신용/체크카드</label>-->
-<!--                            </div>-->
-<!--                            <div class="form-group mb-2">-->
-<!--                                <input type="radio" id="payment-bank" name="payment" value="BANK">-->
-<!--                                <label for="payment-bank" class="ml-2">계좌이체</label>-->
-<!--                            </div>-->
-<!--                            <div class="form-group mb-0">-->
-<!--                                <input type="radio" id="payment-vbank" name="payment" value="VBANK">-->
-<!--                                <label for="payment-vbank" class="ml-2">가상계좌</label>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <!-- 포인트 및 쿠폰 -->
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>사용 포인트</label>
+                                <input class="form-control" type="number" th:field="*{pointUsage}" min="0">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>쿠폰 ID</label>
+                                <input class="form-control" type="text" th:field="*{couponId}">
+                            </div>
+                        </div>
 
-<!--                        &lt;!&ndash; 숨겨진 값 (장바구니 ID 포함 등) &ndash;&gt;-->
-<!--                        <input type="hidden" name="cartId" th:value="${cart.id}">-->
+                        <!-- 결제 진행 버튼 -->
+                        <button type="submit"
+                                class="btn btn-block btn-primary font-weight-bold my-3 py-3">
+                            결제하기
+                        </button>
                     </form>
                 </div>
             </div>
 
-            <!-- ===== 우측: 주문 요약 ===== -->
+            <!-- ===== 우측: 주문 요약 및 상품 목록 ===== -->
             <div class="col-lg-4">
+                <!-- 주문 상품 목록 -->
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">주문 상품</span>
+                </h5>
+                <div class="bg-light p-30 mb-5">
+                    <div class="border-bottom pb-2 mb-3">
+                        <div th:each="item : ${items}" class="d-flex justify-content-between mb-2">
+                            <div class="d-flex">
+                                <img th:src="${item.thumbnailUrl()}" alt="" style="width: 40px; height: 40px; object-fit: cover; margin-right: 10px;">
+                                <span th:text="${item.title()}" style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">상품명</span>
+                            </div>
+                            <span th:text="${item.quantity()} + '개'">1개</span>
+                        </div>
+                    </div>
+                </div>
+
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">결제 요약</span>
                 </h5>
@@ -118,7 +134,7 @@
                         <!-- 상품 금액 -->
                         <div class="d-flex justify-content-between mb-3">
                             <h6>상품 금액</h6>
-                            <h6 th:text="${#numbers.formatInteger(orderSummary.subTotal, 0, 'COMMA')} + '원'">
+                            <h6 th:text="${#numbers.formatInteger(orderSummary?.subTotal, 0, 'COMMA')} + '원'">
                                 72,000원
                             </h6>
                         </div>
@@ -127,8 +143,8 @@
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">배송비</h6>
                             <h6 class="font-weight-medium"
-                                th:text="${orderSummary.shippingFee > 0 ?
-                                        #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">
+                                th:text="${orderSummary?.shippingFee > 0 ?
+                                        #numbers.formatInteger(orderSummary?.shippingFee, 0, 'COMMA') + '원' : '무료'}">
                                 3,000원
                             </h6>
                         </div>
@@ -138,18 +154,10 @@
                     <div class="pt-2">
                         <div class="d-flex justify-content-between mt-2">
                             <h5>총 결제 금액</h5>
-                            <h5 th:text="${#numbers.formatInteger(orderSummary.totalPrice, 0, 'COMMA')} + '원'">
+                            <h5 th:text="${#numbers.formatInteger(orderSummary?.totalPrice, 0, 'COMMA')} + '원'">
                                 75,000원
                             </h5>
                         </div>
-
-                        <!-- 결제 진행 버튼 -->
-                        <form th:action="@{/orders/complete}" method="post">
-                            <button type="submit"
-                                    class="btn btn-block btn-primary font-weight-bold my-3 py-3">
-                                결제하기
-                            </button>
-                        </form>
                     </div>
                 </div>
 

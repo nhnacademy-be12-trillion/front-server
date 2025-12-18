@@ -12,7 +12,7 @@
 
 package com.nhnacademy.frontserver.order;
 
-record OrderItemCreateRequest(
+public record OrderItemCreateRequest(
         Long bookId,
         int quantity,
         Long packagingId

@@ -1,5 +1,6 @@
-package com.nhnacademy.frontserver.order;
+package com.nhnacademy.frontserver.order.client;
 
+import com.nhnacademy.frontserver.order.PaymentResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

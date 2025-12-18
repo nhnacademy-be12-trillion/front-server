@@ -1,7 +1,9 @@
-package com.nhnacademy.frontserver.order;
+package com.nhnacademy.frontserver.order.client;
 
 import com.nhnacademy.frontserver.PageResponse;
+import com.nhnacademy.frontserver.order.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "gateway-order",
@@ -30,8 +32,8 @@ public interface OrderClient {
     // 환불, 환불 요청된 주문 전체 조회
     @GetMapping("/api/order-items/refunds")
     PageResponse<OrderItemResponse> getAllRefundedOrderItemsByMember(@RequestParam("page") int page,
-                                                                           @RequestParam("size") int size,
-                                                                           @RequestParam("sort") String sort);
+                                                                     @RequestParam("size") int size,
+                                                                     @RequestParam("sort") String sort);
 
     // 주문 단건 조회 (회원)
     @GetMapping("/api/orders/{orderId}")
@@ -42,7 +44,7 @@ public interface OrderClient {
     OrderResponse getOrderByNonMember(NonMemberOrderGetRequest request);
 
     // 주문 생성 (회원, 비회원)
-    @PostMapping
+    @PostMapping("/api/orders")
     OrderResponse createOrder(@RequestBody OrderCreateRequest request);
 
     // 주문 상품 상태 변경 (관리자, 회원)
@@ -63,4 +65,31 @@ public interface OrderClient {
     @PostMapping("/api/orders/non-members/{orderId}/cancel")
     void cancelOrderByNonMember(@PathVariable Long orderId,
                                 @RequestBody NonMemberOrderCancelRequest request);
+
+    // 배송비 조회
+    @GetMapping("/api/orders/delivery-policy")
+    DeliveryPolicyResponse getDeliveryPolicy();
+
+    // 배송비 설정 (초기 설정 및 수정)
+    @PutMapping("/api/orders/delivery-policy")
+    void updateDeliveryPolicy(@RequestBody DeliveryPolicyUpdateRequest request);
+
+    // 포장 목록 조회
+    @GetMapping("/api/orders/packaging")
+    PageResponse<PackagingResponse> getAllPackaging(@RequestParam("page") int page,
+                                                     @RequestParam("size") int size,
+                                                     @RequestParam("sort") String sort);
+
+    // 포장 생성
+    @PostMapping("/api/orders/packaging")
+    PackagingResponse createPackaging(@RequestBody PackagingCreateRequest request);
+
+    // 포장 수정
+    @PutMapping("/api/orders/packaging/{packagingId}")
+    void updatePackaging(@PathVariable Long packagingId,
+                         @RequestBody PackagingUpdateRequest request);
+
+    // 포장 삭제
+    @DeleteMapping("/api/orders/packaging/{packagingId}")
+    void removePackaging(@PathVariable Long packagingId);
 }
