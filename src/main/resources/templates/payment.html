@@ -7,6 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Trillion-Shop | 결제하기</title>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
     <th:block layout:fragment="head">
     </th:block>
 </head>
@@ -21,8 +22,7 @@
                     <span class="bg-secondary pr-3">결제하기</span>
                 </h2>
                 <div class="bg-light p-30 mb-5">
-                    
-                    <!-- 주문 상품 목록 -->
+
                     <h5 class="section-title position-relative text-uppercase mb-3">
                         <span class="bg-secondary pr-3">주문 상품</span>
                     </h5>
@@ -50,7 +50,6 @@
                         </table>
                     </div>
 
-                    <!-- 최종 결제 정보 -->
                     <h5 class="section-title position-relative text-uppercase mb-3">
                         <span class="bg-secondary pr-3">최종 결제 금액</span>
                     </h5>
@@ -78,38 +77,74 @@
                         </div>
                     </div>
 
-                    <!-- 결제 수단 선택 -->
                     <h5 class="section-title position-relative text-uppercase mb-3">
                         <span class="bg-secondary pr-3">결제 수단 선택</span>
                     </h5>
                     <div class="mb-4">
-                        <p>여기에 토스페이, 카카오페이 등 다양한 결제 수단 선택 및 정보 입력 UI가 들어갑니다.</p>
-                        <form th:action="@{/payments/process}" method="post">
-                            <input type="hidden" name="orderId" th:value="${order.orderId}" />
-                            <input type="hidden" name="orderNumber" th:value="${order.orderNumber}" />
-                            <input type="hidden" name="amount" th:value="${order.totalPrice}" />
-                            <div class="form-group">
-                                <label for="paymentMethod">결제 방법</label>
-                                <select class="custom-select" id="paymentMethod" name="paymentMethod">
-                                    <option value="TOSS">토스페이</option>
-                                    <option value="CARD">신용카드</option>
-                                    <option value="BANK_TRANSFER">계좌이체</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-block btn-primary font-weight-bold py-3">
-                                <span th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')} + '원'"></span> 결제하기
-                            </button>
-                        </form>
+                        <div class="form-group">
+                            <label for="paymentMethod">결제 방법</label>
+                            <select class="custom-select" id="paymentMethod">
+                                <option value="카드">일반결제 (카드/계좌)</option>
+                                <option value="토스페이">토스페이 앱 결제</option>
+                                <option value="가상계좌">가상계좌</option>
+                            </select>
+                        </div>
+
+                        <button type="button" onclick="requestPayment()" class="btn btn-block btn-primary font-weight-bold py-3">
+                            <span th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')} + '원'"></span> 결제하기
+                        </button>
                     </div>
 
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 
 <th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const clientKey = [[${tossClientKey}]];
+        const tossPayments = TossPayments(clientKey);
+
+        // [수정] orderId(PK)가 아닌 orderNumber(주문번호)를 사용
+        const orderId = [[${order.orderNumber}]];
+        const amount = [[${order.totalPrice}]];
+
+        // 주문명 생성
+        const firstItemName = [[${order.orderItems[0].bookName}]];
+        const totalCount = [[${order.orderItems.size()}]];
+        const orderName = totalCount > 1 ? firstItemName + ' 외 ' + (totalCount - 1) + '건' : firstItemName;
+
+        const customerName = "구매자";
+
+        function requestPayment() {
+            const methodSelect = document.getElementById("paymentMethod");
+            const method = methodSelect.value;
+
+            // Provider 정보 설정
+            const providerInfo = 'TOSS';
+
+            // 리다이렉트 URL 설정 (Provider 포함)
+            const successUrl = window.location.origin + '/payments/success?provider=' + providerInfo;
+            const failUrl = window.location.origin + '/payments/fail';
+
+            tossPayments.requestPayment(method, {
+                amount: amount,
+                orderId: orderId, // 여기에는 이제 orderNumber가 들어갑니다.
+                orderName: orderName,
+                customerName: customerName,
+                successUrl: successUrl,
+                failUrl: failUrl,
+            })
+                .catch(function (error) {
+                    if (error.code === 'USER_CANCEL') {
+                        // 취소 시 처리
+                    } else {
+                        alert(error.message);
+                    }
+                });
+        }
+    </script>
 </th:block>
 
 </body>
