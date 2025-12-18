@@ -21,19 +21,19 @@
 <body>
 
 <div class="container-fluid">
-  <div th:include="~{fragments/header :: topbar}"></div>
+  <div th:replace="~{fragments/header :: topbar}"></div>
 </div>
 <div class="container-fluid bg-dark mb-30">
-  <div th:include="~{fragments/header :: navbar}"></div>
+  <div th:replace="~{fragments/header :: navbar}"></div>
 </div>
 <div layout:fragment="content">
   <p>기본 콘텐츠 영역</p>
 </div>
 
 
-<div th:include="~{fragments/footer :: footer}" class="container-fluid bg-dark text-secondary mt-5 pt-5"></div>
-<a th:include="~{fragments/footer :: back_to_top}" href="#" class="btn btn-primary back-to-top"></a>
-<div th:include="~{fragments/footer :: scripts}"></div>
+<div th:replace="~{fragments/footer :: footer}" class="container-fluid bg-dark text-secondary mt-5 pt-5"></div>
+<a th:replace="~{fragments/footer :: back_to_top}" href="#" class="btn btn-primary back-to-top"></a>
+<div th:replace="~{fragments/footer :: scripts}"></div>
 
 <th:block layout:fragment="script"></th:block>
 
