@@ -17,9 +17,7 @@ public class CartBadgeService {
      * 장바구니 개수 조회
      * - F5 연타... DDOS 등등... 다른데서 방어해야 한다.
      */
-    public int getCartCount(Long memberId, String guestId) {
-        if (memberId == null && (guestId == null || guestId.isEmpty())) return 0;
-
+    public int getCartCount() {
         try {
             CartSummaryResponseDto summary = cartClient.getCartSummary().getBody();
             return (summary != null) ? (int) summary.getTotalQuantity() : 0;

@@ -4,7 +4,6 @@ import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.*;
-import com.nhnacademy.frontserver.common.AuthConst;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
