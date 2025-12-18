@@ -14,7 +14,7 @@ package com.nhnacademy.frontserver.order;
 
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 
-record OrderItemResponse(
+public record OrderItemResponse(
         Long orderItemId,
         Long orderId,
         Long bookId,

@@ -1,6 +1,7 @@
 package com.nhnacademy.frontserver.order.controller;
 
 import com.nhnacademy.frontserver.order.*;
+import com.nhnacademy.frontserver.order.client.OrderClient;
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

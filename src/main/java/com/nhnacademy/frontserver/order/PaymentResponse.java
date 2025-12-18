@@ -14,7 +14,7 @@ package com.nhnacademy.frontserver.order;
 
 import java.time.LocalDateTime;
 
-record PaymentResponse(
+public record PaymentResponse(
         Long paymentId,
         String paymentKey,
         String orderNumber,
