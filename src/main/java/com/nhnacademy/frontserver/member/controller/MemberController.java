@@ -2,13 +2,12 @@ package com.nhnacademy.frontserver.member.controller;
 
 import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.member.MemberClient;
-import com.nhnacademy.frontserver.order.OrderClient;
+import com.nhnacademy.frontserver.order.client.OrderClient;
 import com.nhnacademy.frontserver.order.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
