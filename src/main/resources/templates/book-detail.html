@@ -271,11 +271,13 @@
 <th:block layout:fragment="script">
     <script>
         $(document).ready(function () {
-            // 수량 조절 버튼 로직
-            $('.quantity button').on('click', function () {
+            // [.off('click') 추가] 기존 이벤트를 제거 후 다시 등록하여 중복 방지
+            $('.quantity button').off('click').on('click', function () {
                 var button = $(this);
-                var oldValue = button.parent().parent().find('input').val();
+                var $input = button.parent().parent().find('input#cartQuantity');
+                var oldValue = $input.val();
                 var newVal;
+
                 if (button.hasClass('btn-plus')) {
                     newVal = parseFloat(oldValue) + 1;
                 } else {
@@ -285,11 +287,16 @@
                         newVal = 1;
                     }
                 }
-                button.parent().parent().find('input').val(newVal);
+
+                // 메인 수량 입력창 업데이트
+                $input.val(newVal);
+
+                // 바로구매(buyNowQuantity) 히든 필드 수량도 함께 업데이트
+                $('#buyNowQuantity').val(newVal);
             });
 
-            // 장바구니 담기 AJAX
-            $('#btn-add-cart').on('click', function () {
+            // 장바구니 담기 AJAX (여기도 중복 방지를 위해 off 추가 권장)
+            $('#btn-add-cart').off('click').on('click', function () {
                 const bookId = $(this).data('book-id');
                 const quantity = $('#cartQuantity').val();
 
