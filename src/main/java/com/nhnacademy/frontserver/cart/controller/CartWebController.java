@@ -90,7 +90,7 @@ public class CartWebController {
         model.addAttribute("cartItems", viewItems); // 리스트
         model.addAttribute("cart", new CartTotalSummaryDto(totalItemPrice, shippingFee, finalPrice)); // 요약 정보
 
-        return "cart/list";
+        return "cart";
     }
 
     /**
