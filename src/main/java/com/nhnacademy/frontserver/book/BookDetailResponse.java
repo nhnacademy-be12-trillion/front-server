@@ -13,6 +13,7 @@
 package com.nhnacademy.frontserver.book;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record BookDetailResponse(
         Long bookId,
@@ -31,6 +32,8 @@ public record BookDetailResponse(
         int discountRate,
         double bookReviewRate,
         String bookImage,
-        int viewCount
+        int viewCount,
+        List<CategoryInfo>categoryPath
 ) {
+    public record CategoryInfo(Long categoryId, String categoryName){}
 }
