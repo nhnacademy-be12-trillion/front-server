@@ -31,7 +31,7 @@ public class HomeController {
             @RequestParam(name = "categoryId", defaultValue = "1") Long categoryId,
             Model model
     ) {
-        // 1. 전체 도서 목록
+        // 전체 도서 목록
         try {
             PageResponse<BookListResponse> books = bookClient.getBooks();
             model.addAttribute("books", books);
@@ -39,7 +39,7 @@ public class HomeController {
             model.addAttribute("books", null);
         }
 
-        // 2. 인기 도서
+        // 인기 도서
         try {
             List<BookListResponse> popularBooks = bookClient.getPopularBooks();
             model.addAttribute("popularBooks", popularBooks);
@@ -47,7 +47,7 @@ public class HomeController {
             model.addAttribute("popularBooks", Collections.emptyList());
         }
 
-        // 3. [안전] 1차 카테고리 목록 조회
+        // 뎁스1 카테고리 목록 조회
         List<CategoryTreeResponse> rootCategories = Collections.emptyList();
         try {
             rootCategories = bookClient.getRootCategories();
@@ -56,7 +56,7 @@ public class HomeController {
         }
         model.addAttribute("rootCategories", rootCategories);
 
-        // 4. [안전] 선택된 카테고리 도서 조회
+        // 선택된 카테고리 도서 조회
         List<BookListResponse> categoryBooks = Collections.emptyList();
         try {
             categoryBooks = bookClient.getBooksByCategory(categoryId);
@@ -65,7 +65,7 @@ public class HomeController {
         }
         model.addAttribute("categoryBooks", categoryBooks);
 
-        // 5. 카테고리 이름 찾기 (Null 방어 로직 적용)
+        // 카테고리 이름 찾기
         model.addAttribute("selectedCategoryId", categoryId);
 
         String selectedCategoryName = "추천";
@@ -77,6 +77,15 @@ public class HomeController {
                     .orElse("추천");
         }
         model.addAttribute("selectedCategoryName", selectedCategoryName);
+
+        // 베스트셀러 도서 조회 (Top 5)
+        List<BookListResponse> bestSellers = Collections.emptyList();
+        try {
+            bestSellers = bookClient.getBestSellers();
+        } catch (Exception e) {
+            System.err.println("베스트셀러 조회 실패: " + e.getMessage());
+        }
+        model.addAttribute("bestSellers", bestSellers);
 
         return "index";
     }

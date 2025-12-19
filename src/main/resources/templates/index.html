@@ -86,14 +86,44 @@
         <div class="row px-xl-5">
             <div class="col-lg-8">
                 <div id="header-carousel" class="carousel slide carousel-fade mb-30 mb-lg-0" data-ride="carousel">
+<!--                    <div class="carousel-inner">-->
+<!--                        <div class="carousel-item position-relative active" style="height: 430px;">-->
+<!--                            <img class="position-absolute w-100 h-100" th:src="@{/img/carousel-1.jpg}" style="object-fit: cover;">-->
+<!--                            <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">-->
+<!--                                <div class="p-3">-->
+<!--                                    <h1 class="display-4 text-white mb-3 animate__animated animate__fadeInDown">Best Seller</h1>-->
+<!--                                    <p class="mx-md-5 px-5 animate__animated animate__bounceIn">지금 가장 사랑받는 베스트 셀러를 만나보세요.</p>-->
+<!--                                    <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp" th:href="@{/api/books}">지금 보러가기</a>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
                     <div class="carousel-inner">
-                        <div class="carousel-item position-relative active" style="height: 430px;">
-                            <img class="position-absolute w-100 h-100" th:src="@{/img/carousel-1.jpg}" style="object-fit: cover;">
+                        <div th:each="book, iterStat : ${bestSellers}"
+                             class="carousel-item position-relative"
+                             th:classappend="${iterStat.first} ? 'active'"
+                             style="height: 430px;">
+
+                            <img class="position-absolute w-100 h-100"
+                                 th:src="${book.bookImage != null and book.bookImage != ''} ? ${book.bookImage} : @{/img/carousel-1.jpg}"
+                                 style="object-fit: cover;">
+
                             <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
-                                <div class="p-3">
-                                    <h1 class="display-4 text-white mb-3 animate__animated animate__fadeInDown">Best Seller</h1>
-                                    <p class="mx-md-5 px-5 animate__animated animate__bounceIn">지금 가장 사랑받는 베스트 셀러를 만나보세요.</p>
-                                    <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp" th:href="@{/api/books}">지금 보러가기</a>
+                                <div class="p-3" style="max-width: 700px;">
+                                    <h1 class="display-4 text-white mb-3 animate__animated animate__fadeInDown">
+                                        Best Seller <span th:text="|#${iterStat.count}|">#1</span>
+                                    </h1>
+
+                                    <p class="mx-md-5 px-5 animate__animated animate__bounceIn"
+                                       th:text="${book.bookName}"
+                                       style="font-size: 1.5rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">
+                                        책 제목
+                                    </p>
+
+                                    <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp"
+                                       th:href="@{/books/{id}(id=${book.bookId})}">
+                                        지금 보러가기
+                                    </a>
                                 </div>
                             </div>
                         </div>
