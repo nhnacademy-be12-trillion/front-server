@@ -1,23 +1,29 @@
 package com.nhnacademy.frontserver.order.client;
-
-import com.nhnacademy.frontserver.order.PaymentResponse;
+import com.nhnacademy.frontserver.order.util.payment.PaymentCancelRequestDto;
+import com.nhnacademy.frontserver.order.util.payment.PaymentRequestDto;
+import com.nhnacademy.frontserver.order.util.payment.PaymentResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "gateway-payment",
         url = "${gateway.url}",
         contextId = "paymentClient")
 public interface PaymentClient {
-    //TODO 지훈 PaymentRequestDto 확인, API 경로 논의필요, 결제취소 amount 파라미터 논의
-//    @PostMapping("/payments")
-//    void createPayment(@RequestBody PaymentRequestDto paymentRequestDto);
+    @PostMapping("/api/payments/confirm")
+    PaymentResponse confirmPayment(@RequestBody PaymentRequestDto paymentRequestDto);
 
-    @GetMapping("/api/orders/{orderId}/payment")
-    PaymentResponse getPayment(@PathVariable Long orderId);
+    /**
+     * 결제 내역 단건 조회 (Controller: GET /payments/{orderNumber})
+     * Controller에서 PathVariable이 String orderNumber이므로 타입과 변수명 일치시킴
+     */
+    @GetMapping("/api/payments/{orderNumber}")
+    PaymentResponse getPayment(@PathVariable("orderNumber") String orderNumber);
 
-    @DeleteMapping("/api/orders/{orderId}/payment")
-    void deletePayment(@PathVariable Long orderId);
+    /**
+     * 결제 취소 요청 (Controller: POST /payments/cancel)
+     * Controller가 @RequestBody로 DTO를 받으므로 DELETE가 아니라 POST여야 함
+     */
+    @PostMapping("/api/payments/cancel")
+    void cancelPayment(@RequestBody PaymentCancelRequestDto cancelRequestDto);
 
 }
