@@ -2,7 +2,7 @@ package com.nhnacademy.frontserver.member;
 
 import java.time.LocalDate;
 
-record MemberUpdateRequest(
+public record MemberUpdateRequest(
         String memberContact,
         String memberName,
         LocalDate memberBirth

@@ -1,8 +1,8 @@
-package com.nhnacademy.frontserver.Auth.exception;
+package com.nhnacademy.frontserver.auth.exception;
 
-import com.nhnacademy.frontserver.Auth.adapter.MemberAdapter;
-import com.nhnacademy.frontserver.Auth.dto.TokenResponse;
-import com.nhnacademy.frontserver.Auth.util.CookieUtils;
+import com.nhnacademy.frontserver.auth.client.AuthClient;
+import com.nhnacademy.frontserver.auth.dto.TokenResponse;
+import com.nhnacademy.frontserver.auth.util.CookieUtils;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,11 +18,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class FeignErrorDecoder implements ErrorDecoder {
 
     private final ErrorDecoder defaultDecoder = new Default();
-    private final MemberAdapter memberAdapter; // 재발급 요청용
+    private final AuthClient authClient; // 재발급 요청용
 
     // 순환 참조(Bean Cycle) 방지를 위해 @Lazy 사용
-    public FeignErrorDecoder(@Lazy MemberAdapter memberAdapter) {
-        this.memberAdapter = memberAdapter;
+    public FeignErrorDecoder(@Lazy AuthClient authClient) {
+        this.authClient = authClient;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class FeignErrorDecoder implements ErrorDecoder {
                     try {
                         // Auth 서비스에 재발급 요청 (헤더로 Refresh Token 전송)
                         // 주의: MemberAdapter에 reissue 메소드 구현 필요
-                        TokenResponse newTokens = memberAdapter.reissue(refreshToken);
+                        TokenResponse newTokens = authClient.reissue(refreshToken);
 
                         // 성공 시 새 쿠키 굽기
                         if (servletResponse != null) {
