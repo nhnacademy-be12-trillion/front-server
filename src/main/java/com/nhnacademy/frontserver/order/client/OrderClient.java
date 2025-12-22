@@ -62,7 +62,7 @@ public interface OrderClient {
     void cancelOrderByMember(@PathVariable Long orderId);
 
     // 주문 취소 (비회원)
-    @PostMapping("/api/orders/non-members/{orderId}/cancel")
+    @DeleteMapping("/api/orders/non-members/{orderId}")
     void cancelOrderByNonMember(@PathVariable Long orderId,
                                 @RequestBody NonMemberOrderCancelRequest request);
 

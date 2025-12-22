@@ -1,18 +1,19 @@
 package com.nhnacademy.frontserver.order.controller;
 
 import com.nhnacademy.frontserver.common.PageArgumentResolver;
+import com.nhnacademy.frontserver.order.*;
 import com.nhnacademy.frontserver.order.client.OrderClient;
-import com.nhnacademy.frontserver.order.OrderCreateRequest;
-import com.nhnacademy.frontserver.order.OrderItemCreateRequest;
-import com.nhnacademy.frontserver.order.OrderResponse;
-import com.nhnacademy.frontserver.order.CheckoutItemView;
-import java.util.List;
-import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/orders")
@@ -21,11 +22,13 @@ public class OrderController {
     private final OrderClient orderClient;
     private final PageArgumentResolver pageArgumentResolver;
 
+    // [기존 코드] 주문 생성
     @PostMapping
     public String createOrder(@ModelAttribute OrderCreateRequest request,
                               @RequestParam("address1") String address1,
                               @RequestParam("address2") String address2,
                               HttpSession session) {
+        // ... (기존 로직 동일) ...
         @SuppressWarnings("unchecked")
         List<CheckoutItemView> items = (List<CheckoutItemView>) session.getAttribute("checkoutItems");
         if (items == null || items.isEmpty()) {
@@ -39,21 +42,55 @@ public class OrderController {
         String fullAddress = address1 + " " + address2;
 
         OrderCreateRequest finalRequest = new OrderCreateRequest(
-            request.ordererName(), request.ordererContact(), request.deliveryDate(),
-            request.receiverName(), request.receiverContact(), 
-            fullAddress,
-            request.receiverPostCode(), request.nonMemberPassword(), request.pointUsage(),
-            request.couponId(), orderItems
+                request.ordererName(), request.ordererContact(), request.deliveryDate(),
+                request.receiverName(), request.receiverContact(),
+                fullAddress,
+                request.receiverPostCode(), request.nonMemberPassword(), request.pointUsage(),
+                request.couponId(), orderItems
         );
 
         OrderResponse response = orderClient.createOrder(finalRequest);
 
         session.removeAttribute("checkoutItems");
-
-        // 결제 페이지로 전달할 주문 정보를 세션에 저장
         session.setAttribute("orderForPayment", response);
 
-        // 결제 페이지로 리다이렉트
         return "redirect:/payments";
+    }
+
+    // =====================================================================
+    // [비회원 주문 조회 및 취소]
+    // =====================================================================
+
+    // 1. 비회원 주문 조회 폼 페이지 이동
+    @GetMapping("/non-members-form")
+    public String nonMemberOrderForm() {
+        return "non-members-order-form";
+    }
+
+    // 2. [수정됨] 비회원 주문 조회 처리 (POST)
+    @PostMapping("/non-members")
+    public String getNonMemberOrder(@RequestParam String orderNumber,
+                                    @RequestParam String password,
+                                    Model model) {
+        try {
+            // Client 스펙에 맞는 DTO 생성
+            NonMemberOrderGetRequest request = new NonMemberOrderGetRequest(orderNumber, password);
+
+            // Feign Client 호출
+            OrderResponse order = orderClient.getOrderByNonMember(request);
+
+            // 뷰에 주문 정보 전달
+            model.addAttribute("order", order);
+
+            // [★핵심 추가] 입력한 비밀번호를 뷰로 전달 (나중에 취소할 때 사용하기 위해)
+            model.addAttribute("nonMemberPassword", password);
+
+            return "non-member-order-detail";
+
+        } catch (Exception e) {
+            log.error("비회원 주문 조회 실패", e);
+            model.addAttribute("errorMessage", "주문 정보를 찾을 수 없습니다. 정보를 확인해주세요.");
+            return "non-members-order-form";
+        }
     }
 }
