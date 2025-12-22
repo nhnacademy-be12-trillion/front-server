@@ -58,6 +58,10 @@
                 <option value="50" th:selected="${size == 50}">50개</option>
             </select>
 
+            <!-- 현재 검색 모드 유지(BM25/AI) -->
+            <input type="hidden" name="mode"
+                   th:value="${mode != null ? mode : 'bm25'}"/>
+
             <input type="hidden" name="page" value="0"/>
             <button type="submit">검색</button>
         </form>
@@ -67,6 +71,20 @@
     <p class="muted" style="margin: 6px 0 14px;">
         <b th:text="${query}">-</b> 검색 결과:
         <b th:text="${totalCount}">0</b>건
+
+        <!-- 모드 & 시간 표시 -->
+        <span th:if="${mode == 'ai'}"
+              style="margin-left:8px; font-size:12px; color:#0056b3; font-weight:600;">
+          (AI 검색
+          <span th:if="${elapsedMs != null and elapsedMs > 0}"
+                th:text="' · ' + ${elapsedMs} + 'ms'"> · 0ms</span>
+          )
+        </span>
+
+        <span th:if="${mode != 'ai'}"
+              style="margin-left:8px; font-size:12px; font-size:12px;">
+          (일반 검색)
+        </span>
     </p>
 
     <!-- 결과 없음 -->
@@ -78,14 +96,17 @@
     <!-- 카드형 결과 -->
     <div class="search-grid" th:if="${result != null and !#lists.isEmpty(result)}">
         <div class="card" th:each="b : ${result}">
-            <a th:href="@{/api/books/{id}(id=${b.id})}">
+            <a th:href="@{/books/{id}(id=${b.id})}">
                 <img class="card-img"
-                     th:src="${b.imageUrl != null ? b.imageUrl : '/img/product-1.jpg'}"
+                     th:src="${#strings.isEmpty(b.imageUrl)} ?
+                              '/img/default-book.png' :
+                              '/trillion-bucket/' + b.imageUrl"
                      alt="책 표지"/>
+
             </a>
             <div class="card-body">
                 <a class="title"
-                   th:href="@{/api/books/{id}(id=${b.id})}"
+                   th:href="@{/books/{id}(id=${b.id})}"
                    th:text="${b.title != null ? b.title : '제목 정보 없음'}">제목</a>
 
                 <div class="meta">
@@ -99,27 +120,43 @@
                 </div>
 
                 <div class="tags" th:if="${b.tags != null and !#lists.isEmpty(b.tags)}">
-          <span th:each="t, it : ${b.tags}">
-            <span th:text="${t}">tag</span><span th:if="${!it.last}"> · </span>
-          </span>
+                  <span th:each="t, it : ${b.tags}">
+                    <span th:text="${t}">tag</span><span th:if="${!it.last}"> · </span>
+                  </span>
+                </div>
+
+                <!-- AI 모드일 때만 추천 정보 (필드 있으면 자동 표시, 없으면 그냥 안 나옴) -->
+                <div th:if="${mode == 'ai'}">
+                    <div th:if="${b.recommended}"
+                         style="display:inline-block; padding:2px 6px; border-radius:999px;
+                                background:#eef3ff; color:#1a3cff; font-size:11px; font-weight:600;
+                                margin-top:6px; margin-bottom:4px;">
+                        AI 추천
+                    </div>
+
+                    <div class="meta"
+                         th:if="${b.recommendationReason != null}"
+                         th:text="${b.recommendationReason}">
+                        추천 이유
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 페이징 (간단) -->
+    <!-- 페이징  -->
     <div th:if="${totalPages != null and totalPages > 1 and page != null}" class="pager">
         <a class="btn" th:classappend="${page.first} ? ' disabled' : ''"
-           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${page.number - 1})}">이전</a>
+           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${page.number - 1})}">이전</a>
 
         <a class="btn"
            th:each="p : ${#numbers.sequence(T(java.lang.Math).max(0, page.number - 2), T(java.lang.Math).min(totalPages - 1, page.number + 2))}"
            th:classappend="${p == page.number} ? ' active' : ''"
-           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${p})}"
+           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${p})}"
            th:text="${p + 1}">1</a>
 
         <a class="btn" th:classappend="${page.last} ? ' disabled' : ''"
-           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${page.number + 1})}">다음</a>
+           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${page.number + 1})}">다음</a>
     </div>
 
 </div>
