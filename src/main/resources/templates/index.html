@@ -167,9 +167,6 @@
                             <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" th:onclick="'addToCart(' + ${book.bookId} + ')'">
                                 <i class="fa fa-shopping-cart"></i>
                             </a>
-<!--                            <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" th:onclick="'addToLike(' + ${book.bookId} + ')'">-->
-<!--                                <i class="far fa-heart"></i>-->
-<!--                            </a>-->
                             <a class="btn btn-outline-dark btn-square"
                                href="javascript:void(0);"
                                th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
@@ -188,9 +185,12 @@
                         </div>
 
                         <div class="d-flex align-items-center justify-content-center mt-1">
-                            <div th:if="${book.bookSalePrice > 0}">
+                            <div th:if="${book.bookSalePrice > 0}" class="d-flex align-items-center">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                <h6 class="text-muted ml-2 mb-0"><del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del></h6>
+                                <h6 class="text-muted ml-2 mb-0" th:if="${book.bookSalePrice < book.bookRegularPrice}">
+                                    <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
+                                </h6>
+                                <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '% 할인'">10% 할인</span>
                             </div>
                             <div th:if="${book.bookSalePrice == 0}">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
@@ -218,6 +218,11 @@
 
         <div class="row px-xl-5 mb-4">
             <div class="col-12 text-center">
+                <a th:href="@{/(categoryId=0)}"
+                   class="category-pill"
+                   th:classappend="${selectedCategoryId == 0} ? 'active'">
+                    전체
+                </a>
                 <a th:each="cat : ${rootCategories}"
                    th:href="@{/(categoryId=${cat.categoryId})}"
                    class="category-pill"
@@ -261,9 +266,12 @@
                         </div>
 
                         <div class="d-flex align-items-center justify-content-center mt-1">
-                            <div th:if="${book.bookSalePrice > 0}">
+                            <div th:if="${book.bookSalePrice > 0}" class="d-flex align-items-center">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                <h6 class="text-muted ml-2 mb-0"><del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del></h6>
+                                <h6 class="text-muted ml-2 mb-0" th:if="${book.bookSalePrice < book.bookRegularPrice}">
+                                    <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
+                                </h6>
+                                <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '% 할인'">10% 할인</span>
                             </div>
                             <div th:if="${book.bookSalePrice == 0}">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
