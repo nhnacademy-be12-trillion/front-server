@@ -15,6 +15,8 @@ package com.nhnacademy.frontserver.book;
 import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import com.nhnacademy.frontserver.PageResponse;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,4 +68,8 @@ public interface BookClient {
 
     @GetMapping("api/books/best-sellers")
     List<BookListResponse> getBestSellers();
+
+    // 찜하기 토글 (백엔드의 POST /wishlists/{book-id} 호출)
+    @PostMapping("/wishlists/{bookId}")
+    Map<String, Object> toggleWishlist(@PathVariable("bookId") Long bookId);
 }
