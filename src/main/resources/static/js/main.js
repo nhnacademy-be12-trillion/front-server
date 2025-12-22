@@ -1,24 +1,6 @@
 (function ($) {
     "use strict";
-    
-    // Dropdown on mouse hover
-    $(document).ready(function () {
-        function toggleNavbarMethod() {
-            if ($(window).width() > 992) {
-                $('.navbar .dropdown').on('mouseover', function () {
-                    $('.dropdown-toggle', this).trigger('click');
-                }).on('mouseout', function () {
-                    $('.dropdown-toggle', this).trigger('click').blur();
-                });
-            } else {
-                $('.navbar .dropdown').off('mouseover').off('mouseout');
-            }
-        }
-        toggleNavbarMethod();
-        $(window).resize(toggleNavbarMethod);
-    });
-    
-    
+
     // Back to top button
     $(window).scroll(function () {
         if ($(this).scrollTop() > 100) {
@@ -125,6 +107,24 @@
         }
         button.parent().parent().find('input').val(newVal);
     });
-    
-})(jQuery);
 
+    // [추가됨] 카테고리 메뉴 호버 기능 (PC 화면에서만 동작)
+    // 마우스가 영역에 들어오면 열고(addClass show), 나가면 닫습니다(removeClass show).
+    function toggleNavbarMethod() {
+        if ($(window).width() > 992) {
+            $('.category-hover-area').on('mouseenter', function () {
+                $('#navbar-vertical').addClass('show');
+            }).on('mouseleave', function () {
+                $('#navbar-vertical').removeClass('show');
+            });
+        } else {
+            // 모바일 화면에서는 터치 클릭 방식을 유지하기 위해 이벤트 제거
+            $('.category-hover-area').off('mouseenter mouseleave');
+        }
+    }
+
+    // 초기 실행 및 창 크기 변경 시 재설정
+    toggleNavbarMethod();
+    $(window).resize(toggleNavbarMethod);
+
+})(jQuery);
