@@ -34,6 +34,10 @@ public class PaymentController {
         if (order == null) {
             return "redirect:/";
         }
+        int totalPackagingFee = order.orderItems().stream()
+                .mapToInt(item -> item.packagingPrice() * item.quantity())
+                .sum();
+        model.addAttribute("totalPackagingFee", totalPackagingFee);
         model.addAttribute("order", order);
         model.addAttribute("tossClientKey", tossClientKey);
         return "payment";
