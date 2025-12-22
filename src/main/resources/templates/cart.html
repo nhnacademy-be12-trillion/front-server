@@ -37,22 +37,14 @@
                             <td class="align-middle text-left">
                                 <img th:src="${item.book.bookImage != null ? item.book.bookImage : '/img/product-1.jpg'}"
                                      alt="" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover;">
-
                                 <a th:href="@{/books/{id}(id=${item.book.bookId})}"
-                                   class="text-dark ml-2"
-                                   th:text="${item.book.bookName}">
-                                    도서 제목
-                                </a>
+                                   class="text-dark ml-2" th:text="${item.book.bookName}">도서 제목</a>
                             </td>
-
                             <td class="align-middle"
-                                th:text="${#numbers.formatInteger(item.book.bookSalePrice, 0, 'COMMA')} + '원'">
-                                12,000원
-                            </td>
+                                th:text="${#numbers.formatInteger(item.book.bookSalePrice, 0, 'COMMA')} + '원'">0원</td>
 
                             <td class="align-middle">
                                 <div class="input-group quantity mx-auto" style="width: 100px;">
-
                                     <div class="input-group-btn">
                                         <form th:action="@{/carts/update}" method="post" style="display:inline;">
                                             <input type="hidden" name="bookId" th:value="${item.id}">
@@ -62,11 +54,8 @@
                                             </button>
                                         </form>
                                     </div>
-
-                                    <input type="text"
-                                           class="form-control form-control-sm bg-secondary border-0 text-center"
+                                    <input type="text" class="form-control form-control-sm bg-secondary border-0 text-center"
                                            th:value="${item.quantity}" readonly>
-
                                     <div class="input-group-btn">
                                         <form th:action="@{/carts/update}" method="post" style="display:inline;">
                                             <input type="hidden" name="bookId" th:value="${item.id}">
@@ -79,28 +68,18 @@
                                 </div>
                             </td>
 
-                            <td class="align-middle"
-                                th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">
-                                24,000원
-                            </td>
-
+                            <td class="align-middle" th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">0원</td>
                             <td class="align-middle">
-                                <form th:action="@{/carts/delete/{id}(id=${item.id})}"
-                                      method="post"
-                                      style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="fa fa-times"></i>
-                                    </button>
+                                <form th:action="@{/carts/delete/{id}(id=${item.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></button>
                                 </form>
                             </td>
                         </tr>
 
                         <tr th:if="${cartItems == null or cartItems.empty}">
                             <td colspan="5" class="align-middle py-5 text-center">
-                                <h5 class="m-0 text-muted">장바구니에 담긴 도서가 없습니다.</h5>
-                                <a th:href="@{/books}" class="btn btn-sm btn-primary mt-3">
-                                    도서 둘러보기
-                                </a>
+                                <h5 class="m-0 text-muted">장바구니가 비어있습니다.</h5>
+                                <a th:href="@{/books}" class="btn btn-sm btn-primary mt-3">쇼핑 계속하기</a>
                             </td>
                         </tr>
                         </tbody>
@@ -116,27 +95,21 @@
                     <div class="border-bottom pb-2">
                         <div class="d-flex justify-content-between mb-3">
                             <h6>상품 금액</h6>
-                            <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">
-                                0원
-                            </h6>
+                            <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">0원</h6>
                         </div>
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">배송비</h6>
                             <h6 class="font-weight-medium"
-                                th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">
-                                0원
-                            </h6>
+                                th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">0원</h6>
                         </div>
                     </div>
                     <div class="pt-2">
                         <div class="d-flex justify-content-between mt-2">
                             <h5>총 결제 예정 금액</h5>
-                            <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">
-                                0원
-                            </h5>
+                            <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">0원</h5>
                         </div>
 
-                        <a th:href="@{/orders/checkout}"
+                        <a th:href="@{/checkout}"
                            class="btn btn-block btn-primary font-weight-bold my-3 py-3"
                            th:classappend="${cartItems == null or cartItems.empty} ? 'disabled' : ''">
                             주문서 작성하기
