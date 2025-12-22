@@ -99,7 +99,7 @@
   <!-- base.html 에서 container-fluid bg-dark 가 감싸고 있음 -->
   <div class="row px-xl-5">
     <!-- 왼쪽 카테고리(접히는 메뉴) -->
-    <div class="col-lg-3 d-none d-lg-block">
+    <div class="col-lg-3 d-none d-lg-block category-hover-area">
       <a id="btn-category-toggle"
          class="btn d-flex align-items-center justify-content-between bg-primary w-100"
          href="javascript:void(0)"
@@ -144,15 +144,15 @@
         <div class="collapse navbar-collapse justify-content-between"
              id="navbarCollapse">
           <div class="navbar-nav mr-auto py-0">
-            <a th:href="@{/}" class="nav-item nav-link">
-              베스트
-            </a>
-            <a th:href="@{/books?sort=new}" class="nav-item nav-link">
-              최근 발매
-            </a>
-            <a th:href="@{/books/birthday}" class="nav-item nav-link">
-              생일책
-            </a>
+  <!--            <a th:href="@{/}" class="nav-item nav-link">-->
+  <!--              베스트-->
+  <!--            </a>-->
+  <!--            <a th:href="@{/books?sort=new}" class="nav-item nav-link">-->
+  <!--              최근 발매-->
+  <!--            </a>-->
+  <!--            <a th:href="@{/books/birthday}" class="nav-item nav-link">-->
+  <!--              생일책-->
+  <!--            </a>-->
           </div>
 
           <!-- 좋아요/장바구니 아이콘 -->
