@@ -12,8 +12,9 @@
 
 package com.nhnacademy.frontserver.book;
 
-import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import com.nhnacademy.frontserver.PageResponse;
+import com.nhnacademy.frontserver.book.BookListResponse;
+import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
         url = "${gateway.url}")
 public interface BookClient {
 
-    // 도서 목록 조회
+    // 도서 목록 조회 (전체)
     @GetMapping("/api/books")
     PageResponse<BookListResponse> getBooks(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -33,8 +34,28 @@ public interface BookClient {
             @RequestParam(value = "sort", defaultValue = "bookId,desc") String sort
     );
 
+    default PageResponse<BookListResponse> getBooks(int page, int size) {
+        return getBooks(page, size, "bookId,desc");
+    }
+
     default PageResponse<BookListResponse> getBooks() {
         return getBooks(0, 20, "bookId,desc");
+    }
+
+    // [★추가됨] 카테고리별 도서 목록 조회 (페이징 포함)
+    // 백엔드 엔드포인트가 /api/books/categories/{categoryId} 라고 가정합니다.
+    // 만약 백엔드가 /api/books?categoryId={categoryId} 형태라면 그에 맞게 수정해야 합니다.
+    @GetMapping("/api/books/categories/{categoryId}")
+    PageResponse<BookListResponse> getBooksByCategoryId(
+            @PathVariable("categoryId") Long categoryId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "sort", defaultValue = "bookId,desc") String sort
+    );
+
+    // 편의상 오버로딩 (sort 생략 시 기본값 사용)
+    default PageResponse<BookListResponse> getBooksByCategoryId(Long categoryId, int page, int size) {
+        return getBooksByCategoryId(categoryId, page, size, "bookId,desc");
     }
 
     @GetMapping("/api/books/{book_id}")
@@ -46,6 +67,7 @@ public interface BookClient {
                                             @RequestParam("size") int size,
                                             @RequestParam("sort") String sort);
 
+    // 카테고리 트리 조회 (CategoryClient를 따로 만드셨다면 중복될 수 있으나, 유지해도 무방)
     @GetMapping("/api/books/categories")
     List<CategoryTreeResponse> getCategoryTree();
 
@@ -58,7 +80,7 @@ public interface BookClient {
     @GetMapping("/api/books/popular-books")
     List<BookListResponse> getPopularBooks();
 
-    // 카테고리별 도서 Top 5
+    // 카테고리별 도서 Top 5 (메인페이지 등에서 간단히 보여줄 때 사용)
     @GetMapping("/api/books/categories/{categoryId}/top")
     List<BookListResponse> getBooksByCategory(@PathVariable("categoryId") Long categoryId);
 
