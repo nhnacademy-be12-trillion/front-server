@@ -6,6 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @FeignClient(name = "gateway-order",
         url = "${gateway.url}",
         contextId = "orderClient")
@@ -76,9 +78,9 @@ public interface OrderClient {
 
     // 포장 목록 조회
     @GetMapping("/api/orders/packaging")
-    PageResponse<PackagingResponse> getAllPackaging(@RequestParam("page") int page,
-                                                     @RequestParam("size") int size,
-                                                     @RequestParam("sort") String sort);
+    List<PackagingResponse> getAllPackaging(@RequestParam("page") int page,
+                                            @RequestParam("size") int size,
+                                            @RequestParam("sort") String sort);
 
     // 포장 생성
     @PostMapping("/api/orders/packaging")

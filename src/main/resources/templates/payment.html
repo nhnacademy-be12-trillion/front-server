@@ -58,6 +58,10 @@
                             <h6>총 상품 금액</h6>
                             <h6 th:text="${#numbers.formatInteger(order.originPrice, 0, 'COMMA')} + '원'"></h6>
                         </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6>포장비</h6>
+                            <h6 th:text="${#numbers.formatInteger(totalPackagingFee, 0, 'COMMA')} + '원'"></h6>
+                        </div>
                         <div class="d-flex justify-content-between text-danger" th:if="${order.pointUsage > 0}">
                             <h6>포인트 사용</h6>
                             <h6 th:text="'-' + ${#numbers.formatInteger(order.pointUsage, 0, 'COMMA')} + '원'"></h6>

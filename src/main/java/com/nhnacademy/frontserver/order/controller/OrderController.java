@@ -28,16 +28,13 @@ public class OrderController {
                               @RequestParam("address1") String address1,
                               @RequestParam("address2") String address2,
                               HttpSession session) {
-        // ... (기존 로직 동일) ...
-        @SuppressWarnings("unchecked")
-        List<CheckoutItemView> items = (List<CheckoutItemView>) session.getAttribute("checkoutItems");
-        if (items == null || items.isEmpty()) {
-            return "redirect:/";
-        }
 
-        List<OrderItemCreateRequest> orderItems = items.stream()
-                .map(item -> new OrderItemCreateRequest(item.bookId(), item.quantity(), null))
-                .collect(Collectors.toList());
+        List<OrderItemCreateRequest> orderItems = request.orderItems();
+
+        if (orderItems == null || orderItems.isEmpty()) {
+            log.warn("주문할 상품이 form에 담겨있지 않습니다.");
+            return "redirect:/cart";
+        }
 
         String fullAddress = address1 + " " + address2;
 
