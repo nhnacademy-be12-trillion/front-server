@@ -157,15 +157,15 @@
 
           <!-- 좋아요/장바구니 아이콘 -->
           <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
-            <a th:href="@{/members/wishlists}" class="btn px-0">
+            <a th:href="@{/wishlists}" class="btn px-0">
               <i class="fas fa-heart text-primary"></i>
               <span class="badge text-secondary border border-secondary rounded-circle"
-                    style="padding-top: 2px;">0</span>
+                    style="margin-top: 2px;">0</span>
             </a>
             <a th:href="@{/carts}" class="btn px-0 ml-3">
               <i class="fas fa-shopping-cart text-primary"></i>
               <span class="badge text-secondary border border-secondary rounded-circle"
-                    style="padding-top: 2px;"
+                    style="margin-top: 2px;"
                     th:text="${badgeCount}">0</span>
             </a>
           </div>
