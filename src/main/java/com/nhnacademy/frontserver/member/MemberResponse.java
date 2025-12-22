@@ -8,8 +8,7 @@ public record MemberResponse(
         String memberName,
         String memberContact,
         LocalDate memberBirth,
-        MemberState memberState,
+        String memberState, // ENUM -> String
         Integer memberPoint,
-        String gradeName
-) {
-}
+        String gradeName    // ENUM -> String
+) {}
