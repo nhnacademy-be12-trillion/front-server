@@ -1,4 +1,4 @@
-package com.nhnacademy.frontserver.Auth.config;
+package com.nhnacademy.frontserver.auth.config;
 
 import feign.RequestInterceptor;
 import jakarta.servlet.http.Cookie;

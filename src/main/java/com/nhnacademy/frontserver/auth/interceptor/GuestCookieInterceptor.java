@@ -1,6 +1,6 @@
-package com.nhnacademy.frontserver.Auth.interceptor;
+package com.nhnacademy.frontserver.auth.interceptor;
 
-import com.nhnacademy.frontserver.Auth.util.CookieUtils;
+import com.nhnacademy.frontserver.auth.util.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;

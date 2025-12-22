@@ -1,9 +1,9 @@
-package com.nhnacademy.frontserver.Auth.controller;
+package com.nhnacademy.frontserver.auth.controller;
 
-import com.nhnacademy.frontserver.Auth.adapter.MemberAdapter;
-import com.nhnacademy.frontserver.Auth.dto.LoginRequest;
-import com.nhnacademy.frontserver.Auth.dto.TokenResponse;
-import com.nhnacademy.frontserver.Auth.util.CookieUtils;
+import com.nhnacademy.frontserver.auth.client.AuthClient;
+import com.nhnacademy.frontserver.auth.dto.LoginRequest;
+import com.nhnacademy.frontserver.auth.dto.TokenResponse;
+import com.nhnacademy.frontserver.auth.util.CookieUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +13,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final MemberAdapter memberAdapter;
+    private final AuthClient authClient;
 
     @GetMapping("/login")
     public String loginForm() {
@@ -30,7 +31,7 @@ public class AuthController {
     public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
 
         // FeignClient로 Gateway 호출 -> 토큰 받기
-        TokenResponse tokens = memberAdapter.login(loginRequest);
+        TokenResponse tokens = authClient.login(loginRequest);
         ResponseCookie accessCookie = CookieUtils.createHttpOnlyCookie("accessToken", tokens.getAccessToken(), 60 * 30);
         ResponseCookie refreshCookie = CookieUtils.createHttpOnlyCookie("refreshToken", tokens.getRefreshToken(), 60 * 60 * 24 * 7);
 
@@ -46,7 +47,7 @@ public class AuthController {
         // Auth Service에 로그아웃 요청 (Redis Blacklist 등록)
         // FeignInterceptor가 현재 쿠키의 AccessToken을 헤더에 담아 보냄
         try {
-            memberAdapter.logout();
+            authClient.logout(response.getHeader("Authorization"));
         } catch (Exception e) {
         }
         response.addHeader(HttpHeaders.SET_COOKIE, CookieUtils.deleteCookie("accessToken").toString());
