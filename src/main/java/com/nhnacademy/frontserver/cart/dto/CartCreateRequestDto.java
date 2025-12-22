@@ -1,5 +1,7 @@
 package com.nhnacademy.frontserver.cart.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartCreateRequestDto {
+    @NotNull(message = "책 ID는 필수입니다.")
     private Long bookId;
-    private Integer cartQuantity;
+
+    @NotNull(message = "수량 값은 필수입니다.")
+    @Min(value = 1, message = "수량은 최소 1개 이상이어야 합니다.")
+    private Long cartQuantity;
 }

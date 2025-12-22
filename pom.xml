@@ -121,6 +121,10 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
 <!--        캐시 작업을 위한 의존성 추가 종료-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
 
 
     </dependencies>

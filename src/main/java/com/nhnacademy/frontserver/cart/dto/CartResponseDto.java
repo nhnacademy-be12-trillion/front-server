@@ -2,6 +2,7 @@ package com.nhnacademy.frontserver.cart.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,15 +14,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public//널값 필드는 JSON에서 제외
+@JsonInclude(JsonInclude.Include.NON_NULL) //널값 필드는 JSON에서 제외
+public
 class CartResponseDto {
 
     private Long memberId;   // 회원일 때만 값 있음
     private String guestId;  // 비회원일 때만 값 있음
-
-    Long bookId;
-    int cartQuantity;
+    private long bookId;
+    long cartQuantity;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;
 }
