@@ -94,6 +94,7 @@
 
                         <div class="product-item bg-light mb-4">
                             <div class="product-img position-relative overflow-hidden">
+
                                 <img class="img-fluid w-100 book-thumb"
                                      th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
                                      loading="lazy"
@@ -189,12 +190,11 @@
 
 <th:block layout:fragment="script">
     <script>
-        // 메인 페이지(index.html)와 동일한 로직 적용
+        // 메인 페이지(index.html)와 동일한 로직 적용 (POST + JSON)
         function addToCart(bookId) {
-            // 상세 페이지/메인 페이지와 동일하게 JSON 형식으로 데이터 전송
             const data = {
                 bookId: bookId,
-                cartQuantity: 1 // 리스트에서는 수량 선택이 없으므로 기본 1개
+                cartQuantity: 1
             };
 
             fetch('/carts/add', {
@@ -214,7 +214,6 @@
                             location.href = '/login';
                         }
                     } else {
-                        // 에러 메시지를 텍스트로 읽어서 출력
                         response.text().then(msg => alert('장바구니 담기 실패: ' + msg));
                     }
                 })
@@ -224,20 +223,17 @@
                 });
         }
 
-        // 찜하기 기능도 메인 페이지와 일관성 유지
         function toggleWishlist(bookId) {
             fetch('/wishlists/toggle?bookId=' + bookId, {
                 method: 'GET'
             })
                 .then(response => {
-                    // 로그인 안 된 경우 (401)
                     if (response.status === 401) {
                         if(confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) {
                             location.href = '/login';
                         }
-                        return null; // 이후 로직 중단
+                        return null;
                     }
-
                     if (response.ok) {
                         return response.json();
                     } else {
@@ -246,7 +242,6 @@
                 })
                 .then(data => {
                     if (data) {
-                        // 백엔드에서 보낸 message가 있으면 출력 (없으면 기본 메시지)
                         const msg = data.message || (data.isAdded ? '찜 목록에 추가되었습니다.' : '찜 목록에서 삭제되었습니다.');
                         alert(msg);
                     }
