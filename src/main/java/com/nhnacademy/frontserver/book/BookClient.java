@@ -69,7 +69,11 @@ public interface BookClient {
     @GetMapping("api/books/best-sellers")
     List<BookListResponse> getBestSellers();
 
-    // 찜하기 토글 (백엔드의 POST /wishlists/{book-id} 호출)
+    // 찜하기 토글
     @PostMapping("/wishlists/{bookId}")
     Map<String, Object> toggleWishlist(@PathVariable("bookId") Long bookId);
+
+    // 위시리스트 목록 조회 (페이지용 + 뱃지 카운트용)
+    @GetMapping("/wishlists")
+    List<BookListResponse> getWishlists();
 }

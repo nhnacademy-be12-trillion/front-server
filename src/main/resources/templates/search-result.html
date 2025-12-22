@@ -98,9 +98,9 @@
         <div class="card" th:each="b : ${result}">
             <a th:href="@{/books/{id}(id=${b.id})}">
                 <img class="card-img"
-                     th:src="${#strings.isEmpty(b.imageUrl)} ?
+                     th:src="${#strings.isEmpty(b.imageUrl) ?
                               '/img/default-book.png' :
-                              '/trillion-bucket/' + b.imageUrl"
+                              '/trillion-bucket/' + b.imageUrl}"
                      alt="책 표지"/>
 
             </a>
