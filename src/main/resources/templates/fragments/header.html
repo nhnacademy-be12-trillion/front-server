@@ -43,23 +43,42 @@
       </a>
     </div>
 
-    <!-- 검색 -->
-    <div class="col-lg-4 col-6 text-left">
-      <form th:action="@{/search}" method="get">
-        <div class="input-group">
-          <input type="text" name="query" class="form-control"
-                 placeholder="도서를 검색해 보세요"
-                 th:value="${query}">
-          <div class="input-group-append">
-            <button type="submit" class="input-group-text bg-transparent text-primary">
-              <i class="fa fa-search"></i>
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
+      <!-- 검색 -->
+      <div class="col-lg-4 col-6 text-left">
+          <form th:action="@{/search}" method="get" class="d-flex align-items-center">
+              <div class="input-group">
+                  <input type="text" name="query" class="form-control"
+                         placeholder="도서를 검색해 보세요"
+                         th:value="${query}">
+                  <div class="input-group-append">
+                      <button type="submit" class="input-group-text bg-transparent text-primary">
+                          <i class="fa fa-search"></i>
+                      </button>
+                  </div>
+              </div>
 
-    <!-- 로그인 / 회원 / 마이페이지 -->
+              <!-- AI 검색 토글 -->
+              <div class="ml-2">
+                  <input type="hidden" name="mode"
+                         th:value="${mode != null ? mode : 'bm25'}"/>
+
+                  <div class="custom-control custom-switch">
+                      <input type="checkbox"
+                             class="custom-control-input"
+                             id="aiModeToggle"
+                             onclick="this.form.mode.value = this.checked ? 'ai' : 'bm25'"
+                             th:checked="${mode == 'ai'}">
+                      <label class="custom-control-label" for="aiModeToggle"
+                             style="font-size: 12px;">
+                          AI 검색
+                      </label>
+                  </div>
+              </div>
+          </form>
+      </div>
+
+
+      <!-- 로그인 / 회원 / 마이페이지 -->
     <div class="col-lg-4 col-6 text-right">
       <!-- 비로그인 -->
       <div class="d-inline-flex align-items-center justify-content-end w-100"
