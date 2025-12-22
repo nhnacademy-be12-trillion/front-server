@@ -102,9 +102,8 @@
                     <div class="border-bottom pb-2 mb-3" th:if="${items != null}">
                         <div th:each="item : ${items}" class="d-flex justify-content-between mb-3">
                             <div class="d-flex align-items-center">
-                                <img th:src="${item.thumbnailUrl != null ? item.thumbnailUrl : '/img/default.jpg'}"
-                                     alt=""
-                                     onerror="this.onerror=null; this.src='/img/default.jpg';"
+                                <img th:src="${!#strings.isEmpty(item.thumbnailUrl) ? '/trillion-bucket/' + item.thumbnailUrl : '/img/default-book.png'}"
+                                     alt="도서 이미지"
                                      style="width: 50px; height: 60px; object-fit: cover; margin-right: 10px;">
 
                                 <div class="d-flex flex-column">
@@ -162,6 +161,20 @@
 
 <th:block layout:fragment="script">
     <script>
+        // [추가된 로직] 페이지 로드 시 '희망 배송일'의 최소값을 '오늘'로 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            var dateInput = document.getElementById('visibleDateInput');
+            if (dateInput) {
+                var today = new Date();
+                var dd = String(today.getDate()).padStart(2, '0');
+                var mm = String(today.getMonth() + 1).padStart(2, '0'); // 1월은 0
+                var yyyy = today.getFullYear();
+
+                var minDate = yyyy + '-' + mm + '-' + dd; // YYYY-MM-DD 형식
+                dateInput.setAttribute('min', minDate);
+            }
+        });
+
         function execDaumPostcode() {
             new daum.Postcode({
                 oncomplete: function(data) {

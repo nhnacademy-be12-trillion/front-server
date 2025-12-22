@@ -226,7 +226,7 @@
                                     <h4 class="mb-4 border-bottom pb-2" th:text="${reviews != null ? reviews.totalElements + '개의 리뷰가 있습니다.' : '리뷰가 없습니다.'}"></h4>
 
                                     <div class="media mb-4 pb-4 border-bottom" th:if="${reviews != null}" th:each="review : ${reviews.content}">
-                                        <img src="/img/user.jpg" alt="Image" class="img-fluid mr-3 mt-1 rounded-circle" style="width: 45px;">
+<!--                                        <img src="/img/user.jpg" alt="Image" class="img-fluid mr-3 mt-1 rounded-circle" style="width: 45px;">-->
                                         <div class="media-body">
                                             <h6 th:text="${review.writerName != null ? review.writerName : '익명'}">
                                                 User Name<small class="text-muted ml-2"> - <i th:text="${review.createdAt}">01 Jan 2025</i></small>
