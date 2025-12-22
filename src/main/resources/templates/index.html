@@ -288,18 +288,33 @@
 
 <th:block layout:fragment="script">
     <script>
-        // 비동기(AJAX)로 장바구니 담기
+        // 장바구니 담기 (POST + JSON 방식 적용)
         function addToCart(bookId) {
-            fetch('/carts/add?bookId=' + bookId)
+            // 상세 페이지와 동일하게 JSON 형식으로 데이터 전송
+            const data = {
+                bookId: bookId,
+                cartQuantity: 1 // 리스트에서는 수량 선택이 없으므로 기본 1개
+            };
+
+            fetch('/carts/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
                 .then(response => {
-                    // 응답 상태에 따라 처리
                     if (response.ok) {
-                        alert('장바구니에 담겼습니다.');
+                        if (confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
+                            location.href = '/carts';
+                        }
                     } else if (response.status === 401) {
-                        alert('로그인이 필요한 서비스입니다.');
-                        // 필요 시 로그인 페이지 이동: location.href = '/login';
+                        if(confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) {
+                            location.href = '/login';
+                        }
                     } else {
-                        alert('장바구니 담기에 실패했습니다.');
+                        // 에러 메시지를 텍스트로 읽어서 출력
+                        response.text().then(msg => alert('장바구니 담기 실패: ' + msg));
                     }
                 })
                 .catch(error => {
@@ -308,22 +323,38 @@
                 });
         }
 
-        // 비동기(AJAX)로 좋아요(찜) 하기
+        // 찜하기 (GET 방식 유지, 메시지 처리 보완)
         function toggleWishlist(bookId) {
-            // Controller의 경로(/wishlists/toggle)와 맞춤
-            fetch('/wishlists/toggle?bookId=' + bookId)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // 백엔드 메시지: "찜 목록에 담았습니다" 또는 "찜 목록에서 삭제했습니다"
-                        alert(data.message);
+            fetch('/wishlists/toggle?bookId=' + bookId, {
+                method: 'GET'
+            })
+                .then(response => {
+                    // 로그인 안 된 경우 (401)
+                    if (response.status === 401) {
+                        if(confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) {
+                            location.href = '/login';
+                        }
+                        return null; // 이후 로직 중단
+                    }
+
+                    if (response.ok) {
+                        return response.json();
                     } else {
-                        alert(data.message);
+                        throw new Error('서버 오류');
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        // 백엔드에서 보낸 message가 있으면 출력 (없으면 기본 메시지)
+                        const msg = data.message || (data.isAdded ? '찜 목록에 추가되었습니다.' : '찜 목록에서 삭제되었습니다.');
+                        alert(msg);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('오류가 발생했습니다.');
+                    if (error.message !== '서버 오류') {
+                        // alert('오류가 발생했습니다.');
+                    }
                 });
         }
     </script>

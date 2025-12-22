@@ -27,7 +27,7 @@ public class WishlistController {
             return "wishlist"; // wishlist.html 반환
         } catch (Exception e) {
             // 로그인 안 된 경우 등 -> 로그인 페이지로
-            return "redirect:/auth/login";
+            return "redirect:/login";
         }
     }
 
