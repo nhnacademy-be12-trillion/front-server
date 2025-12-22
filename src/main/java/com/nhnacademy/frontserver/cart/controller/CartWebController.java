@@ -4,7 +4,6 @@ import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.*;
-import com.nhnacademy.frontserver.common.AuthConst;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +89,7 @@ public class CartWebController {
         model.addAttribute("cartItems", viewItems); // 리스트
         model.addAttribute("cart", new CartTotalSummaryDto(totalItemPrice, shippingFee, finalPrice)); // 요약 정보
 
-        return "cart/list";
+        return "cart";
     }
 
     /**

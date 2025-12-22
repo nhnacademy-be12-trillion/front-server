@@ -13,9 +13,6 @@
         <meta content="Book Store, E-commerce" name="keywords">
         <meta content="Online Book Store" name="description">
 
-        <link href="/static/css/style.min.css" rel="stylesheet">
-        <link th:href="@{/css/style.min.css}" rel="stylesheet">
-
         <style>
             /* 섹션 헤더 (제목 + 더보기 버튼) */
             .clean-section-header {
@@ -89,52 +86,58 @@
         <div class="row px-xl-5">
             <div class="col-lg-8">
                 <div id="header-carousel" class="carousel slide carousel-fade mb-30 mb-lg-0" data-ride="carousel">
-                    <!--                    <ol class="carousel-indicators">-->
-                    <!--                        <li data-target="#header-carousel" data-slide-to="0" class="active"></li>-->
-                    <!--                        <li data-target="#header-carousel" data-slide-to="1"></li>-->
-                    <!--                    </ol>-->
+
+                    <ol class="carousel-indicators">
+                        <li th:each="book, iterStat : ${bestSellers}"
+                            data-target="#header-carousel"
+                            th:data-slide-to="${iterStat.index}"
+                            th:classappend="${iterStat.first} ? 'active'">
+                        </li>
+                    </ol>
+
                     <div class="carousel-inner">
-                        <div class="carousel-item position-relative active" style="height: 430px;">
+                        <div th:each="book, iterStat : ${bestSellers}"
+                             class="carousel-item position-relative"
+                             th:classappend="${iterStat.first} ? 'active'"
+                             style="height: 430px;">
+
+                            <img class="position-absolute w-100 h-100"
+                                 th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                                 style="object-fit: cover;">
+
+                            <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+                                <div class="p-3" style="max-width: 700px;">
+                                    <h1 class="display-4 text-white mb-3 animate__animated animate__fadeInDown">
+                                    </h1>
+
+                                    <p class="mx-md-5 px-5 animate__animated animate__bounceIn"
+                                       th:text="${book.bookName}"
+                                       style="font-size: 1.5rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">
+                                        책 제목
+                                    </p>
+
+                                    <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp"
+                                       th:href="@{/books/{id}(id=${book.bookId})}">
+                                        지금 보러가기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(bestSellers)}" class="carousel-item position-relative active" style="height: 430px;">
                             <img class="position-absolute w-100 h-100" th:src="@{/img/carousel-1.jpg}" style="object-fit: cover;">
                             <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                                 <div class="p-3">
                                     <h1 class="display-4 text-white mb-3 animate__animated animate__fadeInDown">Best Seller</h1>
-                                    <p class="mx-md-5 px-5 animate__animated animate__bounceIn">지금 가장 사랑받는 베스트 셀러를 만나보세요.</p>
-                                    <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp" th:href="@{/api/books}">지금 보러가기</a>
+                                    <p class="mx-md-5 px-5 animate__animated animate__bounceIn">지금 가장 사랑받는 도서를 만나보세요.</p>
+                                    <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp" th:href="@{/books}">도서 전체 보기</a>
                                 </div>
                             </div>
                         </div>
-                        <!--                        <div class="carousel-item position-relative" style="height: 430px;">-->
-                        <!--                            <img class="position-absolute w-100 h-100" th:src="@{/img/carousel-2.jpg}" style="object-fit: cover;">-->
-                        <!--                            <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">-->
-                        <!--                                <div class="p-3" style="max-width: 700px;">-->
-                        <!--                                    <h1 class="display-4 text-white mb-3 animate__animated animate__fadeInDown">New Arrival</h1>-->
-                        <!--                                    <p class="mx-md-5 px-5 animate__animated animate__bounceIn">따끈따끈한 신간들을 확인해보세요.</p>-->
-                        <!--                                    <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp" th:href="@{/api/books}">신간 보기</a>-->
-                        <!--                                </div>-->
-                        <!--                            </div>-->
-                        <!--                        </div>-->
+
                     </div>
                 </div>
             </div>
-            <!--            <div class="col-lg-4">-->
-            <!--                <div class="product-offer mb-30" style="height: 200px;">-->
-            <!--                    <img class="img-fluid" th:src="@{/img/offer-1.jpg}" alt="프로모션 1">-->
-            <!--                    <div class="offer-text">-->
-            <!--                        <h6 class="text-white text-uppercase">Save 20%</h6>-->
-            <!--                        <h3 class="text-white mb-3">주간 특가</h3>-->
-            <!--                        <a th:href="@{/api/books}" class="btn btn-primary">보러가기</a>-->
-            <!--                    </div>-->
-            <!--                </div>-->
-            <!--                <div class="product-offer mb-30" style="height: 200px;">-->
-            <!--                    <img class="img-fluid" th:src="@{/img/offer-2.jpg}" alt="프로모션 2">-->
-            <!--                    <div class="offer-text">-->
-            <!--                        <h6 class="text-white text-uppercase">Gift</h6>-->
-            <!--                        <h3 class="text-white mb-3">선물하기 좋은 책</h3>-->
-            <!--                        <a th:href="@{/api/books}" class="btn btn-primary">보러가기</a>-->
-            <!--                    </div>-->
-            <!--                </div>-->
-            <!--            </div>-->
         </div>
     </div>
 
@@ -161,8 +164,14 @@
                              th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
                              loading="lazy" alt="책 표지">
                         <div class="product-action">
-                            <a class="btn btn-outline-dark btn-square" th:href="@{/carts/add(bookId=${book.bookId})}"><i class="fa fa-shopping-cart"></i></a>
-                            <a class="btn btn-outline-dark btn-square" th:href="@{/members/likes/add(bookId=${book.bookId})}"><i class="far fa-heart"></i></a>
+                            <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" th:onclick="'addToCart(' + ${book.bookId} + ')'">
+                                <i class="fa fa-shopping-cart"></i>
+                            </a>
+                            <a class="btn btn-outline-dark btn-square"
+                               href="javascript:void(0);"
+                               th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
+                                <i class="far fa-heart"></i>
+                            </a>
                             <a class="btn btn-outline-dark btn-square" th:href="@{/books/{book_id}(book_id=${book.bookId})}"><i class="fa fa-search"></i></a>
                         </div>
                     </div>
@@ -176,9 +185,12 @@
                         </div>
 
                         <div class="d-flex align-items-center justify-content-center mt-1">
-                            <div th:if="${book.bookSalePrice > 0}">
+                            <div th:if="${book.bookSalePrice > 0}" class="d-flex align-items-center">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                <h6 class="text-muted ml-2 mb-0"><del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del></h6>
+                                <h6 class="text-muted ml-2 mb-0" th:if="${book.bookSalePrice < book.bookRegularPrice}">
+                                    <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
+                                </h6>
+                                <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '% 할인'">10% 할인</span>
                             </div>
                             <div th:if="${book.bookSalePrice == 0}">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
@@ -206,6 +218,11 @@
 
         <div class="row px-xl-5 mb-4">
             <div class="col-12 text-center">
+                <a th:href="@{/(categoryId=0)}"
+                   class="category-pill"
+                   th:classappend="${selectedCategoryId == 0} ? 'active'">
+                    전체
+                </a>
                 <a th:each="cat : ${rootCategories}"
                    th:href="@{/(categoryId=${cat.categoryId})}"
                    class="category-pill"
@@ -228,8 +245,14 @@
                              th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
                              loading="lazy" alt="책 표지">
                         <div class="product-action">
-                            <a class="btn btn-outline-dark btn-square" th:href="@{/carts/add(bookId=${book.bookId})}"><i class="fa fa-shopping-cart"></i></a>
-                            <a class="btn btn-outline-dark btn-square" th:href="@{/members/likes/add(bookId=${book.bookId})}"><i class="far fa-heart"></i></a>
+                            <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" th:onclick="'addToCart(' + ${book.bookId} + ')'">
+                                <i class="fa fa-shopping-cart"></i>
+                            </a>
+                            <a class="btn btn-outline-dark btn-square"
+                               href="javascript:void(0);"
+                               th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
+                                <i class="far fa-heart"></i>
+                            </a>
                             <a class="btn btn-outline-dark btn-square" th:href="@{/books/{book_id}(book_id=${book.bookId})}"><i class="fa fa-search"></i></a>
                         </div>
                     </div>
@@ -243,9 +266,12 @@
                         </div>
 
                         <div class="d-flex align-items-center justify-content-center mt-1">
-                            <div th:if="${book.bookSalePrice > 0}">
+                            <div th:if="${book.bookSalePrice > 0}" class="d-flex align-items-center">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                <h6 class="text-muted ml-2 mb-0"><del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del></h6>
+                                <h6 class="text-muted ml-2 mb-0" th:if="${book.bookSalePrice < book.bookRegularPrice}">
+                                    <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
+                                </h6>
+                                <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '% 할인'">10% 할인</span>
                             </div>
                             <div th:if="${book.bookSalePrice == 0}">
                                 <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
@@ -258,87 +284,49 @@
     </div>
 
 
-    <!--    <div class="container-fluid pt-5 pb-3">-->
-    <!--        <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4">-->
-    <!--            <span class="bg-secondary pr-3">전체 추천 도서</span>-->
-    <!--        </h2>-->
-
-    <!--        <div class="row px-xl-5"-->
-    <!--             th:if="${books != null and books.content != null and !#lists.isEmpty(books.content)}">-->
-
-    <!--            <div class="col-lg-3 col-md-4 col-sm-6 pb-1"-->
-    <!--                 th:each="book : ${books.content}">-->
-    <!--                <div class="product-item bg-light mb-4">-->
-    <!--                    <div class="product-img position-relative overflow-hidden">-->
-    <!--                        <img class="img-fluid w-100 book-thumb"-->
-    <!--                             th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"-->
-    <!--                             loading="lazy" alt="도서 이미지">-->
-    <!--                        <div class="product-action">-->
-    <!--                            <a class="btn btn-outline-dark btn-square" th:href="@{/carts/add(bookId=${book.bookId})}"><i class="fa fa-shopping-cart"></i></a>-->
-    <!--                            <a class="btn btn-outline-dark btn-square" th:href="@{/members/likes/add(bookId=${book.bookId})}"><i class="far fa-heart"></i></a>-->
-    <!--                            <a class="btn btn-outline-dark btn-square" th:href="@{/books/{book_id}(book_id=${book.bookId})}"><i class="fa fa-search"></i></a>-->
-    <!--                        </div>-->
-    <!--                    </div>-->
-    <!--                    <div class="text-center py-4 px-2">-->
-    <!--                        <a class="h6 text-decoration-none text-truncate d-block mb-1"-->
-    <!--                           th:href="@{/books/{book_id}(book_id=${book.bookId})}"-->
-    <!--                           th:text="${book.bookName != null ? book.bookName : '제목 정보 없음'}">도서 제목</a>-->
-
-    <!--                        <div class="small text-muted mb-2">-->
-    <!--                            <span th:text="${book.bookAuthor == null ? '저자 정보 없음' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>-->
-    <!--                        </div>-->
-
-    <!--                        <div class="d-flex align-items-center justify-content-center mt-1">-->
-    <!--                            <div th:if="${book.bookSalePrice > 0}">-->
-    <!--                                <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>-->
-    <!--                                <h6 class="text-muted ml-2 mb-0"><del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del></h6>-->
-    <!--                            </div>-->
-    <!--                            <div th:if="${book.bookSalePrice == 0}">-->
-    <!--                                <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>-->
-    <!--                            </div>-->
-    <!--                        </div>-->
-    <!--                    </div>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        </div>-->
-
-    <!--        <div class="row px-xl-5" th:if="${books == null or books.content == null or #lists.isEmpty(books.content)}">-->
-    <!--            <div class="col-12 text-center py-5">-->
-    <!--                <h4 class="text-muted mb-0">현재 표시할 도서가 없습니다.</h4>-->
-    <!--                <p class="text-muted mt-2 mb-0">도서가 등록되면 이 영역에서 추천 도서를 확인하실 수 있어요.</p>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-
-
-    <!--    <div class="container-fluid pt-5 pb-3">-->
-    <!--        <div class="row px-xl-5">-->
-    <!--            <div class="col-md-6">-->
-    <!--                <div class="product-offer mb-30" style="height: 300px;">-->
-    <!--                    <img class="img-fluid" th:src="@{/img/offer-1.jpg}" alt="프로모션">-->
-    <!--                    <div class="offer-text">-->
-    <!--                        <h6 class="text-white text-uppercase">오늘만 이 가격</h6>-->
-    <!--                        <h3 class="text-white mb-3">한정 수량 특가</h3>-->
-    <!--                        <a th:href="@{/api/books}" class="btn btn-primary">바로 가기</a>-->
-    <!--                    </div>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--            <div class="col-md-6">-->
-    <!--                <div class="product-offer mb-30" style="height: 300px;">-->
-    <!--                    <img class="img-fluid" th:src="@{/img/offer-2.jpg}" alt="프로모션">-->
-    <!--                    <div class="offer-text">-->
-    <!--                        <h6 class="text-white text-uppercase">선물 추천</h6>-->
-    <!--                        <h3 class="text-white mb-3">소중한 사람에게 책 선물</h3>-->
-    <!--                        <a th:href="@{/api/books}" class="btn btn-primary">바로 가기</a>-->
-    <!--                    </div>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-
 </div>
 
 <th:block layout:fragment="script">
+    <script>
+        // 비동기(AJAX)로 장바구니 담기
+        function addToCart(bookId) {
+            fetch('/carts/add?bookId=' + bookId)
+                .then(response => {
+                    // 응답 상태에 따라 처리
+                    if (response.ok) {
+                        alert('장바구니에 담겼습니다.');
+                    } else if (response.status === 401) {
+                        alert('로그인이 필요한 서비스입니다.');
+                        // 필요 시 로그인 페이지 이동: location.href = '/login';
+                    } else {
+                        alert('장바구니 담기에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('오류가 발생했습니다.');
+                });
+        }
+
+        // 비동기(AJAX)로 좋아요(찜) 하기
+        function toggleWishlist(bookId) {
+            // Controller의 경로(/wishlists/toggle)와 맞춤
+            fetch('/wishlists/toggle?bookId=' + bookId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 백엔드 메시지: "찜 목록에 담았습니다" 또는 "찜 목록에서 삭제했습니다"
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('오류가 발생했습니다.');
+                });
+        }
+    </script>
 </th:block>
 
 </body>

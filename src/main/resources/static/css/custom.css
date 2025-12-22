@@ -1,0 +1,15 @@
+.testimonial-carousel .owl-dot.active {
+    background: var(--primary)
+}
+
+/* ▼▼▼ 여기서부터 아래 내용을 복사해서 붙여넣으세요 ▼▼▼ */
+
+/* PC 화면(992px 이상)에서 카테고리 메뉴 마우스 오버 시 열기 */
+@media (min-width: 992px) {
+    .category-hover-area:hover #navbar-vertical {
+        display: block;     /* 메뉴 보이기 */
+        margin-top: 0;      /* 위치 보정 */
+        opacity: 1;         /* 투명도 100% */
+        visibility: visible;
+    }
+}

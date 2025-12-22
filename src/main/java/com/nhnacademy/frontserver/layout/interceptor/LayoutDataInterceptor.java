@@ -1,6 +1,5 @@
 package com.nhnacademy.frontserver.layout.interceptor;
 
-import com.nhnacademy.frontserver.common.AuthConst;
 import com.nhnacademy.frontserver.layout.cartbadge.service.CartBadgeService;
 import com.nhnacademy.frontserver.layout.category.service.CategoryService;
 import com.nhnacademy.frontserver.layout.logininfo.LoginInfo;
@@ -39,7 +38,7 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
 
         // 2. 각 영역별 데이터 주입
         addCategoryMenu(mv);
-        addCartBadge(request, mv);
+        addCartBadge(mv);
         //addMemberInfo(request, mv);
     }
 
@@ -48,11 +47,8 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
         mv.addObject("categories", categoryService.getCategories());
     }
     // --- 2. 장바구니 뱃지용 모델 주입 ---
-    private void addCartBadge(HttpServletRequest request, ModelAndView mv) {
-        Long memberId = parseLongHeader(request, AuthConst.HEADER_MEMBER_ID);
-        String guestId = findCookieValue(request, AuthConst.COOKIE_GUEST_ID);
-
-        int count = cartBadgeService.getCartCount(memberId, guestId);
+    private void addCartBadge(ModelAndView mv){
+        int count = cartBadgeService.getCartCount();
         mv.addObject("badgeCount", count);
     }
     // --- 3. 회원 정보용 모델 주입 ---
@@ -65,23 +61,5 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
 
     private boolean shouldSkip(ModelAndView mv) {
         return mv == null || (mv.getViewName() != null && mv.getViewName().startsWith("redirect:"));
-    }
-
-    private Long parseLongHeader(HttpServletRequest request, String headerName) {
-        String value = request.getHeader(headerName);
-        try {
-            return value != null ? Long.valueOf(value) : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private String findCookieValue(HttpServletRequest request, String cookieName) {
-        if (request.getCookies() == null) return null;
-        return Arrays.stream(request.getCookies())
-                .filter(c -> cookieName.equals(c.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
     }
 }

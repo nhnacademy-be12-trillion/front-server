@@ -7,160 +7,217 @@
 <head>
     <meta charset="UTF-8">
     <title>Trillion-Shop | 주문서 작성</title>
-
-    <!-- base.html 에서 CSS, 기본 head 요소 포함됨 -->
-    <th:block layout:fragment="head">
-        <!-- 이 페이지 전용 추가 CSS가 필요하면 여기에 -->
-    </th:block>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 
 <body>
 <div layout:fragment="content">
-
-    <!-- 주문서 작성 시작 -->
     <div class="container-fluid">
         <div class="row px-xl-5">
 
-            <!-- ===== 좌측: 배송 정보 입력 ===== -->
             <div class="col-lg-8">
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">배송 정보</span>
                 </h5>
 
                 <div class="bg-light p-30 mb-5">
-                    <form th:action="@{/api/orders}" method="post">
+                    <form th:action="@{/orders}" method="post" th:object="${orderCreateRequest}" name="orderForm" onsubmit="return prepareFormData()">
 
-                        <!-- 수령인 정보 -->
+                        <input type="hidden" th:field="*{receiverAddress}" id="hiddenReceiverAddress">
+                        <input type="hidden" th:field="*{deliveryDate}" id="hiddenDeliveryDate">
+
                         <div class="row">
                             <div class="col-md-6 form-group">
-                                <label>수령인 이름</label>
-                                <input class="form-control" type="text" name="receiver"
-                                       th:value="${orderForm.receiver}">
+                                <label>주문자 이름</label>
+                                <input class="form-control" type="text" th:field="*{ordererName}" placeholder="주문자 성함" required>
                             </div>
                             <div class="col-md-6 form-group">
-                                <label>연락처</label>
-                                <input class="form-control" type="text" name="phone"
-                                       th:value="${orderForm.phone}">
-                            </div>
-                            <div class="col-md-12 form-group">
-                                <label>이메일</label>
-                                <input class="form-control" type="email" name="email"
-                                       th:value="${orderForm.email}">
+                                <label>주문자 연락처</label>
+                                <input class="form-control" type="text" th:field="*{ordererContact}" placeholder="010-0000-0000" required>
                             </div>
                         </div>
 
-                        <!-- 주소 -->
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>수령인 이름</label>
+                                <input class="form-control" type="text" th:field="*{receiverName}" placeholder="받는 분 성함" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>수령인 연락처</label>
+                                <input class="form-control" type="text" th:field="*{receiverContact}" placeholder="010-0000-0000" required>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-12 form-group">
                                 <label>우편번호</label>
                                 <div class="d-flex">
-                                    <input class="form-control" type="text" name="zipcode"
-                                           th:value="${orderForm.zipcode}">
-                                    <button type="button" class="btn btn-outline-primary ml-2">주소 검색</button>
+                                    <input class="form-control" type="text" th:field="*{receiverPostCode}" id="postcode" placeholder="우편번호" readonly required>
+                                    <button type="button" class="btn btn-outline-primary ml-2" onclick="execDaumPostcode()">주소 검색</button>
                                 </div>
                             </div>
                             <div class="col-md-12 form-group">
-                                <label>기본 주소</label>
-                                <input class="form-control" type="text" name="address1"
-                                       th:value="${orderForm.address1}">
+                                <label>주소</label>
+                                <input class="form-control" type="text" name="address1" id="roadAddress" placeholder="기본 주소" readonly required>
                             </div>
                             <div class="col-md-12 form-group">
-                                <label>상세 주소</label>
-                                <input class="form-control" type="text" name="address2"
-                                       th:value="${orderForm.address2}">
+                                <label>상세주소</label>
+                                <input class="form-control" type="text" name="address2" id="detailAddress" placeholder="상세 주소를 입력해주세요" required>
                             </div>
                         </div>
 
-                        <!-- 배송 메모 -->
-                        <div class="form-group">
-                            <label>배송 메모</label>
-                            <textarea class="form-control" rows="2"
-                                      name="deliveryMessage"
-                                      placeholder="예: 경비실에 맡겨주세요"
-                                      th:text="${orderForm.deliveryMessage}"></textarea>
+                        <div class="col-md-12 form-group">
+                            <label>희망 배송일</label>
+                            <input class="form-control" type="date" id="visibleDateInput" required>
                         </div>
 
-<!--                        &lt;!&ndash; 결제 수단 &ndash;&gt;-->
-<!--                        <h5 class="section-title position-relative text-uppercase mt-4 mb-3">-->
-<!--                            <span class="bg-secondary pr-3">결제 수단</span>-->
-<!--                        </h5>-->
+                        <div class="col-md-12 form-group" th:if="${isMember != true}">
+                            <label class="text-danger">비회원 주문 비밀번호</label>
+                            <input class="form-control" type="password" th:field="*{nonMemberPassword}" placeholder="주문 조회용 비밀번호 입력">
+                        </div>
 
-<!--                        <div class="bg-white p-3 border">-->
-<!--                            <div class="form-group mb-2">-->
-<!--                                <input type="radio" id="payment-card" name="payment" value="CARD" checked>-->
-<!--                                <label for="payment-card" class="ml-2">신용/체크카드</label>-->
-<!--                            </div>-->
-<!--                            <div class="form-group mb-2">-->
-<!--                                <input type="radio" id="payment-bank" name="payment" value="BANK">-->
-<!--                                <label for="payment-bank" class="ml-2">계좌이체</label>-->
-<!--                            </div>-->
-<!--                            <div class="form-group mb-0">-->
-<!--                                <input type="radio" id="payment-vbank" name="payment" value="VBANK">-->
-<!--                                <label for="payment-vbank" class="ml-2">가상계좌</label>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>사용 포인트</label>
+                                <input class="form-control" type="number" th:field="*{pointUsage}" min="0" value="0">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>쿠폰 ID</label>
+                                <input class="form-control" type="text" th:field="*{couponId}" placeholder="쿠폰 코드 입력">
+                            </div>
+                        </div>
 
-<!--                        &lt;!&ndash; 숨겨진 값 (장바구니 ID 포함 등) &ndash;&gt;-->
-<!--                        <input type="hidden" name="cartId" th:value="${cart.id}">-->
+                        <button type="submit" class="btn btn-block btn-primary font-weight-bold my-3 py-3">
+                            결제하기
+                        </button>
                     </form>
                 </div>
             </div>
 
-            <!-- ===== 우측: 주문 요약 ===== -->
             <div class="col-lg-4">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">주문 상품</span>
+                </h5>
+                <div class="bg-light p-30 mb-5">
+                    <div class="border-bottom pb-2 mb-3" th:if="${items != null}">
+                        <div th:each="item : ${items}" class="d-flex justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <img th:src="${!#strings.isEmpty(item.thumbnailUrl) ? '/trillion-bucket/' + item.thumbnailUrl : '/img/default-book.png'}"
+                                     alt="도서 이미지"
+                                     style="width: 50px; height: 60px; object-fit: cover; margin-right: 10px;">
+
+                                <div class="d-flex flex-column">
+                                    <span th:text="${item.title}" class="font-weight-bold"
+                                          style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        상품명
+                                    </span>
+                                    <small class="text-muted" th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')} + '원'">
+                                        10,000원
+                                    </small>
+                                </div>
+                            </div>
+                            <span class="align-self-center" th:text="${item.quantity} + '개'">1개</span>
+                        </div>
+                    </div>
+                    <div th:if="${items == null or items.empty}" class="text-center py-3">
+                        <p>주문할 상품 정보가 없습니다.</p>
+                    </div>
+                </div>
+
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">결제 요약</span>
                 </h5>
 
                 <div class="bg-light p-30 mb-5">
-                    <div class="border-bottom pb-2">
-
-                        <!-- 상품 금액 -->
+                    <div class="border-bottom pb-2" th:if="${orderSummary != null}">
                         <div class="d-flex justify-content-between mb-3">
                             <h6>상품 금액</h6>
                             <h6 th:text="${#numbers.formatInteger(orderSummary.subTotal, 0, 'COMMA')} + '원'">
-                                72,000원
+                                0원
                             </h6>
                         </div>
-
-                        <!-- 배송비 -->
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">배송비</h6>
                             <h6 class="font-weight-medium"
-                                th:text="${orderSummary.shippingFee > 0 ?
-                                        #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">
-                                3,000원
+                                th:text="${orderSummary.shippingFee > 0 ? #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">
+                                0원
                             </h6>
                         </div>
                     </div>
 
-                    <!-- 총 금액 -->
-                    <div class="pt-2">
+                    <div class="pt-2" th:if="${orderSummary != null}">
                         <div class="d-flex justify-content-between mt-2">
                             <h5>총 결제 금액</h5>
                             <h5 th:text="${#numbers.formatInteger(orderSummary.totalPrice, 0, 'COMMA')} + '원'">
-                                75,000원
+                                0원
                             </h5>
                         </div>
-
-                        <!-- 결제 진행 버튼 -->
-                        <form th:action="@{/orders/complete}" method="post">
-                            <button type="submit"
-                                    class="btn btn-block btn-primary font-weight-bold my-3 py-3">
-                                결제하기
-                            </button>
-                        </form>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
 <th:block layout:fragment="script">
-    <!-- checkout 페이지 전용 JS 가 필요하면 여기에 -->
-    <!-- <script th:src="@{/js/checkout.js}"></script> -->
+    <script>
+        // [추가된 로직] 페이지 로드 시 '희망 배송일'의 최소값을 '오늘'로 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            var dateInput = document.getElementById('visibleDateInput');
+            if (dateInput) {
+                var today = new Date();
+                var dd = String(today.getDate()).padStart(2, '0');
+                var mm = String(today.getMonth() + 1).padStart(2, '0'); // 1월은 0
+                var yyyy = today.getFullYear();
+
+                var minDate = yyyy + '-' + mm + '-' + dd; // YYYY-MM-DD 형식
+                dateInput.setAttribute('min', minDate);
+            }
+        });
+
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = '';
+                    if (data.userSelectedType === 'R') {
+                        addr = data.roadAddress;
+                    } else {
+                        addr = data.jibunAddress;
+                    }
+                    document.getElementById('postcode').value = data.zonecode;
+                    document.getElementById("roadAddress").value = addr;
+                    document.getElementById("detailAddress").focus();
+                }
+            }).open();
+        }
+
+        function prepareFormData() {
+            // 1. 주소 처리
+            var road = document.getElementById("roadAddress").value;
+            var detail = document.getElementById("detailAddress").value;
+
+            if(!road || !detail) {
+                alert("주소를 모두 입력해주세요.");
+                return false;
+            }
+
+            var fullAddress = road + " " + detail;
+            document.getElementById("hiddenReceiverAddress").value = fullAddress.trim();
+
+            // 2. 날짜 포맷 변환
+            var dateInput = document.getElementById("visibleDateInput").value;
+
+            if (!dateInput) {
+                alert("배송 희망일을 선택해주세요.");
+                return false;
+            }
+
+            var localDateTime = dateInput + "T00:00:00";
+            document.getElementById("hiddenDeliveryDate").value = localDateTime;
+
+            return true;
+        }
+    </script>
 </th:block>
 
 </body>
