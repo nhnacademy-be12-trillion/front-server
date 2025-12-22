@@ -17,4 +17,12 @@ interface SearchClient {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     );
+
+    @GetMapping("/api/search/ai")
+    BookSearchResponse searchAi(
+            @RequestParam("query") String query,
+            @RequestParam(value = "sort", defaultValue = "RELEVANCE") BookSortOption sort,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    );
 }
