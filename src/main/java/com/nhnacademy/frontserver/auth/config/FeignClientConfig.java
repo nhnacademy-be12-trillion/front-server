@@ -51,6 +51,10 @@ public class FeignClientConfig {
                         String accessTokenFromCookie = null;
 
                         for (Cookie cookie : cookies) {
+                            log.info("cookie조회 :{},{}",cookie.getName(),cookie.getValue());
+                        }
+
+                        for (Cookie cookie : cookies) {
                             if (cookieHeader.length() > 0) {
                                 cookieHeader.append("; ");
                             }
@@ -61,6 +65,7 @@ public class FeignClientConfig {
                                 accessTokenFromCookie = cookie.getValue();
                             }
                         }
+                        log.info("cookieAccessToken:{}",accessTokenFromCookie);
 
                         // AccessToken이 있으면 헤더에 추가
                         if (accessTokenFromCookie != null) {
