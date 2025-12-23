@@ -17,7 +17,7 @@ public interface AuthClient {
     TokenResponse login(@RequestBody LoginRequest loginRequest);
 
     @PostMapping("/api/auth/logout")
-    void logout(@RequestHeader("Authorization") String accessToken);;
+    void logout();
 
     @PostMapping("/api/auth/reissue")
     TokenResponse reissue(@RequestHeader("X-Refresh-Token") String refreshToken);

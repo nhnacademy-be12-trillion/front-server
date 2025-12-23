@@ -52,8 +52,9 @@ public class AuthController {
         // Auth Service에 로그아웃 요청 (Redis Blacklist 등록)
         // FeignInterceptor가 현재 쿠키의 AccessToken을 헤더에 담아 보냄
         try {
-            authClient.logout(response.getHeader("Authorization"));
+            authClient.logout();
         } catch (Exception e) {
+            log.warn("로그아웃 처리 중 오류 (무시됨): {}", e.getMessage());
         }
         response.addHeader(HttpHeaders.SET_COOKIE, CookieUtils.deleteCookie("accessToken").toString());
         response.addHeader(HttpHeaders.SET_COOKIE, CookieUtils.deleteCookie("refreshToken").toString());
