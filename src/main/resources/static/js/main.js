@@ -42,13 +42,18 @@
     });
 
 
-    // Related carousel
+    // [수정] Related carousel (인기 도서 섹션)
     $('.related-carousel').owlCarousel({
         loop: true,
         margin: 29,
-        nav: false,
+        nav: true,          // [변경] 화살표 활성화
+        navText: [          // [추가] 화살표 아이콘 설정 (FontAwesome)
+            '<i class="fa fa-angle-left" aria-hidden="true"></i>',
+            '<i class="fa fa-angle-right" aria-hidden="true"></i>'
+        ],
         autoplay: true,
         smartSpeed: 1000,
+        slideBy: 1,         // [추가] 한 번에 하나씩 이동
         responsive: {
             0:{
                 items:1
@@ -61,6 +66,9 @@
             },
             992:{
                 items:4
+            },
+            1200:{
+                items:5     // [변경] PC 큰 화면에서 5개씩 보기
             }
         }
     });

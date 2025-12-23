@@ -50,7 +50,7 @@
             }
             .product-img .book-thumb { height: 240px; }
 
-            /* [추가됨] 카테고리 선택 버튼 (Pills) 스타일 */
+            /* 카테고리 선택 버튼 (Pills) 스타일 */
             .category-pill {
                 display: inline-block;
                 padding: 8px 20px;
@@ -74,6 +74,35 @@
                 color: #3D464D;
                 border-color: #FFD333;
                 box-shadow: 0 2px 5px rgba(255, 211, 51, 0.4);
+            }
+
+            /* [추가] Owl Carousel 화살표 커스텀 스타일 */
+            .owl-carousel .owl-nav {
+                position: absolute;
+                top: -55px;  /* 제목 높이에 맞춰 위치 조정 */
+                right: 0;
+                display: flex;
+            }
+            .owl-carousel .owl-nav .owl-prev,
+            .owl-carousel .owl-nav .owl-next {
+                width: 30px;
+                height: 30px;
+                background: transparent !important;
+                color: #333 !important;
+                border: 1px solid #ddd !important;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: 10px;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+            .owl-carousel .owl-nav .owl-prev:hover,
+            .owl-carousel .owl-nav .owl-next:hover {
+                background: #FFD333 !important;
+                border-color: #FFD333 !important;
+                color: #fff !important;
             }
         </style>
     </th:block>
@@ -147,7 +176,6 @@
             <div class="col-12">
                 <div class="clean-section-header">
                     <h2 class="clean-section-title">🔥 지금 많이 보고 있는 책</h2>
-                    <a th:href="@{/books(sort='viewCount,desc')}" class="clean-more-btn">더보기 +</a>
                 </div>
             </div>
         </div>
@@ -157,43 +185,45 @@
                 <p class="text-muted">집계된 인기 도서가 없습니다.</p>
             </div>
 
-            <div class="col-lg-2 col-md-4 col-6" th:each="book : ${popularBooks}">
-                <div class="product-item bg-light mb-4">
-                    <div class="product-img position-relative overflow-hidden">
-                        <img class="img-fluid w-100 book-thumb"
-                             th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
-                             loading="lazy" alt="책 표지">
-                        <div class="product-action">
-                            <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" th:onclick="'addToCart(' + ${book.bookId} + ')'">
-                                <i class="fa fa-shopping-cart"></i>
-                            </a>
-                            <a class="btn btn-outline-dark btn-square"
-                               href="javascript:void(0);"
-                               th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
-                                <i class="far fa-heart"></i>
-                            </a>
-                            <a class="btn btn-outline-dark btn-square" th:href="@{/books/{book_id}(book_id=${book.bookId})}"><i class="fa fa-search"></i></a>
-                        </div>
-                    </div>
-                    <div class="text-center py-4 px-2">
-                        <a class="h6 text-decoration-none text-truncate d-block mb-1"
-                           th:href="@{/books/{book_id}(book_id=${book.bookId})}"
-                           th:text="${book.bookName}">책 제목</a>
-
-                        <div class="small text-muted mb-2">
-                            <span th:text="${book.bookAuthor == null ? '저자 미상' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>
-                        </div>
-
-                        <div class="d-flex align-items-center justify-content-center mt-1">
-                            <div th:if="${book.bookSalePrice > 0}" class="d-flex align-items-center">
-                                <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                <h6 class="text-muted ml-2 mb-0" th:if="${book.bookSalePrice < book.bookRegularPrice}">
-                                    <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
-                                </h6><br>
-                                <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '% 할인'">10% 할인</span>
+            <div class="col-12" th:unless="${#lists.isEmpty(popularBooks)}">
+                <div class="owl-carousel related-carousel position-relative">
+                    <div class="product-item bg-light" th:each="book : ${popularBooks}">
+                        <div class="product-img position-relative overflow-hidden">
+                            <img class="img-fluid w-100 book-thumb"
+                                 th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                                 loading="lazy" alt="책 표지">
+                            <div class="product-action">
+                                <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" th:onclick="'addToCart(' + ${book.bookId} + ')'">
+                                    <i class="fa fa-shopping-cart"></i>
+                                </a>
+                                <a class="btn btn-outline-dark btn-square"
+                                   href="javascript:void(0);"
+                                   th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
+                                    <i class="far fa-heart"></i>
+                                </a>
+                                <a class="btn btn-outline-dark btn-square" th:href="@{/books/{book_id}(book_id=${book.bookId})}"><i class="fa fa-search"></i></a>
                             </div>
-                            <div th:if="${book.bookSalePrice == 0}">
-                                <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
+                        </div>
+                        <div class="text-center py-4 px-2">
+                            <a class="h6 text-decoration-none text-truncate d-block mb-1"
+                               th:href="@{/books/{book_id}(book_id=${book.bookId})}"
+                               th:text="${book.bookName}">책 제목</a>
+
+                            <div class="small text-muted mb-2">
+                                <span th:text="${book.bookAuthor == null ? '저자 미상' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-center mt-1">
+                                <div th:if="${book.bookSalePrice > 0}" class="d-flex align-items-center">
+                                    <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
+                                    <h6 class="text-muted ml-2 mb-0" th:if="${book.bookSalePrice < book.bookRegularPrice}">
+                                        <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
+                                    </h6><br>
+                                    <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '% 할인'">10% 할인</span>
+                                </div>
+                                <div th:if="${book.bookSalePrice == 0}">
+                                    <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -211,7 +241,7 @@
                     <h2 class="clean-section-title">
                         ✨ <span class="text-primary" th:text="${selectedCategoryName}">추천</span> 분야의 도서
                     </h2>
-                    <a th:href="@{/books(categoryId=${selectedCategoryId})}" class="clean-more-btn">더보기 +</a>
+<!--                    <a th:href="@{/books(categoryId=${selectedCategoryId})}" class="clean-more-btn">더보기 +</a>-->
                 </div>
             </div>
         </div>
@@ -282,7 +312,6 @@
             </div>
         </div>
     </div>
-
 
 </div>
 
