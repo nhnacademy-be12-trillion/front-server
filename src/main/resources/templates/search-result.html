@@ -52,7 +52,7 @@
                 font-weight: 600;
             }
 
-            /* 리스트형 아이템 (YES24 느낌) */
+            /* 리스트형 아이템 */
             .search-result-list {
                 border-top: 1px solid #eee;
             }
@@ -97,7 +97,7 @@
             .search-result-meta {
                 font-size: 0.85rem;
                 color: #666;
-                margin-bottom: 6px;
+                margin-bottom: 4px;
             }
 
             .search-result-tags {
@@ -114,12 +114,46 @@
                 margin-bottom: 3px;
             }
 
-            .price-block {
-                text-align: right;
-                min-width: 130px;
-                margin-left: 15px;
+            /* 가격 + 평점(왼쪽) */
+            .search-result-price-row {
+                margin-top: 4px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 4px 10px;
             }
 
+            .price-now {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #e60012;
+            }
+
+            .price-regular {
+                font-size: 0.85rem;
+                color: #999;
+            }
+
+            .price-regular del {
+                color: #999;
+            }
+
+            .discount-badge-inline {
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: #e60012;
+            }
+
+            .search-result-rating {
+                font-size: 0.8rem;
+                color: #666;
+            }
+
+            .search-result-rating i.fa-star {
+                font-size: 0.85rem;
+            }
+
+            /* 오른쪽 버튼 영역 */
             .action-block {
                 min-width: 140px;
                 margin-left: 15px;
@@ -152,42 +186,14 @@
                 font-size: 0.8rem;
             }
 
-            .price-now {
-                font-size: 1.05rem;
-                font-weight: 700;
-                color: #e60012; /* 할인 가격 느낌 */
-            }
-
-            .price-regular {
-                font-size: 0.85rem;
-                color: #999;
-            }
-
-            .price-regular del {
-                color: #999;
-            }
-
-            .search-result-rating {
-                font-size: 0.8rem;
-                color: #666;
-            }
-
-            .search-result-rating i.fa-star {
-                font-size: 0.85rem;
-            }
-
             @media (max-width: 767.98px) {
                 .search-result-item {
                     flex-direction: row;
                 }
-                .price-block {
-                    text-align: left;
-                    margin-left: 0;
-                    margin-top: 8px;
-                }
                 .action-block {
                     margin-left: 0;
                     margin-top: 8px;
+                    text-align: left;
                 }
             }
         </style>
@@ -203,11 +209,8 @@
             <div class="col-12 mb-2 d-flex justify-content-between align-items-end flex-wrap">
                 <h2 class="search-page-title mb-2 mb-md-0">검색 결과</h2>
 
-                <!-- 정렬 / 페이지 크기 컨트롤 -->
                 <form class="search-filter-form form-inline d-flex flex-wrap justify-content-lg-end"
                       th:action="@{/search}" method="get">
-
-                    <!-- 검색어와 모드는 유지 -->
                     <input type="hidden" name="query" th:value="${query}">
                     <input type="hidden" name="mode"
                            th:value="${mode != null ? mode : 'bm25'}">
@@ -275,7 +278,7 @@
         </div>
     </div>
 
-    <!-- 검색 결과 리스트 (YES24 스타일) -->
+    <!-- 검색 결과 리스트 -->
     <div class="container-fluid" th:if="${result != null and !#lists.isEmpty(result)}">
         <div class="row px-xl-5">
             <div class="col-12">
@@ -293,6 +296,7 @@
                         <!-- 본문 -->
                         <div class="search-result-body">
                             <div class="d-flex justify-content-between flex-wrap">
+                                <!-- 왼쪽: 정보 + 가격 + 평점 -->
                                 <div class="flex-grow-1 mr-2">
                                     <a class="search-result-title"
                                        th:href="@{/books/{id}(id=${b.id})}"
@@ -304,6 +308,54 @@
                                         <span th:text="${b.author != null ? b.author : '저자 정보 없음'}">저자</span>
                                         <span class="mx-1">|</span>
                                         <span th:text="${b.publisher != null ? b.publisher : '출판사 정보 없음'}">출판사</span>
+                                    </div>
+
+                                    <!-- 가격 + 할인률 + 평점/리뷰 -->
+                                    <div class="search-result-price-row">
+
+                                        <!-- 할인가 있는 경우 -->
+                                        <th:block th:if="${b.salePrice != null}">
+                                            <span class="price-now"
+                                                  th:text="${#numbers.formatInteger(b.salePrice, 0, 'COMMA')} + '원'">
+                                                0원
+                                            </span>
+                                            <span class="price-regular" th:if="${b.price != null}">
+                                                <del th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">
+                                                    0원
+                                                </del>
+                                            </span>
+
+                                            <!-- 할인률 -->
+                                            <span class="discount-badge-inline"
+                                                  th:if="${b.price != null and b.salePrice < b.price}"
+                                                  th:text="${T(java.lang.Math).round((1.0 - (b.salePrice * 1.0 / b.price)) * 100)} + '% 할인'">
+                                                10% 할인
+                                            </span>
+                                        </th:block>
+
+                                        <!-- 할인가 없고 정가만 있는 경우 -->
+                                        <th:block th:if="${b.salePrice == null}">
+                                            <span class="price-now"
+                                                  th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">
+                                                0원
+                                            </span>
+                                        </th:block>
+
+                                        <!-- 평점 / 리뷰 수 -->
+                                        <span class="search-result-rating" th:if="${b.ratingAvg != null}">
+                                            <span class="text-warning">
+                                                <i class="fa fa-star"></i>
+                                            </span>
+                                            <span class="font-weight-bold ml-1"
+                                                  th:text="${#numbers.formatDecimal(b.ratingAvg, 1, 1)}">
+                                                0.0
+                                            </span>
+                                            <span class="ml-1">/ 5</span>
+
+                                            <span class="text-muted ml-1" th:if="${b.reviewCount != null}">
+                                                (<span th:text="${b.reviewCount}">0</span>개 리뷰)
+                                            </span>
+                                        </span>
                                     </div>
 
                                     <!-- 태그 -->
@@ -330,46 +382,7 @@
                                     </div>
                                 </div>
 
-                                <!-- 가격 / 평점 영역 -->
-                                <div class="price-block mt-2 mt-md-0">
-                                    <!-- 할인가 있는 경우 -->
-                                    <div th:if="${b.salePrice != null}">
-                                        <div class="price-now"
-                                             th:text="${#numbers.formatInteger(b.salePrice, 0, 'COMMA')} + '원'">
-                                            0원
-                                        </div>
-                                        <div class="price-regular" th:if="${b.price != null}">
-                                            <del th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">
-                                                0원
-                                            </del>
-                                        </div>
-                                    </div>
-
-                                    <!-- 할인가 없고 정가만 있는 경우 -->
-                                    <div th:if="${b.salePrice == null}">
-                                        <div class="price-now"
-                                             th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">
-                                            0원
-                                        </div>
-                                    </div>
-
-                                    <!-- 평점 / 리뷰 수 -->
-                                    <div class="search-result-rating mt-2" th:if="${b.ratingAvg != null}">
-                                        <span class="text-warning">
-                                            <i class="fa fa-star"></i>
-                                        </span>
-                                        <span class="font-weight-bold ml-1"
-                                              th:text="${#numbers.formatDecimal(b.ratingAvg, 1, 1)}">
-                                            0.0
-                                        </span>
-                                        <span class="ml-1">/ 10</span>
-
-                                        <span class="text-muted ml-1" th:if="${b.reviewCount != null}">
-                                            (<span th:text="${b.reviewCount}">0</span>개 리뷰)
-                                        </span>
-                                    </div>
-                                </div>
-                                <!-- 장바구니 / 바로구매 / 찜하기 -->
+                                <!-- 오른쪽: 수량 + 버튼들 -->
                                 <div class="action-block mt-2 mt-md-0">
                                     <div class="input-group input-group-sm">
                                         <div class="input-group-prepend">
@@ -405,7 +418,6 @@
                                         <i class="far fa-heart mr-1"></i> 찜하기
                                     </button>
                                 </div>
-                                <!-- 장바구니 / 바로구매 / 찜하기 -->
                             </div>
                         </div>
 
@@ -422,7 +434,6 @@
             <div class="col-12">
                 <nav>
                     <ul class="pagination justify-content-center mb-5 mt-3">
-                        <!-- 이전 -->
                         <li class="page-item" th:classappend="${page.first} ? ' disabled'">
                             <a class="page-link"
                                th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${page.number - 1})}">
@@ -430,7 +441,6 @@
                             </a>
                         </li>
 
-                        <!-- 페이지 번호들 -->
                         <li class="page-item"
                             th:each="p : ${#numbers.sequence(T(java.lang.Math).max(0, page.number - 2), T(java.lang.Math).min(totalPages - 1, page.number + 2))}"
                             th:classappend="${p == page.number} ? ' active'">
@@ -441,7 +451,6 @@
                             </a>
                         </li>
 
-                        <!-- 다음 -->
                         <li class="page-item" th:classappend="${page.last} ? ' disabled'">
                             <a class="page-link"
                                th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${page.number + 1})}">
@@ -514,7 +523,7 @@
                 });
             });
 
-            // 바로 구매 (GET /checkout?bookId=..&quantity=.. 로 이동)
+            // 바로 구매
             $('.search-result-list').on('click', '.js-btn-buy', function () {
                 const bookId = $(this).data('book-id');
                 const quantity = getRowQuantity($(this));
