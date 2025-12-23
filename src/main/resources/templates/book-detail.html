@@ -20,13 +20,30 @@
                 border-radius: 5px;
                 cursor: pointer;
                 border: 1px solid #ddd;
-                margin-right: 10px;
-                margin-bottom: 10px;
                 transition: 0.2s;
             }
             .review-img-thumb:hover {
                 opacity: 0.8;
                 border-color: #007bff;
+                transform: scale(1.05);
+            }
+
+            /* 요청하신 리뷰 이미지 배경 스타일 */
+            .review-img-bg {
+                background-color: #f0f0f0; /* 배경색 (원하는 이미지나 색상으로 변경 가능) */
+                padding: 5px;
+                border-radius: 5px;
+                display: inline-block;
+                margin-right: 10px;
+                margin-bottom: 10px;
+            }
+
+            /* 별점 입력 스타일 */
+            .star-rating .star-icon {
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: #FFD333;
+                margin-right: 2px;
             }
 
             /* 구분선 스타일 커스텀 */
@@ -131,7 +148,7 @@
 
                         <span class="badge badge-danger ml-2" style="font-size: 0.9rem;"
                               th:if="${book.bookSalePrice < book.bookRegularPrice}"
-                              th:text="${book.discountRate} + '% 할인'">10% 할인</span>
+                              th:text="${book.discountRate} + '%'">10%</span>
                     </h5>
 
                     <hr class="my-4">
@@ -194,16 +211,6 @@
                             <i class="far fa-heart mr-1"></i> 찜하기
                         </button>
                     </div>
-
-                    <div class="d-flex pt-2 border-top pt-4 mt-4">
-                        <strong class="text-dark mr-2">Share on:</strong>
-                        <div class="d-inline-flex">
-                            <a class="text-dark px-2" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="text-dark px-2" href=""><i class="fab fa-twitter"></i></a>
-                            <a class="text-dark px-2" href=""><i class="fab fa-linkedin-in"></i></a>
-                            <a class="text-dark px-2" href=""><i class="fab fa-pinterest"></i></a>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -230,7 +237,40 @@
 
                         <div class="tab-pane fade" id="tab-pane-3">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
+                                    <div class="bg-light p-4 mb-5 rounded border">
+                                        <h4 class="mb-3">리뷰 작성</h4>
+                                        <form id="reviewForm" th:action="@{/reviews/add}" method="post">
+                                            <input type="hidden" name="bookId" th:value="${book.bookId}">
+
+                                            <div class="d-flex my-3 align-items-center">
+                                                <p class="mb-0 mr-3 font-weight-bold">별점 평가</p>
+                                                <div class="text-primary star-rating">
+                                                    <i class="fas fa-star star-icon" data-value="1"></i>
+                                                    <i class="fas fa-star star-icon" data-value="2"></i>
+                                                    <i class="fas fa-star star-icon" data-value="3"></i>
+                                                    <i class="fas fa-star star-icon" data-value="4"></i>
+                                                    <i class="fas fa-star star-icon" data-value="5"></i>
+                                                    <input type="hidden" name="reviewRate" id="reviewRateInput" value="5">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group mb-0">
+                                                <textarea id="reviewText" name="reviewContents" cols="30" rows="5"
+                                                          class="form-control mb-3"
+                                                          placeholder="배송 문의나 욕설 및 인신공격성 글은 상품 페이지에서 노출 제외처리됩니다."
+                                                          style="resize: none;"
+                                                          onclick="checkLoginAndFocus()"></textarea>
+
+                                                <div class="text-right">
+                                                    <button type="button" id="submitBtn" class="btn btn-primary px-4 py-2" onclick="submitReview()">
+                                                        등록하기
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
                                     <h4 class="mb-4 border-bottom pb-2"
                                         th:text="${reviews != null ? reviews.totalElements + '개의 리뷰가 있습니다.' : '리뷰가 없습니다.'}">
                                     </h4>
@@ -240,21 +280,24 @@
                                          th:each="review, reviewStat : ${reviews.content}">
 
                                         <div class="media-body">
-                                            <h6 th:text="${review.writerName != null ? review.writerName : '익명'}">
-                                                User Name<small class="text-muted ml-2"> - <i th:text="${review.createdAt}">01 Jan 2025</i></small>
-                                            </h6>
+                                            <div class="d-flex justify-content-between">
+                                                <h6 th:text="${review.writerName != null ? review.writerName : '익명'}">
+                                                    User Name
+                                                </h6>
+                                                <small class="text-muted" th:text="${review.createdAt}">01 Jan 2025</small>
+                                            </div>
 
                                             <div class="text-primary mb-2">
                                                 <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
                                                    th:classappend="${review.reviewRate >= i} ? 'text-primary' : 'text-secondary'"></i>
                                             </div>
 
-                                            <p th:text="${review.reviewContents}" class="text-dark">리뷰 내용</p>
+                                            <p th:text="${review.reviewContents}" class="text-dark mt-2 mb-3" style="line-height: 1.6;">리뷰 내용</p>
 
                                             <div th:if="${!#lists.isEmpty(review.imageUrls)}" class="d-flex flex-wrap mt-2">
-                                                <div th:each="imgUrl, imgStat : ${review.imageUrls}">
+                                                <div th:each="imgUrl, imgStat : ${review.imageUrls}" class="review-img-bg">
                                                     <img th:src="@{'/trillion-bucket/' + ${imgUrl}}"
-                                                         class="review-img-thumb"
+                                                         class="review-img-thumb m-0"
                                                          alt="리뷰 이미지"
                                                          data-toggle="modal"
                                                          th:data-target="'#reviewModal-' + ${reviewStat.index}"
@@ -269,7 +312,6 @@
                                                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                                     <div class="modal-content bg-transparent border-0">
                                                         <div class="modal-body p-0 position-relative">
-
                                                             <button type="button" class="close position-absolute text-white" data-dismiss="modal" aria-label="Close"
                                                                     style="top: -30px; right: 0; z-index: 1050; opacity: 1;">
                                                                 <span aria-hidden="true">&times;</span>
@@ -298,7 +340,6 @@
                                                                     </a>
                                                                 </th:block>
                                                             </div>
-
                                                         </div>
                                                     </div>
                                                 </div>
@@ -307,15 +348,7 @@
                                     </div>
 
                                     <div th:if="${reviews == null or reviews.content.isEmpty()}">
-                                        <p class="text-muted">작성된 리뷰가 없습니다. 첫 번째 리뷰를 남겨주세요!</p>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <h4 class="mb-4">리뷰 작성</h4>
-                                    <small>상품을 구매하신 후 리뷰를 작성할 수 있습니다.</small>
-                                    <div class="mt-3">
-                                        <a href="/members/my-orders" class="btn btn-primary px-3">구매내역에서 작성하기</a>
+                                        <p class="text-muted text-center py-5">첫 번째 리뷰의 주인공이 되어보세요!</p>
                                     </div>
                                 </div>
                             </div>
@@ -327,8 +360,67 @@
     </div>
 </div>
 
+<input type="hidden" id="isLoggedIn" th:value="${#authorization.expression('isAuthenticated()')}" />
+
 <th:block layout:fragment="script">
     <script>
+        // 리뷰 작성 관련 스크립트
+        // 1. 별점 UI 동작
+        document.querySelectorAll('.star-icon').forEach(star => {
+            star.addEventListener('click', function() {
+                let value = this.getAttribute('data-value');
+                document.getElementById('reviewRateInput').value = value;
+
+                // 별 아이콘 채우기/비우기
+                let stars = this.parentElement.querySelectorAll('.star-icon');
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= value) {
+                        s.classList.remove('far'); // 빈 별 제거 (필요시 class 조정)
+                        s.classList.add('fas');    // 꽉 찬 별 추가
+                        s.classList.remove('text-secondary');
+                        s.classList.add('text-primary');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far'); // FontAwesome 버전에 따라 'far' 사용
+                        s.classList.remove('text-primary');
+                        s.classList.add('text-secondary');
+                    }
+                });
+            });
+        });
+
+        // 2. 로그인 체크 및 리다이렉트 함수
+        function checkLoginAndFocus() {
+            const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
+
+            if (!isLoggedIn) {
+                document.getElementById('reviewText').blur(); // 포커스 해제
+
+                const confirmLogin = confirm("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?");
+
+                if (confirmLogin) {
+                    // 현재 페이지 URL을 redirectURL 파라미터로 저장하여 이동
+                    const currentUrl = encodeURIComponent(window.location.href);
+                    window.location.href = '/login?redirectURL=' + currentUrl;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        // 3. 리뷰 등록
+        function submitReview() {
+            if (checkLoginAndFocus()) {
+                const text = document.getElementById('reviewText').value;
+                if(text.trim() === "") {
+                    alert("리뷰 내용을 입력해주세요.");
+                    return;
+                }
+                // 폼 전송
+                document.getElementById('reviewForm').submit();
+            }
+        }
+
         $(document).ready(function () {
             // 수량 조절 버튼 이벤트
             $('.quantity button').off('click').on('click', function () {
@@ -380,7 +472,7 @@
                 });
             });
 
-            // [수정됨] 찜하기 AJAX (컨트롤러에 맞춰 GET /wishlists/toggle?bookId=... 로 수정)
+            // 찜하기 AJAX
             $('#btn-add-like').off('click').on('click', function () {
                 const bookId = $(this).data('book-id');
 
@@ -388,8 +480,6 @@
                     url: '/wishlists/toggle?bookId=' + bookId,
                     method: 'GET',
                     success: function (res) {
-                        // 결과에 따라 메시지 분기 (컨트롤러가 Map을 리턴하므로 확인 필요)
-                        // 단순 성공 시에도 200 OK가 오므로 아래와 같이 처리 가능
                         alert('찜 목록에 반영되었습니다.');
                     },
                     error: function (xhr) {
