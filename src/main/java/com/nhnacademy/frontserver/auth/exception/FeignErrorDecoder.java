@@ -58,13 +58,24 @@ public class FeignErrorDecoder implements ErrorDecoder {
 
                         log.info("토큰 재발급 성공! 원래 요청을 다시 시도합니다.");
 
-                        // [수정 2] 원래 요청 재시도 (RetryableException 던지기)
+                        feign.Request originalRequest = response.request();
+                        java.util.Map<String, java.util.Collection<String>> headers = new java.util.HashMap<>(originalRequest.headers());
+                        headers.put("Authorization", java.util.Collections.singletonList("Bearer " + newTokens.getAccessToken()));
+
+                        feign.Request newRequest = feign.Request.create(
+                                originalRequest.httpMethod(),
+                                originalRequest.url(),
+                                headers,
+                                originalRequest.body(),
+                                originalRequest.charset() != null ? originalRequest.charset() : java.nio.charset.StandardCharsets.UTF_8
+                        );
+
                         return new RetryableException(
                                 response.status(),
                                 "Token reissued",
                                 response.request().httpMethod(),
-                                0L,
-                                response.request()
+                                (Long) null,
+                                newRequest
                         );
 
                     } catch (Exception e) {

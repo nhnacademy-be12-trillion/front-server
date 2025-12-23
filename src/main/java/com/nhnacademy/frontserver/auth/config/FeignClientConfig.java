@@ -1,6 +1,7 @@
 package com.nhnacademy.frontserver.auth.config;
 
 import feign.RequestInterceptor;
+import feign.Retryer;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +15,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class FeignClientConfig {
 
     @Bean
+    public Retryer retryer() {
+        return new Retryer.Default(100L, 1000L, 2);
+    }
+
+    @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
-            if (template.url().contains("/reissue")) {
+            if ("/api/auth/reissue".equals(template.path())) {
                 return;
             }
 
