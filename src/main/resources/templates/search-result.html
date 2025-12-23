@@ -120,6 +120,38 @@
                 margin-left: 15px;
             }
 
+            .action-block {
+                min-width: 140px;
+                margin-left: 15px;
+                text-align: right;
+            }
+
+            .action-block .btn {
+                display: block;
+                width: 100%;
+                font-size: 0.8rem;
+                font-weight: 600;
+                margin-bottom: 4px;
+                padding-top: 6px;
+                padding-bottom: 6px;
+            }
+
+            .action-block .input-group {
+                width: 100%;
+                margin-bottom: 6px;
+            }
+
+            .action-block .form-control {
+                padding: 2px 4px;
+                height: 28px;
+                font-size: 0.8rem;
+            }
+
+            .action-block .btn-qty {
+                padding: 0 8px;
+                font-size: 0.8rem;
+            }
+
             .price-now {
                 font-size: 1.05rem;
                 font-weight: 700;
@@ -150,6 +182,10 @@
                 }
                 .price-block {
                     text-align: left;
+                    margin-left: 0;
+                    margin-top: 8px;
+                }
+                .action-block {
                     margin-left: 0;
                     margin-top: 8px;
                 }
@@ -333,6 +369,43 @@
                                         </span>
                                     </div>
                                 </div>
+                                <!-- 장바구니 / 바로구매 / 찜하기 -->
+                                <div class="action-block mt-2 mt-md-0">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <button class="btn btn-outline-secondary btn-qty js-qty-minus" type="button">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text"
+                                               class="form-control text-center js-qty-input"
+                                               value="1">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary btn-qty js-qty-plus" type="button">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="button"
+                                            class="btn btn-primary js-btn-cart mt-1"
+                                            th:data-book-id="${b.id}">
+                                        <i class="fa fa-shopping-cart mr-1"></i> 장바구니
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-dark js-btn-buy"
+                                            th:data-book-id="${b.id}">
+                                        <i class="fa fa-credit-card mr-1"></i> 바로 구매
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-outline-danger js-btn-like"
+                                            th:data-book-id="${b.id}">
+                                        <i class="far fa-heart mr-1"></i> 찜하기
+                                    </button>
+                                </div>
+                                <!-- 장바구니 / 바로구매 / 찜하기 -->
                             </div>
                         </div>
 
@@ -381,5 +454,103 @@
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(function () {
+
+            function getRowQuantity($btn) {
+                const $row = $btn.closest('.search-result-item');
+                const $input = $row.find('.js-qty-input');
+                let val = parseInt($input.val(), 10);
+                if (isNaN(val) || val < 1) val = 1;
+                $input.val(val);
+                return val;
+            }
+
+            // 수량 +/-
+            $('.search-result-list').on('click', '.js-qty-plus, .js-qty-minus', function () {
+                const $row = $(this).closest('.search-result-item');
+                const $input = $row.find('.js-qty-input');
+                let val = parseInt($input.val(), 10);
+                if (isNaN(val) || val < 1) val = 1;
+
+                if ($(this).hasClass('js-qty-plus')) {
+                    val++;
+                } else {
+                    if (val > 1) {
+                        val--;
+                    }
+                }
+                $input.val(val);
+            });
+
+            // 장바구니 담기
+            $('.search-result-list').on('click', '.js-btn-cart', function () {
+                const bookId = $(this).data('book-id');
+                const quantity = getRowQuantity($(this));
+
+                $.ajax({
+                    url: '/carts/add',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        bookId: bookId,
+                        cartQuantity: quantity
+                    }),
+                    success: function () {
+                        if (confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
+                            location.href = '/carts';
+                        }
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 401) {
+                            alert('로그인이 필요합니다.');
+                            location.href = '/login';
+                        } else {
+                            alert('오류가 발생했습니다: ' + xhr.responseText);
+                        }
+                    }
+                });
+            });
+
+            // 바로 구매 (GET /checkout?bookId=..&quantity=.. 로 이동)
+            $('.search-result-list').on('click', '.js-btn-buy', function () {
+                const bookId = $(this).data('book-id');
+                const quantity = getRowQuantity($(this));
+
+                const url = '/checkout?bookId=' + encodeURIComponent(bookId)
+                    + '&quantity=' + encodeURIComponent(quantity);
+
+                window.location.href = url;
+            });
+
+            // 찜하기
+            $('.search-result-list').on('click', '.js-btn-like', function () {
+                const bookId = $(this).data('book-id');
+
+                $.ajax({
+                    url: '/wishlists/toggle?bookId=' + bookId,
+                    method: 'GET',
+                    success: function () {
+                        alert('찜 목록에 반영되었습니다.');
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 401) {
+                            if (confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) {
+                                location.href = '/login';
+                            }
+                        } else if (xhr.status === 409) {
+                            alert('이미 찜한 도서입니다.');
+                        } else {
+                            alert('오류가 발생했습니다.');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+
 </body>
 </html>
