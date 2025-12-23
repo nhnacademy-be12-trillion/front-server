@@ -9,22 +9,29 @@ import feign.RetryableException;
 import feign.codec.ErrorDecoder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class FeignErrorDecoder implements ErrorDecoder {
 
     private final AuthClient authClient;
     private final ErrorDecoder defaultDecoder = new Default();
 
+    public FeignErrorDecoder(@Lazy AuthClient authClient) {
+        this.authClient = authClient;
+    }
+
     @Override
     public Exception decode(String methodKey, Response response) {
+        if (methodKey.contains("login") || methodKey.contains("reissue")) {
+            return defaultDecoder.decode(methodKey, response);
+        }
+
         if (response.status() == 401) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
