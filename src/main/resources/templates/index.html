@@ -211,10 +211,10 @@
                     <h2 class="clean-section-title">
                         ✨
                         <span class="text-primary"
-                              th:text="${selectedCategoryId == 0 ? '따끈따끈한 신간' : selectedCategoryName}">
+                              th:text="${selectedCategoryId == 0 ? '전체' : selectedCategoryName}">
                         추천
                     </span>
-                        <span th:text="${selectedCategoryId == 0 ? '도서' : '분야의 도서'}">도서</span>
+                        <span th:text="${selectedCategoryId == 0 ? '도서' : '분야의 신간 도서'}">도서</span>
                     </h2>
 <!--                    <a th:href="@{/books(categoryId=${selectedCategoryId}, sort=${selectedCategoryId == 0 ? 'publicationDate,desc' : ''})}"-->
 <!--                       class="clean-more-btn">더보기 +</a>-->
