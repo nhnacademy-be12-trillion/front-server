@@ -12,7 +12,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Controller
@@ -42,7 +40,7 @@ public class MemberController {
         return "signup";
     }
 
-    // 회원가입 처리
+    // 회원가입 처리 (Form Submit)
     @PostMapping("/signup")
     public String signup(@Valid @ModelAttribute("signupRequest") MemberSignupRequest request,
                          BindingResult bindingResult) {
@@ -65,32 +63,14 @@ public class MemberController {
         return "find-password";
     }
 
-    // 인증번호 발송 요청
-    @ResponseBody
-    @PostMapping("/emails/password")
-    public ResponseEntity<String> sendResetEmail(@RequestBody Map<String, String> body) {
-        String email = body.get("memberEmail");
-        try {
-            // EmailRequest DTO로 감싸서 전송
-            memberClient.sendResetPasswordEmail(new EmailRequest(email));
-            return ResponseEntity.ok("인증번호가 발송되었습니다.");
-        } catch (Exception e) {
-            // 백엔드에서 '가입되지 않은 이메일' 에러를 던지면 여기서 잡힘.
-            return ResponseEntity.badRequest().body("가입되지 않은 이메일이거나 오류가 발생했습니다.");
-        }
-    }
-
-    // 비밀번호 변경 요청
+    // 비밀번호 변경 처리 (Form Submit)
     @PostMapping("/password/reset")
     public String resetPassword(@ModelAttribute PasswordResetRequest request, RedirectAttributes redirectAttributes) {
         try {
-            // 여기서 (이메일 + 인증코드 + 새비번)을 한꺼번에 보냄
             memberClient.resetPassword(request);
-
             redirectAttributes.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다. 로그인해주세요.");
-            return "redirect:/auth/login";
+            return "redirect:/login";
         } catch (Exception e) {
-            // 인증코드가 틀렸거나 만료된 경우 여기서 예외 발생
             redirectAttributes.addFlashAttribute("error", "변경 실패: 인증번호가 틀렸거나 만료되었습니다.");
             return "redirect:/members/password/reset";
         }
@@ -100,7 +80,6 @@ public class MemberController {
     @GetMapping("/my-page")
     public String myPage(Model model, HttpServletResponse response) {
         try {
-            // 회원 정보 조회 시도
             MemberResponse member = memberClient.getMember();
             model.addAttribute("member", member);
 
@@ -112,9 +91,9 @@ public class MemberController {
             return "my/my-page";
 
         } catch (Exception e) {
-            log.warn("마이페이지 접근 실패 (유효하지 않은 토큰 또는 탈퇴 회원): {}", e.getMessage());
+            log.warn("마이페이지 접근 실패: {}", e.getMessage());
             forceLogout(response);
-            return "redirect:/auth/login?error=access_denied";
+            return "redirect:/login?error=access_denied";
         }
     }
 
@@ -124,7 +103,7 @@ public class MemberController {
         return "find-email";
     }
 
-    // 이메일 찾기 요청
+    // 이메일 찾기 처리 (Form Submit -> 결과 페이지)
     @PostMapping("/find/email")
     public String findEmail(@ModelAttribute FindMemberIdRequest request, Model model) {
         try {
@@ -136,40 +115,28 @@ public class MemberController {
         return "find-email";
     }
 
-    //이메일 인증번호 발송
-    @ResponseBody
-    @PostMapping("/api/email/send")
-    public ResponseEntity<Void> sendEmail(@RequestBody EmailRequest request) {
-        memberClient.sendSignupEmail(request);
-        return ResponseEntity.ok().build();
-    }
-
-    // 이메일 인증번호 검증
-    @ResponseBody
-    @PostMapping("/api/email/verify")
-    public ResponseEntity<Void> verifyEmail(@RequestBody VerifyEmailRequest request) {
-        memberClient.verifyEmail(request);
-        return ResponseEntity.ok().build();
-    }
-
+    // 주소 추가 (Form Submit)
     @PostMapping("/addresses")
     public String addAddress(@ModelAttribute AddressCreateRequest request) {
         memberClient.addAddress(request);
         return "redirect:/members/my-page";
     }
 
+    // 주소 삭제 (Form Submit)
     @PostMapping("/addresses/{addressId}/delete")
     public String deleteAddress(@PathVariable Long addressId) {
         memberClient.deleteAddress(addressId);
         return "redirect:/members/my-page";
     }
 
+    // 주소 수정 (Form Submit)
     @PostMapping("/addresses/{addressId}/update")
     public String updateAddress(@PathVariable Long addressId, @ModelAttribute AddressUpdateRequest request) {
         memberClient.updateAddress(addressId, request);
         return "redirect:/members/my-page";
     }
 
+    // 회원 탈퇴 (Form Submit)
     @PostMapping("/withdraw")
     public String withdrawMember(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -191,59 +158,36 @@ public class MemberController {
         return "redirect:/";
     }
 
-    private void forceLogout(HttpServletResponse response) {
-        ResponseCookie accessCookie = CookieUtils.deleteCookie("accessToken");
-        ResponseCookie refreshCookie = CookieUtils.deleteCookie("refreshToken");
-
-        response.addHeader("Set-Cookie", accessCookie.toString());
-        response.addHeader("Set-Cookie", refreshCookie.toString());
-    }
-
     // 소셜 회원가입 추가 정보 입력 페이지
     @GetMapping("/social-signup")
-    public String socialSignupForm(HttpServletRequest request, Model model) {
-        // 쿼리 파라미터로 넘어온 토큰을 쿠키에 저장하는 로직은
-        // 별도의 Handler나 Interceptor에서 처리되었다고 가정하거나,
-        // 여기서 request.getParameter("accessToken")을 꺼내 쿠키에 심어줘야 할 수도 있습니다.
-        // 보통은 /login/oauth2/success 와 비슷한 로직으로 토큰을 먼저 세팅해야 합니다.
-
+    public String socialSignupForm() {
         return "social-signup";
     }
 
     // 소셜 추가 정보 저장 처리
     @PostMapping("/social-signup")
-    public String submitSocialInfo(@ModelAttribute SocialSignupRequest request,
-                                   HttpServletRequest httpRequest,
+    public String submitSocialInfo(@ModelAttribute SocialInfoUpdateRequest request, // DTO 이름 확인 필요
                                    HttpServletResponse response) {
-        // member Service 호출 (정보 업데이트 & 등급 승격)
-        // FeignClient가 헤더에 GUEST용 AccessToken을 싣고 갑니다.
         memberClient.updateSocialMember(request);
-
-        ResponseCookie accessCookie = CookieUtils.deleteCookie("accessToken");
-        ResponseCookie refreshCookie = CookieUtils.deleteCookie("refreshToken");
-
-        response.addHeader("Set-Cookie", accessCookie.toString());
-        response.addHeader("Set-Cookie", refreshCookie.toString());
-
-        return "redirect:/auth/login?social_complete=true";
+        forceLogout(response); // 정보 갱신 후 재로그인 유도
+        return "redirect:/login?social_complete=true";
     }
 
-
-
+    // 등급 조회
     @GetMapping("/grades")
     public String gradeForm(Model model) {
         List<GradeResponse> grades = memberClient.getGrades();
-        model.addAttribute("grades",grades);
+        model.addAttribute("grades", grades);
         return "grade-list";
     }
 
+    // 주문 내역 조회
     @GetMapping("/orders")
     public String myPageOrders(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
-        // 정렬은 우선 고정
         String sort = "bookId,desc";
         PageResponse<OrderResponse> orders = orderClient.getAllOrderByMember(page, size, sort);
         model.addAttribute("orders", orders);
@@ -251,10 +195,17 @@ public class MemberController {
         return "/my/my-orders";
     }
 
+    // 리뷰 조회
     @GetMapping("/reviews")
-    public String getReviews(Model model) {
-
+    public String getReviews() {
         return "/my/my-reviews";
     }
 
+    private void forceLogout(HttpServletResponse response) {
+        ResponseCookie accessCookie = CookieUtils.deleteCookie("accessToken");
+        ResponseCookie refreshCookie = CookieUtils.deleteCookie("refreshToken");
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+    }
 }

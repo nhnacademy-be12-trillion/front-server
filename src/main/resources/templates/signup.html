@@ -115,14 +115,13 @@
 
                 <div class="text-center mt-3">
                     <span class="text-secondary">이미 계정이 있으신가요?</span>
-                    <a href="/auth/login" class="text-primary font-weight-bold ml-2">로그인</a>
+                    <a href="/login" class="text-primary font-weight-bold ml-2">로그인</a>
                 </div>
 
             </form>
         </div>
     </div>
 </div>
-
 <th:block layout:fragment="script">
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
@@ -146,7 +145,7 @@
             }
         }
 
-        // 폼 제출 시 검증 (비밀번호 불일치 시 막기)
+        // 폼 제출 시 검증
         function validateForm() {
             const pw = document.getElementById('memberPassword').value;
             const pwConfirm = document.getElementById('passwordConfirm').value;
@@ -154,27 +153,40 @@
             if (pw !== pwConfirm) {
                 alert("비밀번호가 일치하지 않습니다.");
                 document.getElementById('passwordConfirm').focus();
-                return false; // 제출 중단
+                return false;
             }
-            return true; // 제출 진행
+            return true;
         }
 
-        // 이메일 인증번호 발송
         function sendEmail() {
             const memberEmail = document.getElementById('memberEmail').value;
             if(!memberEmail) { alert("이메일을 입력해주세요."); return; }
+
+            isEmailVerified = false;
 
             fetch('/members/api/email/send', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({memberEmail: memberEmail})
-            }).then(res => {
-                if(res.ok) alert('인증번호가 발송되었습니다.');
-                else alert('발송 실패: 서버 오류');
-            });
+            })
+                .then(async res => {
+                    const msg = await res.text();
+
+                    if(res.ok) {
+                        alert(msg);
+                    } else if (res.status === 409) {
+                        alert(msg);
+                        document.getElementById('memberEmail').focus();
+                    } else {
+                        alert('발송 실패: ' + msg);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("서버 연결 실패");
+                });
         }
 
-        // 인증번호 확인
         function verifyCode() {
             const memberEmail = document.getElementById('memberEmail').value;
             const verificationCode = document.getElementById('verificationCode').value;
@@ -198,6 +210,9 @@
                     msgBox.innerText = "인증 실패";
                     msgBox.className = "text-danger font-weight-bold mt-1 d-block";
                 }
+            }).catch(err => {
+                console.error(err);
+                alert("서버 연결 실패");
             });
         }
 
