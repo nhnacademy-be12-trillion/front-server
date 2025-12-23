@@ -16,7 +16,7 @@ public class FeignClientConfig {
 
     @Bean
     public Retryer retryer() {
-        return new Retryer.Default(100L, 1000L, 2);
+        return new Retryer.Default(100L, 1000L, 3);
     }
 
     @Bean
@@ -25,7 +25,9 @@ public class FeignClientConfig {
             if ("/api/auth/reissue".equals(template.path())) {
                 return;
             }
-
+            if (template.headers().containsKey("Authorization")) {
+                return;
+            }
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
             if (attributes != null) {
