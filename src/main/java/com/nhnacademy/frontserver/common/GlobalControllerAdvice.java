@@ -35,7 +35,7 @@ public class GlobalControllerAdvice {
                 model.addAttribute("isLogin", true);
                 model.addAttribute("member", member);
             } catch (Exception e) {
-                log.error("회원 정보 조회 실패 (토큰 만료 혹은 Gateway 거절): {}", e.getMessage());
+                log.error("Unexpected System Error 발생! URL={}, Message={}", request.getRequestURI(), e.getMessage(), e);
                 model.addAttribute("isLogin", false);
             }
         } else {
