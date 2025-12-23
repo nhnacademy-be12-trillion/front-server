@@ -13,8 +13,6 @@
 package com.nhnacademy.frontserver.book;
 
 import com.nhnacademy.frontserver.PageResponse;
-import com.nhnacademy.frontserver.book.BookListResponse;
-import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -42,9 +40,7 @@ public interface BookClient {
         return getBooks(0, 20, "bookId,desc");
     }
 
-    // [★추가됨] 카테고리별 도서 목록 조회 (페이징 포함)
-    // 백엔드 엔드포인트가 /api/books/categories/{categoryId} 라고 가정합니다.
-    // 만약 백엔드가 /api/books?categoryId={categoryId} 형태라면 그에 맞게 수정해야 합니다.
+    // 카테고리별 도서 목록 조회 (페이징 포함)
     @GetMapping("/api/books/categories/{categoryId}")
     PageResponse<BookListResponse> getBooksByCategoryId(
             @PathVariable("categoryId") Long categoryId,
@@ -67,7 +63,7 @@ public interface BookClient {
                                             @RequestParam("size") int size,
                                             @RequestParam("sort") String sort);
 
-    // 카테고리 트리 조회 (CategoryClient를 따로 만드셨다면 중복될 수 있으나, 유지해도 무방)
+    // 카테고리 트리 조회
     @GetMapping("/api/books/categories")
     List<CategoryTreeResponse> getCategoryTree();
 
@@ -76,9 +72,13 @@ public interface BookClient {
                                               @RequestParam("size") int size,
                                               @RequestParam("sort") String sort);
 
-    // 인기 도서 (조회수 기준) Top 5
+    // 인기 도서 (조회수 기준) Top 10
     @GetMapping("/api/books/popular-books")
     List<BookListResponse> getPopularBooks();
+
+    // 전체 신간 도서 Top 5
+    @GetMapping("/api/books/new-books")
+    List<BookListResponse> getNewBooks();
 
     // 카테고리별 도서 Top 5 (메인페이지 등에서 간단히 보여줄 때 사용)
     @GetMapping("/api/books/categories/{categoryId}/top")

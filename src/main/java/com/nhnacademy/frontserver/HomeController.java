@@ -56,26 +56,34 @@ public class HomeController {
         }
         model.addAttribute("rootCategories", rootCategories);
 
-        // 선택된 카테고리 도서 조회
+        // 신간 도서 조회 (전체 vs 카테고리별)
         List<BookListResponse> categoryBooks = Collections.emptyList();
+        String selectedCategoryName = "전체";
+
         try {
-            categoryBooks = bookClient.getBooksByCategory(categoryId);
+            if (categoryId == 0L) {
+                // '전체' 선택 시 -> 전체 신간 Top 5 호출
+                categoryBooks = bookClient.getNewBooks();
+                selectedCategoryName = "전체";
+            } else {
+                // '카테고리' 선택 시 -> 해당 카테고리 신간 Top 5 호출
+                categoryBooks = bookClient.getBooksByCategory(categoryId);
+
+                // 카테고리 이름 찾기
+                if (rootCategories != null) {
+                    selectedCategoryName = rootCategories.stream()
+                            .filter(c -> c.categoryId().equals(categoryId))
+                            .findFirst()
+                            .map(CategoryTreeResponse::categoryName)
+                            .orElse("카테고리");
+                }
+            }
         } catch (Exception e) {
-            System.err.println("카테고리 도서 조회 실패: " + e.getMessage());
+            System.err.println("추천 도서 조회 실패: " + e.getMessage());
         }
+
         model.addAttribute("categoryBooks", categoryBooks);
-
-        // 카테고리 이름 찾기
         model.addAttribute("selectedCategoryId", categoryId);
-
-        String selectedCategoryName = "추천";
-        if (rootCategories != null && !rootCategories.isEmpty()) {
-            selectedCategoryName = rootCategories.stream()
-                    .filter(c -> c.categoryId().equals(categoryId))
-                    .findFirst()
-                    .map(CategoryTreeResponse::categoryName)
-                    .orElse("추천");
-        }
         model.addAttribute("selectedCategoryName", selectedCategoryName);
 
         // 베스트셀러 도서 조회 (Top 5)
