@@ -1,23 +1,17 @@
 package com.nhnacademy.frontserver.auth.config;
 
+import com.nhnacademy.frontserver.auth.util.TokenHolder;
 import feign.RequestInterceptor;
 import feign.Retryer;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-@Slf4j
 @Configuration
 public class FeignClientConfig {
-
-    @Bean
-    public Retryer retryer() {
-        return new Retryer.Default(100L, 1000L, 3);
-    }
 
     @Bean
     public RequestInterceptor requestInterceptor() {
@@ -25,9 +19,18 @@ public class FeignClientConfig {
             if ("/api/auth/reissue".equals(template.path())) {
                 return;
             }
+
+            String newAccessToken = TokenHolder.get();
+            if (newAccessToken != null) {
+                template.header("Authorization", "Bearer " + newAccessToken);
+                TokenHolder.clear();
+                return;
+            }
+
             if (template.headers().containsKey("Authorization")) {
                 return;
             }
+
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
             if (attributes != null) {
@@ -39,12 +42,14 @@ public class FeignClientConfig {
                         if ("accessToken".equals(cookie.getName())) {
                             template.header("Authorization", "Bearer " + cookie.getValue());
                         }
-                        if ("guestId".equals(cookie.getName())) {
-                            template.header("Cookie", "guestId=" + cookie.getValue());
-                        }
                     }
                 }
             }
         };
+    }
+
+    @Bean
+    public Retryer retryer() {
+        return new Retryer.Default(100L, 1000L, 2);
     }
 }
