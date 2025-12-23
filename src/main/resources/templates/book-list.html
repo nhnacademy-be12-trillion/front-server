@@ -127,14 +127,19 @@
                                     <span th:text="${book.bookAuthor == null ? '저자 미상' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>
                                 </div>
 
-                                <div class="d-flex align-items-center justify-content-center mt-1">
-                                    <div th:if="${book.bookSalePrice > 0}" class="d-flex align-items-center">
-                                        <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                        <h6 class="text-muted ml-2 mb-0" th:if="${book.bookSalePrice < book.bookRegularPrice}">
+                                <div class="mt-2" style="text-align: center;">
+                                    <div th:if="${book.bookSalePrice > 0}">
+
+                                        <h6 class="text-muted mb-1" th:if="${book.bookSalePrice < book.bookRegularPrice}">
                                             <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
                                         </h6>
-                                        <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '%'">10%</span>
+
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
+                                            <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '%'">10%</span>
+                                        </div>
                                     </div>
+
                                     <div th:if="${book.bookSalePrice == 0}">
                                         <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
                                     </div>
@@ -153,31 +158,50 @@
 
                     <div class="col-12 mt-3" th:if="${page != null and page.totalPages > 0}">
                         <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center mb-3">
-                                <li class="page-item" th:classappend="${page.number == 0} ? 'disabled'">
+                            <ul class="pagination justify-content-center mb-3"
+                                th:with="start=${(page.number / 5) * 5},
+                                         end= ${(start + 4) < (page.totalPages - 1) ? (start + 4) : (page.totalPages - 1)}">
+
+                                <li class="page-item" th:if="${start > 0}">
+                                    <a class="page-link"
+                                       th:href="@{/books(page=${start - 1}, categoryId=${currentCategoryId})}"
+                                       aria-label="Previous Group">
+                                        <span aria-hidden="true"><i class="fa fa-angle-double-left"></i></span>
+                                    </a>
+                                </li>
+
+                                <li class="page-item" th:if="${!page.first}">
                                     <a class="page-link"
                                        th:href="@{/books(page=${page.number - 1}, categoryId=${currentCategoryId})}"
                                        aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
+                                        <span aria-hidden="true"><i class="fa fa-angle-left"></i></span>
                                     </a>
                                 </li>
+
                                 <li class="page-item"
-                                    th:each="i : ${#numbers.sequence(
-                                        page.number > 2 ? page.number - 2 : 0,
-                                        page.number + 2 < page.totalPages - 1 ? page.number + 2 : page.totalPages - 1
-                                    )}"
+                                    th:each="i : ${#numbers.sequence(start, end)}"
                                     th:classappend="${i == page.number} ? 'active'">
                                     <a class="page-link"
                                        th:text="${i + 1}"
                                        th:href="@{/books(page=${i}, categoryId=${currentCategoryId})}">1</a>
                                 </li>
-                                <li class="page-item" th:classappend="${page.number == page.totalPages - 1} ? 'disabled'">
+
+                                <li class="page-item" th:if="${!page.last}">
                                     <a class="page-link"
                                        th:href="@{/books(page=${page.number + 1}, categoryId=${currentCategoryId})}"
                                        aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
+                                        <span aria-hidden="true"><i class="fa fa-angle-right"></i></span>
                                     </a>
                                 </li>
+
+                                <li class="page-item" th:if="${end < page.totalPages - 1}">
+                                    <a class="page-link"
+                                       th:href="@{/books(page=${end + 1}, categoryId=${currentCategoryId})}"
+                                       aria-label="Next Group">
+                                        <span aria-hidden="true"><i class="fa fa-angle-double-right"></i></span>
+                                    </a>
+                                </li>
+
                             </ul>
                         </nav>
                     </div>
@@ -190,7 +214,6 @@
 
 <th:block layout:fragment="script">
     <script>
-        // 메인 페이지(index.html)와 동일한 로직 적용 (POST + JSON)
         function addToCart(bookId) {
             const data = {
                 bookId: bookId,
