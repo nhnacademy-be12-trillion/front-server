@@ -68,9 +68,12 @@
         <p class="text-muted">로그인하여 더 많은 혜택을 누리세요</p>
       </div>
 
-      <div th:if="${param.error}" class="alert alert-danger text-center py-2 mb-4" role="alert">
-        아이디 또는 비밀번호를 확인해주세요.
-      </div>
+      <div class="bg-light p-4 p-md-5 rounded shadow-sm">
+        <div th:if="${message}" class="alert alert-success text-center py-2 mb-4" role="alert" th:text="${message}"></div>
+
+        <div th:if="${param.error}" class="alert alert-danger text-center py-2 mb-4" role="alert">
+          아이디 또는 비밀번호를 확인해주세요.
+        </div>
 
       <form action="/login" method="post" id="loginForm" novalidate>
         <div class="form-group">

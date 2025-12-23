@@ -81,12 +81,12 @@
       const birthInput = document.getElementById('memberBirth').value;
       if (!birthInput) return false;
 
-      const birthDate = new Date(birthInput);
+      const memberBirth = new Date(birthInput);
       const today = new Date();
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(today.getFullYear() - 1);
 
-      if (birthDate > oneYearAgo) {
+      if (memberBirth > oneYearAgo) {
         alert("생년월일을 정확히 입력해주세요. (최근 1년 이내 날짜 선택 불가)");
         return false;
       }

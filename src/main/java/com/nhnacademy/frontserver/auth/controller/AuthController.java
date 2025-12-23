@@ -4,6 +4,7 @@ import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.dto.LoginRequest;
 import com.nhnacademy.frontserver.auth.dto.TokenResponse;
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,17 +30,21 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
+        try {
+            // FeignClient로 Gateway 호출 -> 토큰 받기
+            TokenResponse tokens = authClient.login(loginRequest);
+            ResponseCookie accessCookie = CookieUtils.createHttpOnlyCookie("accessToken", tokens.getAccessToken(), 60 * 30);
+            ResponseCookie refreshCookie = CookieUtils.createHttpOnlyCookie("refreshToken", tokens.getRefreshToken(), 60 * 60 * 24 * 7);
 
-        // FeignClient로 Gateway 호출 -> 토큰 받기
-        TokenResponse tokens = authClient.login(loginRequest);
-        ResponseCookie accessCookie = CookieUtils.createHttpOnlyCookie("accessToken", tokens.getAccessToken(), 60 * 30);
-        ResponseCookie refreshCookie = CookieUtils.createHttpOnlyCookie("refreshToken", tokens.getRefreshToken(), 60 * 60 * 24 * 7);
+            // 응답 헤더에 추가
+            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-        // 응답 헤더에 추가
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-
-        return "redirect:/";
+            return "redirect:/";
+        }catch (FeignException e){
+            log.info("로그인 실패: {}", e.getMessage());
+            return "redirect:/login?error";
+        }
     }
 
     @PostMapping("/logout")
