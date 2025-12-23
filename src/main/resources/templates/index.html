@@ -209,9 +209,15 @@
             <div class="col-12">
                 <div class="clean-section-header">
                     <h2 class="clean-section-title">
-                        ✨ <span class="text-primary" th:text="${selectedCategoryName}">추천</span> 분야의 도서
+                        ✨
+                        <span class="text-primary"
+                              th:text="${selectedCategoryId == 0 ? '따끈따끈한 신간' : selectedCategoryName}">
+                        추천
+                    </span>
+                        <span th:text="${selectedCategoryId == 0 ? '도서' : '분야의 도서'}">도서</span>
                     </h2>
-                    <a th:href="@{/books(categoryId=${selectedCategoryId})}" class="clean-more-btn">더보기 +</a>
+<!--                    <a th:href="@{/books(categoryId=${selectedCategoryId}, sort=${selectedCategoryId == 0 ? 'publicationDate,desc' : ''})}"-->
+<!--                       class="clean-more-btn">더보기 +</a>-->
                 </div>
             </div>
         </div>
@@ -223,19 +229,24 @@
                    th:classappend="${selectedCategoryId == 0} ? 'active'">
                     전체
                 </a>
-                <a th:each="cat : ${rootCategories}"
-                   th:href="@{/(categoryId=${cat.categoryId})}"
-                   class="category-pill"
-                   th:classappend="${cat.categoryId == selectedCategoryId} ? 'active'"
-                   th:text="${cat.categoryName}">
-                    문학
-                </a>
+
+                <th:block th:each="cat : ${rootCategories}">
+                    <a th:if="${cat.categoryName != '총류'}"
+                       th:href="@{/(categoryId=${cat.categoryId})}"
+                       class="category-pill"
+                       th:classappend="${cat.categoryId == selectedCategoryId} ? 'active'"
+                       th:text="${cat.categoryName}">
+                        문학
+                    </a>
+                </th:block>
             </div>
         </div>
 
         <div class="row px-xl-5">
             <div class="col-12 text-center py-5" th:if="${#lists.isEmpty(categoryBooks)}">
-                <p class="text-muted">해당 카테고리의 추천 도서가 없습니다.</p>
+                <p class="text-muted" th:text="${selectedCategoryId == 0 ? '등록된 신간 도서가 없습니다.' : '해당 카테고리의 추천 도서가 없습니다.'}">
+                    도서가 없습니다.
+                </p>
             </div>
 
             <div class="col-lg-2 col-md-4 col-6" th:each="book : ${categoryBooks}">
