@@ -13,10 +13,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Configuration
 public class FeignClientConfig {
 
-    // 브라우저로 부터 받은 쿠키 꺼내서 헤더로 변경
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
+            if (template.url().contains("/reissue")) {
+                return;
+            }
+
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
             if (attributes != null) {
