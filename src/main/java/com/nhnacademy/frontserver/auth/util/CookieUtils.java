@@ -1,4 +1,4 @@
-package com.nhnacademy.frontserver.Auth.util;
+package com.nhnacademy.frontserver.auth.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

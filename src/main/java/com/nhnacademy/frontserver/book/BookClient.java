@@ -12,7 +12,6 @@
 
 package com.nhnacademy.frontserver.book;
 
-import com.nhnacademy.frontserver.book.CategoryTreeResponse;
 import com.nhnacademy.frontserver.PageResponse;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
         url = "${gateway.url}")
 public interface BookClient {
 
-    // 도서 목록 조회
+    // 도서 목록 조회 (전체)
     @GetMapping("/api/books")
     PageResponse<BookListResponse> getBooks(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -33,8 +32,26 @@ public interface BookClient {
             @RequestParam(value = "sort", defaultValue = "bookId,desc") String sort
     );
 
+    default PageResponse<BookListResponse> getBooks(int page, int size) {
+        return getBooks(page, size, "bookId,desc");
+    }
+
     default PageResponse<BookListResponse> getBooks() {
         return getBooks(0, 20, "bookId,desc");
+    }
+
+    // 카테고리별 도서 목록 조회 (페이징 포함)
+    @GetMapping("/api/books/categories/{categoryId}")
+    PageResponse<BookListResponse> getBooksByCategoryId(
+            @PathVariable("categoryId") Long categoryId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "sort", defaultValue = "bookId,desc") String sort
+    );
+
+    // 편의상 오버로딩 (sort 생략 시 기본값 사용)
+    default PageResponse<BookListResponse> getBooksByCategoryId(Long categoryId, int page, int size) {
+        return getBooksByCategoryId(categoryId, page, size, "bookId,desc");
     }
 
     @GetMapping("/api/books/{book_id}")
@@ -46,6 +63,7 @@ public interface BookClient {
                                             @RequestParam("size") int size,
                                             @RequestParam("sort") String sort);
 
+    // 카테고리 트리 조회
     @GetMapping("/api/books/categories")
     List<CategoryTreeResponse> getCategoryTree();
 
@@ -54,11 +72,15 @@ public interface BookClient {
                                               @RequestParam("size") int size,
                                               @RequestParam("sort") String sort);
 
-    // 인기 도서 (조회수 기준) Top 5
+    // 인기 도서 (조회수 기준) Top 10
     @GetMapping("/api/books/popular-books")
     List<BookListResponse> getPopularBooks();
 
-    // 카테고리별 도서 Top 5
+    // 전체 신간 도서 Top 5
+    @GetMapping("/api/books/new-books")
+    List<BookListResponse> getNewBooks();
+
+    // 카테고리별 도서 Top 5 (메인페이지 등에서 간단히 보여줄 때 사용)
     @GetMapping("/api/books/categories/{categoryId}/top")
     List<BookListResponse> getBooksByCategory(@PathVariable("categoryId") Long categoryId);
 
@@ -69,7 +91,11 @@ public interface BookClient {
     @GetMapping("api/books/best-sellers")
     List<BookListResponse> getBestSellers();
 
-    // 찜하기 토글 (백엔드의 POST /wishlists/{book-id} 호출)
+    // 찜하기 토글
     @PostMapping("/wishlists/{bookId}")
     Map<String, Object> toggleWishlist(@PathVariable("bookId") Long bookId);
+
+    // 위시리스트 목록 조회 (페이지용 + 뱃지 카운트용)
+    @GetMapping("/wishlists")
+    List<BookListResponse> getWishlists();
 }

@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -19,13 +20,31 @@ public class SearchController {
             @RequestParam(defaultValue = "RELEVANCE") BookSortOption sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "mode", defaultValue = "bm25") String mode, // bm25 / ai
             Model model
     ) {
         String q = (query == null) ? "" : query.trim();
+        boolean aiMode = "ai".equalsIgnoreCase(mode);
 
-        BookSearchResponse res = q.isBlank()
-                ? new BookSearchResponse(java.util.List.of(), 0L, page, size)   // :contentReference[oaicite:6]{index=6}
-                : searchClient.search(q, sort, page, size);                    // :contentReference[oaicite:7]{index=7}
+        BookSearchResponse res;
+        long elapsedMs = 0L;
+
+        if (q.isBlank()) {
+            // 검색어 없으면 그냥 빈 결과
+            res = new BookSearchResponse(List.of(), 0L, page, size);
+        } else {
+            long start = System.currentTimeMillis();
+
+            if (aiMode) {
+                // AI 검색 엔드포인트 호출
+                res = searchClient.searchAi(q, sort, page, size);
+            } else {
+                // 기존 BM25 검색
+                res = searchClient.search(q, sort, page, size);
+            }
+
+            elapsedMs = System.currentTimeMillis() - start;
+        }
 
         long totalCount = res.total();
 
@@ -44,6 +63,10 @@ public class SearchController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("page", new PageView(currentPage, first, last));
 
+        // 헤더/검색폼/뷰에서 쓸 모드 + 시간 정보
+        model.addAttribute("mode", aiMode ? "ai" : "bm25");
+        model.addAttribute("aiMode", aiMode);
+        model.addAttribute("elapsedMs", elapsedMs);
 
         return "search-result";
     }

@@ -1,7 +1,7 @@
 package com.nhnacademy.frontserver.infra;
 
 
-import com.nhnacademy.frontserver.Auth.interceptor.GuestCookieInterceptor;
+import com.nhnacademy.frontserver.auth.interceptor.GuestCookieInterceptor;
 import com.nhnacademy.frontserver.CheckTimeInterceptor;
 import com.nhnacademy.frontserver.infra.argumentResolver.CustomArgumentResolver;
 import java.util.List;

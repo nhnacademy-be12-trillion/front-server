@@ -1,13 +1,18 @@
 package com.nhnacademy.frontserver.order.controller;
 
+import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.CartResponseDto;
 import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.order.CheckoutItemView;
+import com.nhnacademy.frontserver.order.DeliveryPolicyResponse;
 import com.nhnacademy.frontserver.order.OrderCreateRequest;
+import com.nhnacademy.frontserver.order.PackagingResponse;
+import com.nhnacademy.frontserver.order.client.OrderClient;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +30,7 @@ public class CheckoutController {
     private final CartClient cartClient;
     private final BookClient bookClient;
     private final MemberClient memberClient;
+    private final OrderClient orderClient;
 
     // 결제 요약 정보를 담을 DTO
     public record OrderSummary(int subTotal, int shippingFee, int totalPrice) {}
@@ -54,25 +60,22 @@ public class CheckoutController {
         }
         // 2) 장바구니 결제 흐름: bookId + quantity 가 없는 경우
         else {
-            try {
-                List<CartResponseDto> carts = cartClient.getCartItems().getBody();
-                if (carts != null) {
-                    for (CartResponseDto cart : carts) {
-                        BookDetailResponse book = bookClient.getBookDetail(cart.getBookId());
-                        int qty = cart.getCartQuantity();
-                        int unitPrice = book.bookSalePrice();
-                        CheckoutItemView item = new CheckoutItemView(
-                                cart.getBookId(),
-                                book.bookName(), // title
-                                book.bookImage(), // thumbnailUrl
-                                unitPrice,
-                                qty,
-                                unitPrice * qty
-                        );
-                        items.add(item);
-                    }
+            List<CartResponseDto> carts = cartClient.getCartItems().getBody();
+            if (carts != null) {
+                for (CartResponseDto cart : carts) {
+                    BookDetailResponse book = bookClient.getBookDetail(cart.getBookId());
+                    int qty = cart.getCartQuantity();
+                    int unitPrice = book.bookSalePrice();
+                    CheckoutItemView item = new CheckoutItemView(
+                            cart.getBookId(),
+                            book.bookName(), // title
+                            book.bookImage(), // thumbnailUrl
+                            unitPrice,
+                            qty,
+                            unitPrice * qty
+                    );
+                    items.add(item);
                 }
-            } catch (Exception e) {
             }
         }
 
@@ -82,31 +85,52 @@ public class CheckoutController {
         int subTotal = items.stream()
                 .mapToInt(CheckoutItemView::totalPrice)
                 .sum();
-        int shippingFee = subTotal >= 50000 ? 0 : 3000; // 5만원 이상 무료배송
+
+        // 배송비 동적 조회
+        DeliveryPolicyResponse policy = null;
+        int shippingFee;
+        try {
+            policy = orderClient.getDeliveryPolicy();
+            shippingFee = subTotal >= policy.deliveryPolicyThreshold() ? 0 : policy.deliveryPolicyFee();
+        } catch (Exception e) {
+            log.error("배송비 정책을 가져오는 데 실패했습니다. 기본값으로 설정됩니다.", e);
+            shippingFee = subTotal >= 50000 ? 0 : 3000; // Fallback to default
+        }
+
         int totalPrice = subTotal + shippingFee;
         OrderSummary orderSummary = new OrderSummary(subTotal, shippingFee, totalPrice);
 
         // 2. isMember 플래그 확인
         boolean isMember = false;
         try {
-            // 회원 정보 조회를 시도하여 로그인 상태 확인
             if (memberClient.getMember() != null) {
                 isMember = true;
             }
         } catch (Exception e) {
-            // 예외 발생 시 비회원으로 간주
             isMember = false;
         }
 
         // 3. 배송 정보 폼은 항상 비어있는 OrderCreateRequest 로 준비
         OrderCreateRequest orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, 0, null, null);
 
+        // 4. 포장 정보 조회
+        List<PackagingResponse> packagings = Collections.emptyList();
+        try {
+            List<PackagingResponse> packagingResponse = orderClient.getAllPackaging(0, 100, "id,asc");
+            if (!packagingResponse.isEmpty()) {
+                packagings = packagingResponse;
+            }
+        } catch (Exception e) {
+            log.error("포장 정보를 가져오는 데 실패했습니다.", e);
+        }
 
-        // 4. 모델과 세션에 데이터 추가
+        // 5. 모델과 세션에 데이터 추가
         model.addAttribute("items", items);
         model.addAttribute("orderSummary", orderSummary);
         model.addAttribute("orderCreateRequest", orderCreateRequest);
-        model.addAttribute("isMember", isMember); // isMember 플래그 추가
+        model.addAttribute("isMember", isMember);
+        model.addAttribute("packagings", packagings);
+        model.addAttribute("deliveryPolicy", policy); // 배송 정책 정보를 모델에 추가
         session.setAttribute("checkoutItems", items);
 
         return "checkout";

@@ -7,24 +7,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Trillion-Shop | 주문서 작성</title>
+    <!-- Daum 주소 검색 API -->
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container-fluid">
-        <div class="row px-xl-5">
+        <form th:action="@{/orders}" method="post" th:object="${orderCreateRequest}" name="orderForm" onsubmit="return prepareFormData()">
+            <div class="row px-xl-5">
 
-            <div class="col-lg-8">
-                <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">배송 정보</span>
-                </h5>
-
-                <div class="bg-light p-30 mb-5">
-                    <form th:action="@{/orders}" method="post" th:object="${orderCreateRequest}" name="orderForm" onsubmit="return prepareFormData()">
-
+                <!-- ===== 좌측: 배송 정보 및 주문 상품 ===== -->
+                <div class="col-lg-8">
+                    <h5 class="section-title position-relative text-uppercase mb-3">
+                        <span class="bg-secondary pr-3">배송 정보</span>
+                    </h5>
+                    <div class="bg-light p-30 mb-5">
+                        <!-- Hidden fields for final address and date -->
                         <input type="hidden" th:field="*{receiverAddress}" id="hiddenReceiverAddress">
                         <input type="hidden" th:field="*{deliveryDate}" id="hiddenDeliveryDate">
+                        <!-- Hidden field for non-member point usage -->
+                        <input type="hidden" name="pointUsage" value="0" th:if="!${isMember}">
 
                         <div class="row">
                             <div class="col-md-6 form-group">
@@ -52,7 +55,7 @@
                             <div class="col-md-12 form-group">
                                 <label>우편번호</label>
                                 <div class="d-flex">
-                                    <input class="form-control" type="text" th:field="*{receiverPostCode}" id="postcode" placeholder="우편번호" readonly required>
+                                    <input class="form-control" type="text" name="postcode" th:field="*{receiverPostCode}" id="postcode" placeholder="우편번호" readonly required>
                                     <button type="button" class="btn btn-outline-primary ml-2" onclick="execDaumPostcode()">주소 검색</button>
                                 </div>
                             </div>
@@ -66,115 +69,197 @@
                             </div>
                         </div>
 
-                        <div class="col-md-12 form-group">
+                        <div class="col-md-12 form-group pl-0">
                             <label>희망 배송일</label>
                             <input class="form-control" type="date" id="visibleDateInput" required>
                         </div>
 
-                        <div class="col-md-12 form-group" th:if="${isMember != true}">
+                        <div class="col-md-12 form-group pl-0" th:if="!${isMember}">
                             <label class="text-danger">비회원 주문 비밀번호</label>
                             <input class="form-control" type="password" th:field="*{nonMemberPassword}" placeholder="주문 조회용 비밀번호 입력">
                         </div>
+                    </div>
 
-                        <div class="row">
+                    <!-- 주문 상품 목록 -->
+                    <h5 class="section-title position-relative text-uppercase mb-3 mt-4">
+                        <span class="bg-secondary pr-3">주문 상품 및 포장 선택</span>
+                    </h5>
+                    <div class="bg-light p-30 mb-5">
+                        <div class="table-responsive" th:if="${items != null and !items.empty}">
+                            <table class="table table-light table-borderless table-hover text-center mb-0">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th>상품</th>
+                                    <th>가격</th>
+                                    <th>수량</th>
+                                    <th>포장 선택</th>
+                                    <th>합계</th>
+                                </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                <tr th:each="item, itemStat : ${items}" th:id="|item-row-${item.bookId()}|" th:data-price="${item.unitPrice()}">
+                                    <input type="hidden" th:name="|orderItems[${itemStat.index}].bookId|" th:value="${item.bookId()}">
+                                    <td class="align-middle text-left">
+                                        <img th:src="${!#strings.isEmpty(item.thumbnailUrl) ? '/trillion-bucket/' + item.thumbnailUrl : '/img/default-book.png'}"
+                                             alt="도서 이미지"
+                                             style="width: 50px; height: 60px; object-fit: cover; margin-right: 10px;">
+                                        <span th:text="${item.title()}">상품명</span>
+                                    </td>
+                                    <td class="align-middle" th:text="${#numbers.formatInteger(item.unitPrice(), 0, 'COMMA')} + '원'">50</td>
+                                    <td class="align-middle" style="width: 120px;">
+                                        <input type="number" class="form-control form-control-sm text-center quantity-input"
+                                               th:name="|orderItems[${itemStat.index}].quantity|"
+                                               th:value="${item.quantity()}"
+                                               min="1">
+                                    </td>
+                                    <td class="align-middle">
+                                        <select class="form-control packaging-select" th:name="|orderItems[${itemStat.index}].packagingId|">
+                                            <option value="" data-price="0" selected>포장 없음 (0원)</option>
+                                            <option th:each="pkg : ${packagings}"
+                                                    th:value="${pkg.packagingId()}"
+                                                    th:data-price="${pkg.packagingPrice()}"
+                                                    th:text="|${pkg.packagingType()} (+${#numbers.formatInteger(pkg.packagingPrice(), 0, 'COMMA')}원)|">
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td class="align-middle row-total" th:text="${#numbers.formatInteger(item.totalPrice(), 0, 'COMMA')} + '원'">50</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${items == null or items.empty}" class="text-center py-3">
+                            <p>주문할 상품 정보가 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 우측: 결제 요약 및 진행 ===== -->
+                <div class="col-lg-4">
+                    <h5 class="section-title position-relative text-uppercase mb-3">
+                        <span class="bg-secondary pr-3">결제 요약</span>
+                    </h5>
+                    <div id="summary-box" class="bg-light p-30 mb-5"
+                         th:attr="data-policy-fee=${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyFee : 3000}, data-policy-threshold=${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyThreshold : 50000}">
+                        <div class="border-bottom pb-2">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h6>상품 금액</h6>
+                                <h6 id="summary-subtotal" th:text="${orderSummary != null ? #numbers.formatInteger(orderSummary.subTotal, 0, 'COMMA') + '원' : '0원'}">0원</h6>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <h6>포장비</h6>
+                                <h6 id="summary-packaging">0원</h6>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <h6 class="font-weight-medium">배송비</h6>
+                                <h6 id="summary-shipping" class="font-weight-medium" th:text="${orderSummary != null and orderSummary.shippingFee > 0 ? #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">0원</h6>
+                            </div>
+                        </div>
+                        <div class="pt-2">
+                            <div class="d-flex justify-content-between mt-2">
+                                <h5>총 결제 금액</h5>
+                                <h5 id="summary-total" th:text="${orderSummary != null ? #numbers.formatInteger(orderSummary.totalPrice, 0, 'COMMA') + '원' : '0원'}">0원</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-30 mb-5">
+                        <div class="row" th:if="${isMember}">
                             <div class="col-md-6 form-group">
                                 <label>사용 포인트</label>
-                                <input class="form-control" type="number" th:field="*{pointUsage}" min="0" value="0">
+                                <input class="form-control" type="number" th:field="*{pointUsage}" min="0">
                             </div>
                             <div class="col-md-6 form-group">
                                 <label>쿠폰 ID</label>
                                 <input class="form-control" type="text" th:field="*{couponId}" placeholder="쿠폰 코드 입력">
                             </div>
                         </div>
-
                         <button type="submit" class="btn btn-block btn-primary font-weight-bold my-3 py-3">
-                            결제하기
+                            주문하기
                         </button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">주문 상품</span>
-                </h5>
-                <div class="bg-light p-30 mb-5">
-                    <div class="border-bottom pb-2 mb-3" th:if="${items != null}">
-                        <div th:each="item : ${items}" class="d-flex justify-content-between mb-3">
-                            <div class="d-flex align-items-center">
-                                <img th:src="${!#strings.isEmpty(item.thumbnailUrl) ? '/trillion-bucket/' + item.thumbnailUrl : '/img/default-book.png'}"
-                                     alt="도서 이미지"
-                                     style="width: 50px; height: 60px; object-fit: cover; margin-right: 10px;">
-
-                                <div class="d-flex flex-column">
-                                    <span th:text="${item.title}" class="font-weight-bold"
-                                          style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                        상품명
-                                    </span>
-                                    <small class="text-muted" th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')} + '원'">
-                                        10,000원
-                                    </small>
-                                </div>
-                            </div>
-                            <span class="align-self-center" th:text="${item.quantity} + '개'">1개</span>
-                        </div>
-                    </div>
-                    <div th:if="${items == null or items.empty}" class="text-center py-3">
-                        <p>주문할 상품 정보가 없습니다.</p>
-                    </div>
-                </div>
-
-                <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">결제 요약</span>
-                </h5>
-
-                <div class="bg-light p-30 mb-5">
-                    <div class="border-bottom pb-2" th:if="${orderSummary != null}">
-                        <div class="d-flex justify-content-between mb-3">
-                            <h6>상품 금액</h6>
-                            <h6 th:text="${#numbers.formatInteger(orderSummary.subTotal, 0, 'COMMA')} + '원'">
-                                0원
-                            </h6>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <h6 class="font-weight-medium">배송비</h6>
-                            <h6 class="font-weight-medium"
-                                th:text="${orderSummary.shippingFee > 0 ? #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">
-                                0원
-                            </h6>
-                        </div>
-                    </div>
-
-                    <div class="pt-2" th:if="${orderSummary != null}">
-                        <div class="d-flex justify-content-between mt-2">
-                            <h5>총 결제 금액</h5>
-                            <h5 th:text="${#numbers.formatInteger(orderSummary.totalPrice, 0, 'COMMA')} + '원'">
-                                0원
-                            </h5>
-                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
 <th:block layout:fragment="script">
     <script>
-        // [추가된 로직] 페이지 로드 시 '희망 배송일'의 최소값을 '오늘'로 설정
-        document.addEventListener('DOMContentLoaded', function() {
+        // [통합] 페이지 로드 시 및 동적 업데이트 로직
+        document.addEventListener('DOMContentLoaded', function () {
+            // [커밋 80312e22] 희망 배송일의 최소값을 '오늘'로 설정하는 로직
             var dateInput = document.getElementById('visibleDateInput');
             if (dateInput) {
                 var today = new Date();
                 var dd = String(today.getDate()).padStart(2, '0');
                 var mm = String(today.getMonth() + 1).padStart(2, '0'); // 1월은 0
                 var yyyy = today.getFullYear();
-
                 var minDate = yyyy + '-' + mm + '-' + dd; // YYYY-MM-DD 형식
                 dateInput.setAttribute('min', minDate);
             }
+
+            // [자체 추가] 실시간 가격 업데이트 로직
+            const summaryBox = document.getElementById('summary-box');
+            const policyFee = parseInt(summaryBox.dataset.policyFee, 10);
+            const policyThreshold = parseInt(summaryBox.dataset.policyThreshold, 10);
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            function updateTotals() {
+                let subTotal = 0;
+                let totalPackagingFee = 0;
+                const itemRows = document.querySelectorAll('tbody tr');
+
+                itemRows.forEach(row => {
+                    const price = parseInt(row.dataset.price, 10);
+                    const quantityInput = row.querySelector('.quantity-input');
+                    const quantity = parseInt(quantityInput.value, 10);
+                    const rowTotalCell = row.querySelector('.row-total');
+
+                    if (!isNaN(price) && !isNaN(quantity)) {
+                        const rowTotal = price * quantity;
+                        rowTotalCell.textContent = formatNumber(rowTotal) + '원';
+                        subTotal += rowTotal;
+                    }
+
+                    const packagingSelect = row.querySelector('.packaging-select');
+                    if (packagingSelect) {
+                        const selectedOption = packagingSelect.options[packagingSelect.selectedIndex];
+                        const packagingPrice = parseInt(selectedOption.dataset.price, 10);
+                        if (!isNaN(packagingPrice)) {
+                            totalPackagingFee += packagingPrice * quantity;
+                        }
+                    }
+                });
+
+                const baseForShipping = subTotal + totalPackagingFee;
+                const shippingFee = baseForShipping >= policyThreshold ? 0 : policyFee;
+                const total = subTotal + totalPackagingFee + shippingFee;
+
+                document.getElementById('summary-subtotal').textContent = formatNumber(subTotal) + '원';
+                document.getElementById('summary-packaging').textContent = formatNumber(totalPackagingFee) + '원';
+                document.getElementById('summary-shipping').textContent = shippingFee > 0 ? formatNumber(shippingFee) + '원' : '무료';
+                document.getElementById('summary-total').textContent = formatNumber(total) + '원';
+            }
+
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            quantityInputs.forEach(input => {
+                input.addEventListener('change', updateTotals);
+                input.addEventListener('input', updateTotals);
+            });
+
+            const packagingSelects = document.querySelectorAll('.packaging-select');
+            packagingSelects.forEach(select => {
+                select.addEventListener('change', updateTotals);
+            });
+
+            // 페이지 최초 로드 시 총액 계산 실행
+            updateTotals();
         });
 
+        // [커밋 80312e22] 주소 검색 함수
         function execDaumPostcode() {
             new daum.Postcode({
                 oncomplete: function(data) {
@@ -190,9 +275,9 @@
                 }
             }).open();
         }
-
+        
+        // [커밋 80312e22] 폼 제출 전 데이터 준비 함수
         function prepareFormData() {
-            // 1. 주소 처리
             var road = document.getElementById("roadAddress").value;
             var detail = document.getElementById("detailAddress").value;
 
@@ -200,20 +285,14 @@
                 alert("주소를 모두 입력해주세요.");
                 return false;
             }
+            document.getElementById("hiddenReceiverAddress").value = (road + " " + detail).trim();
 
-            var fullAddress = road + " " + detail;
-            document.getElementById("hiddenReceiverAddress").value = fullAddress.trim();
-
-            // 2. 날짜 포맷 변환
             var dateInput = document.getElementById("visibleDateInput").value;
-
             if (!dateInput) {
                 alert("배송 희망일을 선택해주세요.");
                 return false;
             }
-
-            var localDateTime = dateInput + "T00:00:00";
-            document.getElementById("hiddenDeliveryDate").value = localDateTime;
+            document.getElementById("hiddenDeliveryDate").value = dateInput + "T00:00:00";
 
             return true;
         }

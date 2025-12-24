@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<div layout:fragment="content">
+
+  <div class="container-fluid">
+    <div class="row px-xl-5">
+      <div class="col-12">
+        <nav class="breadcrumb bg-light mb-30">
+          <a class="breadcrumb-item text-dark" href="/">Home</a>
+          <a class="breadcrumb-item text-dark" href="/members/my-page">마이페이지</a>
+          <span class="breadcrumb-item active">등급 혜택 안내</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row px-xl-5 justify-content-center">
+      <div class="col-lg-10 mb-5">
+
+        <h2 class="section-title position-relative text-uppercase mb-4">
+          <span class="bg-secondary pr-3">회원 등급 및 혜택 안내</span>
+        </h2>
+
+        <div class="bg-light p-30">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover text-center mb-0">
+              <thead class="thead-dark">
+              <tr>
+                <th>등급명</th>
+                <th>적립률</th>
+                <th>등급 달성 조건 (순수 주문 금액)</th>
+              </tr>
+              </thead>
+              <tbody class="align-middle">
+              <tr th:each="grade : ${grades}">
+
+                <td>
+                  <h5 class="font-weight-bold mb-0"
+                      th:text="${grade.gradeName}"
+                      th:classappend="${#strings.equals(grade.gradeName, 'COMMON')} ? 'text-dark' : 'text-primary'">
+                  </h5>
+                </td>
+
+                <td>
+                                        <span class="badge p-2" style="font-size: 1rem;"
+                                              th:text="${grade.gradePointRatio} + '%'"
+                                              th:classappend="${#strings.equals(grade.gradeName, 'COMMON')} ? 'badge-secondary' : 'badge-primary'">
+                                        </span>
+                </td>
+
+                <td>
+                  <span class="text-dark font-weight-bold" th:text="${#numbers.formatInteger(grade.gradeCondition, 0, 'COMMA')} + '원 이상'"></span>
+                </td>
+              </tr>
+
+              <tr th:if="${#lists.isEmpty(grades)}">
+                <td colspan="3" class="py-5 text-center">등록된 등급 정보가 없습니다.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-center mt-4">
+            <a href="/members/my-page" class="btn btn-primary py-2 px-4">
+              마이페이지로 돌아가기
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</html>

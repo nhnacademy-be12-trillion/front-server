@@ -4,206 +4,235 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{base}">
 
-<head>
-  <meta charset="utf-8">
-  <title>Trillion-Shop | 회원가입</title>
-
-  <th:block layout:fragment="head">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-    <style>
-      .auth-card {
-        max-width: 720px;
-        width: 100%;
-        margin: 0 auto;
-      }
-      .auth-wrapper {
-        min-height: 70vh;
-      }
-      .small-hint {
-        font-size: 0.8rem;
-      }
-    </style>
-  </th:block>
-</head>
-
-<body>
-
 <div layout:fragment="content">
 
-  <!-- 회원가입 폼 -->
-  <div class="container auth-wrapper d-flex align-items-center justify-content-center py-5">
-    <div class="auth-card bg-light p-4 p-md-5 border">
-      <h4 class="mb-4 text-center">회원가입</h4>
-
-      <form th:action="@{/auth/signup}" method="post" th:object="${signUpRequest}">
-
-        <!-- 이름 -->
-        <div class="form-group">
-          <label for="memberName">이름</label>
-          <input id="memberName" type="text" class="form-control"
-                 th:field="*{memberName}" placeholder="이름을 입력하세요" required>
-        </div>
-
-        <!-- 이메일 + 인증번호 요청 -->
-        <div class="form-group">
-          <label for="memberEmail">이메일</label>
-          <div class="input-group">
-            <input id="memberEmail" type="email" class="form-control"
-                   th:field="*{memberEmail}" placeholder="example@email.com" required>
-            <div class="input-group-append">
-              <button type="button" id="btnSendCode" class="btn btn-outline-primary">
-                인증번호 요청
-              </button>
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <a class="breadcrumb-item text-dark" href="/">Home</a>
+                    <span class="breadcrumb-item active">회원가입</span>
+                </nav>
             </div>
-          </div>
         </div>
-
-        <!-- 이메일 인증번호 -->
-        <div class="form-group">
-          <label for="verificationCode">인증번호</label>
-          <input id="verificationCode" type="text" class="form-control"
-                 th:field="*{verificationCode}" placeholder="이메일로 전송된 인증번호 입력" required>
-        </div>
-
-        <!-- 비밀번호 -->
-        <div class="form-row">
-          <div class="form-group col-md-6">
-            <label for="memberPassword">비밀번호</label>
-            <input id="memberPassword" type="password" class="form-control"
-                   th:field="*{memberPassword}" placeholder="영문+숫자 8자 이상" required>
-          </div>
-          <div class="form-group col-md-6">
-            <label for="passwordConfirm">비밀번호 확인</label>
-            <input id="passwordConfirm" type="password" class="form-control"
-                   placeholder="다시 입력하세요" required>
-          </div>
-        </div>
-
-        <small id="passwordHelp" class="form-text small-hint mb-2">
-          비밀번호와 확인 비밀번호가 일치해야 합니다.
-        </small>
-
-        <!-- 전화번호 -->
-        <div class="form-group">
-          <label for="memberContact">전화번호</label>
-          <input id="memberContact" type="text" class="form-control"
-                 th:field="*{memberContact}" placeholder="010-0000-0000" required>
-        </div>
-
-        <!-- 생일 -->
-        <div class="form-group">
-          <label for="memberBirth">생일</label>
-          <input id="memberBirth" type="date" class="form-control"
-                 th:field="*{memberBirth}" required>
-        </div>
-
-        <!-- 주소 -->
-        <div class="form-group">
-          <label>주소</label>
-
-          <div class="form-row">
-            <div class="form-group col-md-5">
-              <input type="text" class="form-control"
-                     th:field="*{address.addressPostCode}"
-                     id="zipcode" placeholder="우편번호" readonly>
-            </div>
-            <div class="form-group col-md-3">
-              <button type="button" class="btn btn-outline-secondary btn-block"
-                      id="btnSearchAddress">
-                주소 검색
-              </button>
-            </div>
-          </div>
-
-          <input type="text" class="form-control mb-2"
-                 th:field="*{address.addressBase}"
-                 id="street" placeholder="기본 주소" readonly>
-
-          <input type="text" class="form-control mb-2"
-                 th:field="*{address.addressDetail}"
-                 id="detail" placeholder="상세 주소 입력">
-
-          <input type="text" class="form-control"
-                 th:field="*{address.addressAlias}"
-                 placeholder="주소 별칭 (예: 집, 회사)">
-        </div>
-
-        <!-- 약관 동의 -->
-        <div class="form-group">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="termsAgree" required>
-            <label class="custom-control-label" for="termsAgree">
-              <a href="#" class="text-primary">이용약관</a> 및
-              <a href="#" class="text-primary">개인정보 처리방침</a>에 동의합니다. (필수)
-            </label>
-          </div>
-        </div>
-
-        <div class="d-flex justify-content-between mt-4">
-          <a th:href="@{/api/auth/login}" class="btn btn-outline-secondary">
-            취소
-          </a>
-          <button type="submit" id="btnSignUp" class="btn btn-primary">
-            회원가입 완료
-          </button>
-        </div>
-
-      </form>
     </div>
-  </div>
+
+    <div class="container mb-5" style="max-width: 700px;">
+
+        <h2 class="section-title position-relative text-uppercase text-center mb-4">
+            <span class="bg-secondary px-3">회원가입</span>
+        </h2>
+
+        <div class="bg-light p-4 p-md-5 rounded shadow-sm">
+            <form th:action="@{/members/signup}" th:object="${signupRequest}" method="post" id="signupForm" onsubmit="return validateForm()">
+
+                <h5 class="font-weight-bold mb-3">계정 정보</h5>
+
+                <div class="form-group">
+                    <label>이메일</label>
+                    <div class="input-group">
+                        <input type="email" id="memberEmail" th:field="*{memberEmail}" class="form-control" placeholder="example@nhn.com" required>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick="sendEmail()">인증번호 전송</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>인증번호</label>
+                    <div class="input-group">
+                        <input type="text" id="verificationCode" th:field="*{verificationCode}" class="form-control" placeholder="인증번호 입력" required>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-dark" type="button" onclick="verifyCode()">확인</button>
+                        </div>
+                    </div>
+                    <small id="verifyMsg" class="font-weight-bold mt-1 d-block"></small>
+                </div>
+
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="memberPassword" th:field="*{memberPassword}" class="form-control" placeholder="비밀번호 (8자 이상)" required oninput="checkPasswordMatch()">
+                </div>
+
+                <div class="form-group">
+                    <label>비밀번호 확인</label>
+                    <input type="password" id="passwordConfirm" class="form-control" placeholder="비밀번호를 한 번 더 입력해주세요" required oninput="checkPasswordMatch()">
+                    <small id="pwMatchMsg" class="font-weight-bold mt-1 d-block"></small>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="font-weight-bold mb-3">개인 정보</h5>
+
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" th:field="*{memberName}" class="form-control" placeholder="이름 입력" required>
+                </div>
+
+                <div class="form-group">
+                    <label>전화번호</label>
+                    <input type="text" th:field="*{memberContact}" class="form-control" placeholder="010-0000-0000 (하이픈 포함)" required>
+                </div>
+
+                <div class="form-group">
+                    <label>생년월일</label>
+                    <input type="date" th:field="*{memberBirth}" class="form-control" required>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="font-weight-bold mb-3">배송지 정보</h5>
+
+                <div class="form-group">
+                    <label>우편번호</label>
+                    <div class="input-group">
+                        <input type="text" id="zipcode" th:field="*{address.addressPostCode}" class="form-control" placeholder="우편번호" readonly onclick="execDaumPostcode()">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick="execDaumPostcode()">주소 찾기</button>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback d-block" th:errors="*{address.addressPostCode}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>기본 주소</label>
+                    <input type="text" id="addressBase" th:field="*{address.addressBase}" class="form-control" placeholder="주소 찾기를 이용해주세요" readonly>
+                    <div class="invalid-feedback d-block" th:errors="*{address.addressBase}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>상세 주소</label>
+                    <input type="text" id="addressDetail" th:field="*{address.addressDetail}" class="form-control" placeholder="상세 주소를 입력해주세요" required>
+                    <div class="invalid-feedback d-block" th:errors="*{address.addressDetail}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>주소 별칭</label>
+                    <input type="text" th:field="*{address.addressAlias}" class="form-control" value="우리집">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block py-3 font-weight-bold mt-4" style="font-size: 1.1rem;">가입하기</button>
+
+                <div class="text-center mt-3">
+                    <span class="text-secondary">이미 계정이 있으신가요?</span>
+                    <a href="/login" class="text-primary font-weight-bold ml-2">로그인</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
 </div>
-
-<!-- 페이지 전용 JS -->
 <th:block layout:fragment="script">
-  <script>
-    // 비밀번호 일치 검사
-    function validatePasswordMatch() {
-      const pw1 = $('#memberPassword').val();
-      const pw2 = $('#passwordConfirm').val();
-      const help = $('#passwordHelp');
-      const submit = $('#btnSignUp');
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        // 비밀번호 일치 확인 (실시간)
+        function checkPasswordMatch() {
+            const pw = document.getElementById('memberPassword').value;
+            const pwConfirm = document.getElementById('passwordConfirm').value;
+            const msgBox = document.getElementById('pwMatchMsg');
 
-      if (!pw1 || !pw2) {
-        help.text('비밀번호를 입력해주세요.')
-                .removeClass('text-success text-danger')
-                .addClass('text-muted');
-        submit.prop('disabled', false);
-        return;
-      }
+            if (pwConfirm === "") {
+                msgBox.innerText = "";
+                return;
+            }
 
-      if (pw1 === pw2) {
-        help.text('비밀번호가 일치합니다.')
-                .removeClass('text-muted text-danger')
-                .addClass('text-success');
-        submit.prop('disabled', false);
-      } else {
-        help.text('비밀번호가 일치하지 않습니다.')
-                .removeClass('text-muted text-success')
-                .addClass('text-danger');
-        submit.prop('disabled', true);
-      }
-    }
+            if (pw === pwConfirm) {
+                msgBox.innerText = "비밀번호가 일치합니다.";
+                msgBox.className = "text-success font-weight-bold mt-1 d-block";
+            } else {
+                msgBox.innerText = "비밀번호가 일치하지 않습니다.";
+                msgBox.className = "text-danger font-weight-bold mt-1 d-block";
+            }
+        }
 
-    $('#memberPassword, #passwordConfirm').on('keyup change', validatePasswordMatch);
+        // 폼 제출 시 검증
+        function validateForm() {
+            const pw = document.getElementById('memberPassword').value;
+            const pwConfirm = document.getElementById('passwordConfirm').value;
 
-    // 이메일 인증번호 요청
-    $('#btnSendCode').on('click', function () {
-      const email = $('#memberEmail').val();
-      if (!email) {
-        alert('이메일을 먼저 입력해 주세요.');
-        $('#memberEmail').focus();
-        return;
-      }
-      alert('입력하신 이메일로 인증번호를 전송했습니다.');
-    });
+            if (pw !== pwConfirm) {
+                alert("비밀번호가 일치하지 않습니다.");
+                document.getElementById('passwordConfirm').focus();
+                return false;
+            }
+            return true;
+        }
 
-    // 주소 검색 버튼 (추후 카카오 주소 API 연동)
-    $('#btnSearchAddress').on('click', function () {
-      alert('주소 검색 기능은 추후 연동 예정입니다.');
-    });
-  </script>
+        function sendEmail() {
+            const memberEmail = document.getElementById('memberEmail').value;
+            if(!memberEmail) { alert("이메일을 입력해주세요."); return; }
+
+            isEmailVerified = false;
+
+            fetch('/members/api/email/send', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({memberEmail: memberEmail})
+            })
+                .then(async res => {
+                    const msg = await res.text();
+
+                    if(res.ok) {
+                        alert(msg);
+                    } else if (res.status === 409) {
+                        alert(msg);
+                        document.getElementById('memberEmail').focus();
+                    } else {
+                        alert('발송 실패: ' + msg);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("서버 연결 실패");
+                });
+        }
+
+        function verifyCode() {
+            const memberEmail = document.getElementById('memberEmail').value;
+            const verificationCode = document.getElementById('verificationCode').value;
+            const msgBox = document.getElementById('verifyMsg');
+
+            if (!memberEmail || !verificationCode) { alert("입력값을 확인해주세요."); return; }
+
+            fetch('/members/api/email/verify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({memberEmail, verificationCode})
+            }).then(res => {
+                if(res.ok) {
+                    alert("인증 성공!");
+                    msgBox.innerText = "인증 성공";
+                    msgBox.className = "text-success font-weight-bold mt-1 d-block";
+                    document.getElementById('memberEmail').readOnly = true;
+                    document.getElementById('verificationCode').readOnly = true;
+                } else {
+                    alert("인증 실패");
+                    msgBox.innerText = "인증 실패";
+                    msgBox.className = "text-danger font-weight-bold mt-1 d-block";
+                }
+            }).catch(err => {
+                console.error(err);
+                alert("서버 연결 실패");
+            });
+        }
+
+        // 주소 찾기
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                    if(data.userSelectedType === 'R'){
+                        var extraAddr = '';
+                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)) extraAddr += data.bname;
+                        if(data.buildingName !== '' && data.apartment === 'Y') extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        if(extraAddr !== '') addr += ' (' + extraAddr + ')';
+                    }
+                    document.getElementById('zipcode').value = data.zonecode;
+                    document.getElementById('addressBase').value = addr;
+                    document.getElementById('addressDetail').focus();
+                }
+            }).open();
+        }
+    </script>
 </th:block>
-
-</body>
 </html>

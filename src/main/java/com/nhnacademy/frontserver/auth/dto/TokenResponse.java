@@ -1,4 +1,4 @@
-package com.nhnacademy.frontserver.Auth.dto;
+package com.nhnacademy.frontserver.auth.dto;
 
 
 public record TokenResponse(

@@ -15,7 +15,7 @@
     });
 
 
-    // Vendor carousel
+    // Vendor carousel (기존 유지)
     $('.vendor-carousel').owlCarousel({
         loop: true,
         margin: 29,
@@ -23,50 +23,39 @@
         autoplay: true,
         smartSpeed: 1000,
         responsive: {
-            0:{
-                items:2
-            },
-            576:{
-                items:3
-            },
-            768:{
-                items:4
-            },
-            992:{
-                items:5
-            },
-            1200:{
-                items:6
-            }
+            0:{ items:2 },
+            576:{ items:3 },
+            768:{ items:4 },
+            992:{ items:5 },
+            1200:{ items:6 }
         }
     });
 
 
-    // Related carousel
+    // [수정됨] Related carousel (인기 도서 섹션 - 넷플릭스 스타일)
     $('.related-carousel').owlCarousel({
-        loop: true,
+        loop: false,        // [변경] 데이터가 적을 때 반복 시 오류 방지 & 끝이 있는 리스트 느낌
         margin: 29,
-        nav: false,
-        autoplay: true,
+        nav: true,          // 화살표 켜기
+        navText: [          // 화살표 아이콘 (FontAwesome)
+            '<i class="fa fa-angle-left" aria-hidden="true"></i>',
+            '<i class="fa fa-angle-right" aria-hidden="true"></i>'
+        ],
+        autoplay: false,    // [변경] 넷플릭스처럼 사용자가 클릭할 때만 이동 (자동재생 끔)
         smartSpeed: 1000,
+        slideBy: 1,         // 한 번에 하나씩 부드럽게 이동
+        dots: false,        // [추가] 하단 점(Indicator) 제거
         responsive: {
-            0:{
-                items:1
-            },
-            576:{
-                items:2
-            },
-            768:{
-                items:3
-            },
-            992:{
-                items:4
-            }
+            0:{ items:1 },
+            576:{ items:2 },
+            768:{ items:3 },
+            992:{ items:4 },
+            1200:{ items:5 } // PC 큰 화면에서 5개 보이기
         }
     });
 
 
-    // Testimonials carousel
+    // Testimonials carousel (기존 유지)
     $(".testimonial-carousel").owlCarousel({
         autoplay: true,
         smartSpeed: 1000,
@@ -76,18 +65,10 @@
         loop: true,
         nav : false,
         responsive: {
-            0:{
-                items:1
-            },
-            576:{
-                items:2
-            },
-            768:{
-                items:3
-            },
-            992:{
-                items:4
-            }
+            0:{ items:1 },
+            576:{ items:2 },
+            768:{ items:3 },
+            992:{ items:4 }
         }
     });
 
@@ -108,8 +89,7 @@
         button.parent().parent().find('input').val(newVal);
     });
 
-    // [추가됨] 카테고리 메뉴 호버 기능 (PC 화면에서만 동작)
-    // 마우스가 영역에 들어오면 열고(addClass show), 나가면 닫습니다(removeClass show).
+    // 카테고리 메뉴 호버 기능 (PC 화면에서만 동작)
     function toggleNavbarMethod() {
         if ($(window).width() > 992) {
             $('.category-hover-area').on('mouseenter', function () {
@@ -118,12 +98,10 @@
                 $('#navbar-vertical').removeClass('show');
             });
         } else {
-            // 모바일 화면에서는 터치 클릭 방식을 유지하기 위해 이벤트 제거
             $('.category-hover-area').off('mouseenter mouseleave');
         }
     }
 
-    // 초기 실행 및 창 크기 변경 시 재설정
     toggleNavbarMethod();
     $(window).resize(toggleNavbarMethod);
 

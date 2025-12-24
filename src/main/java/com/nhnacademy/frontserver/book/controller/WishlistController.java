@@ -1,32 +1,57 @@
-package com.nhnacademy.frontserver.book.controller;
+package com.nhnacademy.frontserver.controller;
 
 import com.nhnacademy.frontserver.book.BookClient;
+import com.nhnacademy.frontserver.book.BookListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/wishlists")
 public class WishlistController {
+
     private final BookClient bookClient;
 
-    // 프론트엔드 AJAX 요청 처리
-    @GetMapping("/toggle")
-    public ResponseEntity<Map<String, Object>> toggleWishlist(@RequestParam("bookId") Long bookId) {
+    // 1. 위시리스트 페이지 조회 (화면)
+    @GetMapping
+    public String wishlistsPage(Model model) {
         try {
-            // 백엔드 호출
+            List<BookListResponse> wishlists = bookClient.getWishlists();
+            model.addAttribute("books", wishlists);
+            return "wishlist"; // wishlist.html 반환
+        } catch (Exception e) {
+            // 로그인 안 된 경우 등 -> 로그인 페이지로
+            return "redirect:/login";
+        }
+    }
+
+    // 2. 찜 토글 (AJAX)
+    @GetMapping("/toggle")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> toggle(@RequestParam("bookId") Long bookId) {
+        try {
             Map<String, Object> result = bookClient.toggleWishlist(bookId);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            // 로그인 안 된 경우 등 예외 처리
-            return ResponseEntity.status(401)
-                    .body(Map.of("success", false, "message", "로그인이 필요한 서비스입니다."));
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "로그인이 필요합니다."));
+        }
+    }
+
+    // 3. 찜 개수 조회 (AJAX - 배지 업데이트용)
+    @GetMapping("/count")
+    @ResponseBody
+    public ResponseEntity<Integer> getWishlistCount() {
+        try {
+            List<BookListResponse> wishlists = bookClient.getWishlists();
+            return ResponseEntity.ok(wishlists.size());
+        } catch (Exception e) {
+            return ResponseEntity.ok(0); // 에러나면 0개로 표시
         }
     }
 }
