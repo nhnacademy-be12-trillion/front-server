@@ -56,7 +56,6 @@ public class CartWebController {
 
         // 장바구니 목록 조회 (bookId만 있음)
         List<CartResponseDto> cartItems = cartClient.getCartItems().getBody();
-
         List<CartItemDetailDto> viewItems = new ArrayList<>();
         long totalItemPrice = 0; // 소계
         long lineCount = cartItems != null ? cartItems.size() : 0;      // 종류 수
