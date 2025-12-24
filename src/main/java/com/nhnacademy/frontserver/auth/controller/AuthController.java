@@ -4,6 +4,7 @@ import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.dto.LoginRequest;
 import com.nhnacademy.frontserver.auth.dto.TokenResponse;
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
+import com.nhnacademy.frontserver.cart.client.CartClient;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,18 @@ public class AuthController {
 
     private final AuthClient authClient;
 
+    private final CartClient cartClient;
+
     @GetMapping("/login")
     public String loginForm() {
         return "login";
     }
 
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
+    public String login(
+            @RequestHeader(name="X-Guest-Id", required = false) String guestId,
+            @ModelAttribute LoginRequest loginRequest,
+                        HttpServletResponse response) {
         try {
             // FeignClient로 Gateway 호출 -> 토큰 받기
             TokenResponse tokens = authClient.login(loginRequest);
@@ -37,6 +43,25 @@ public class AuthController {
             response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
+            if (guestId != null && !guestId.isBlank()) {
+                try {
+                    // 토큰 헤더 생성 (Bearer 포함)
+                    String authHeader = tokens.getAccessToken();
+
+                    // 게이트웨이로 병합 요청 전송 (토큰 + 게스트ID 직접 주입)
+                    cartClient.mergeCart(authHeader, guestId);
+
+                    log.info("로그인 병합 성공 - GuestId: {}", guestId);
+
+                    // 병합 성공 후 게스트 쿠키 삭제 가능
+                    //ResponseCookie deleteGuest = CookieUtils.deleteCookie("guestId");
+                    //response.addHeader(HttpHeaders.SET_COOKIE, deleteGuest.toString());
+
+                } catch (Exception e) {
+                    // 로그인 자체는 성공했으므로, 장바구니 병합 실패가 로그인을 막으면 안 될 듯
+                    log.error("장바구니 병합 실패 (로그인은 정상 처리됨): {}", e.getMessage());
+                }
+            }
             return "redirect:/";
         }catch (FeignException.Forbidden e){
             String responseBody = e.contentUTF8();
