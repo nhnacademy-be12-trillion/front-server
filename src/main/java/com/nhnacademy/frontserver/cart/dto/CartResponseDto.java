@@ -17,11 +17,11 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL) //널값 필드는 JSON에서 제외
 public
 class CartResponseDto {
-
     private Long memberId;   // 회원일 때만 값 있음
     private String guestId;  // 비회원일 때만 값 있음
-    private long bookId;
-    long cartQuantity;
+
+    private Long bookId;
+    private int cartQuantity;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;
 }
