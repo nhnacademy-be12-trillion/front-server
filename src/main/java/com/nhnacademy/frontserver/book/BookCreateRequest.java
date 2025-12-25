@@ -29,7 +29,7 @@ public class BookCreateRequest {
     private LocalDate bookPublicationDate; // Backend: bookPublicationDate
 
     private String bookIndex;
-    private boolean bookPackaging;
+    private Boolean bookPackaging;
     private BookState bookState;        // Enum이 프론트에 없다면 String으로 변경하세요.
     private int bookStock;
     private int bookRegularPrice;
