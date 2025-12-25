@@ -229,7 +229,97 @@
           <div class="tab-pane fade" id="policy-content" role="tabpanel">
             <div class="content-box">
               <h4 class="mb-4 text-primary">정책 설정</h4>
-              <div class="alert alert-info">기존 코드가 유지되는 영역입니다.</div>
+
+              <!-- 배송비 정책 -->
+              <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-truck mr-2"></i>배송비 정책 관리</h5>
+              <div class="row mb-5">
+                <div class="col-md-6">
+                  <form th:action="@{/admin/policy/delivery}" method="post" class="p-4 bg-light rounded">
+                    <div class="form-group">
+                      <label>기본 배송비 (원)</label>
+                      <input type="number" class="form-control" name="deliveryPolicyFee"
+                             th:value="${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyFee : 3000}" required>
+                    </div>
+                    <div class="form-group">
+                      <label>무료 배송 기준 금액 (원)</label>
+                      <input type="number" class="form-control" name="deliveryPolicyThreshold"
+                             th:value="${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyThreshold : 50000}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">배송비 정책 수정</button>
+                  </form>
+                </div>
+                <div class="col-md-6">
+                  <div class="alert alert-info mt-4 mt-md-0">
+                    <h6><i class="fas fa-info-circle"></i> 도움말</h6>
+                    <p class="mb-0 small">
+                      설정된 기준 금액 이상 구매 시 배송비가 0원으로 적용됩니다.<br>
+                      기준 금액 미만일 경우 기본 배송비가 부과됩니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 포장 정책 -->
+              <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-gift mr-2"></i>포장 정책 관리</h5>
+              <div class="row">
+                <!-- 포장 추가 폼 -->
+                <div class="col-md-4">
+                  <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-secondary text-white">
+                      <h6 class="mb-0">새 포장지 등록</h6>
+                    </div>
+                    <div class="card-body">
+                      <form th:action="@{/admin/policy/packaging}" method="post">
+                        <div class="form-group">
+                          <label>포장지 이름</label>
+                          <input type="text" class="form-control" name="packagingType" placeholder="예: 크리스마스 포장" required>
+                        </div>
+                        <div class="form-group">
+                          <label>포장 비용 (원)</label>
+                          <input type="number" class="form-control" name="packagingPrice" placeholder="0" required>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-block">등록하기</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 포장 목록 -->
+                <div class="col-md-8">
+                  <div class="table-responsive">
+                    <table class="table table-hover text-center border">
+                      <thead class="thead-light">
+                      <tr>
+                        <th>ID</th>
+                        <th>포장지 종류</th>
+                        <th>비용</th>
+                        <th>관리</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr th:each="pkg : ${packagingList}">
+                        <td th:text="${pkg.packagingId}">1</td>
+                        <td th:text="${pkg.packagingType}">기본 포장</td>
+                        <td th:text="${#numbers.formatInteger(pkg.packagingPrice, 0, 'COMMA')} + '원'">0원</td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary"
+                                  th:onclick="updatePackaging([[${pkg.packagingId}]], [[${pkg.packagingType}]], [[${pkg.packagingPrice}]])">
+                            수정
+                          </button>
+                          <form th:action="@{/admin/policy/packaging/delete/{id}(id=${pkg.packagingId})}" method="post" style="display:inline;"
+                                onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                          </form>
+                        </td>
+                      </tr>
+                      <tr th:if="${#lists.isEmpty(packagingList)}">
+                        <td colspan="4" class="text-muted py-4">등록된 포장 정책이 없습니다.</td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -564,6 +654,39 @@
           reader.readAsDataURL(input.files[0]);
         }
       };
+
+      // [정책 관리] 포장 정책 수정
+      window.updatePackaging = function(id, name, currentPrice) {
+        const newPrice = prompt(`[${name}]의 새로운 가격을 입력하세요:`, currentPrice);
+        if (newPrice !== null && newPrice.trim() !== '') {
+          // 동적 폼 생성 및 제출
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = '/admin/policy/packaging/update';
+
+          const idField = document.createElement('input');
+          idField.type = 'hidden';
+          idField.name = 'packagingId';
+          idField.value = id;
+
+          const priceField = document.createElement('input');
+          priceField.type = 'hidden';
+          priceField.name = 'packagingPrice';
+          priceField.value = newPrice;
+
+          form.appendChild(idField);
+          form.appendChild(priceField);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      };
+
+      // [공통] URL 파라미터(tab)에 따른 탭 활성화
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get('tab');
+      if (tab === 'policy') {
+        $('#policy-tab').tab('show');
+      }
     });
   </script>
 </th:block>
