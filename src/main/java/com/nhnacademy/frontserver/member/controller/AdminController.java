@@ -1,9 +1,15 @@
 package com.nhnacademy.frontserver.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookCreateRequest;
+import com.nhnacademy.frontserver.book.BookState;
 import com.nhnacademy.frontserver.book.CategorySearchResponse;
+import com.nhnacademy.frontserver.order.OrderItemStatusPatchRequest;
+import com.nhnacademy.frontserver.order.OrderResponse;
+import com.nhnacademy.frontserver.order.client.OrderClient;
+import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,32 +24,65 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Controller
-@RequestMapping("/admin") // [핵심] 브라우저는 /admin 경로로 접근 (Gateway의 /api/admin과 분리)
 @RequiredArgsConstructor
 public class AdminController {
 
     private final BookClient bookClient;
+    private final OrderClient orderClient;
     private final ObjectMapper objectMapper;
 
     // =================================================================================
     // 1. 관리자 페이지 화면 (View) - GET /admin
     // =================================================================================
-    @GetMapping
+    @GetMapping("/admin")
     public String adminPage(Model model) {
-        model.addAttribute("orders", Collections.emptyList());
-        model.addAttribute("shippingPolicy", Map.of(
-                "shippingFee", 3000,
-                "freeShippingCondition", 50000
-        ));
+
+        List<OrderResponse> orderList = Collections.emptyList();
+        try {
+            // 정렬 기준: orderDetails.orderDate (내림차순)
+            PageResponse<OrderResponse> response = orderClient.getAllOrderByAdmin(0, 200, "orderDetails.orderDate,desc");
+
+            // Record 타입 접근자 .content() 사용
+            if (response != null && response.content() != null) {
+                orderList = response.content();
+            }
+
+            log.info(">>>> [프런트] 관리자 주문 내역 조회 성공: {}건", orderList.size());
+        } catch (Exception e) {
+            log.error(">>>> [프런트] 주문 내역 조회 실패 (Order Service 통신 오류)", e);
+        }
+
+        model.addAttribute("orders", orderList);
+
+        // 상태 변경을 위한 Enum 값 전달
+        model.addAttribute("itemStatuses", OrderItemStatus.values());
+
+        // 상태값 한글 매핑 맵 생성
+        Map<String, String> statusMap = new HashMap<>();
+        statusMap.put("PENDING", "결제 대기");
+        statusMap.put("COMPLETED", "결제 완료");
+        statusMap.put("CANCELED", "주문 취소");
+        statusMap.put("FAILED", "주문 실패");
+        statusMap.put("PREPARING", "상품 준비중");
+        statusMap.put("SHIPPED", "배송중");
+        statusMap.put("DELIVERED", "배송 완료");
+        statusMap.put("RETURNED", "반품 완료");
+        statusMap.put("CONFIRMED", "구매 확정");
+        statusMap.put("RETURN_REQUESTED_CHANGE_OF_MIND", "반품 요청 (변심)");
+        statusMap.put("RETURN_REQUESTED_DAMAGED", "반품 요청 (파손)");
+
+        model.addAttribute("statusMap", statusMap);
+
+        // 기타 데이터 설정
+        model.addAttribute("shippingPolicy", Map.of("shippingFee", 3000, "freeShippingCondition", 50000));
         model.addAttribute("packagingList", Collections.emptyList());
-        model.addAttribute("pointPolicy", Map.of(
-                "basePointRate", 1.0
-        ));
+        model.addAttribute("pointPolicy", Map.of("basePointRate", 1.0));
         model.addAttribute("memberGrades", Collections.emptyList());
         model.addAttribute("memberInfo", null);
 
@@ -51,81 +90,86 @@ public class AdminController {
     }
 
     // =================================================================================
-    // 2. 도서 등록 관련 API (Action)
+    // 2. 주문 상태 변경 API (AJAX)
     // =================================================================================
+    @PatchMapping("/admin/orders/{orderId}/items/{orderItemId}/status")
+    @ResponseBody
+    public ResponseEntity<String> updateOrderItemStatus(
+            @PathVariable("orderId") Long orderId,
+            @PathVariable("orderItemId") Long orderItemId,
+            @RequestParam("status") OrderItemStatus status
+    ) {
+        try {
+            log.info(">>>> [프런트] 주문 상태 변경 요청: orderId={}, itemId={}, status={}", orderId, orderItemId, status);
 
-    /**
-     * 도서 등록 요청 처리 (POST /admin/books)
-     * HTML Form action="@{/admin/books}"
-     */
-    @PostMapping("/books")
+            OrderItemStatusPatchRequest request = new OrderItemStatusPatchRequest(status);
+            orderClient.patchOrderItemStatusByMember(orderId, orderItemId, request);
+
+            return ResponseEntity.ok("상태 변경 성공");
+        } catch (Exception e) {
+            log.error(">>>> [프런트] 상태 변경 실패", e);
+            return ResponseEntity.status(500).body("상태 변경 실패: " + e.getMessage());
+        }
+    }
+
+    // =================================================================================
+    // 3. 도서 등록 및 검색 API
+    // =================================================================================
+    @PostMapping("/admin/books")
     public String createBook(
             @ModelAttribute BookCreateRequest request,
             @RequestParam(value = "bookImageFile", required = false) MultipartFile file
     ) {
         try {
-            log.info(">>>> [프론트] 도서 등록 요청 시작: title={}, isbn={}", request.getBookName(), request.getIsbn());
+            // [BookState 누락 방지]
+            if (request.getBookState() == null) {
+                request.setBookState(BookState.ON_SALE);
+                log.info(">>>> [프런트] BookState 누락 -> ON_SALE로 설정");
+            }
 
-            // 1. DTO -> JSON String 변환
+            // [추가] 포장 가능 여부(isPackaging) 누락 방지 (기본값 true)
+            // 폼에서 값이 넘어오지 않았거나 null일 경우 true로 설정
+            if (request.getBookPackaging() == null) {
+                request.setBookPackaging(true);
+                log.info(">>>> [프런트] isPackaging 누락 -> true로 설정");
+            }
+
+            log.info(">>>> 도서 등록 요청: title={}, state={}, packaging={}",
+                    request.getBookName(), request.getBookState(), request.getBookPackaging());
+
             String jsonRequest = objectMapper.writeValueAsString(request);
+            MultipartFile jsonPart = new DtoMultipartFile("book", "book.json", "application/json", jsonRequest.getBytes(StandardCharsets.UTF_8));
 
-            // 2. JSON Bytes를 담은 커스텀 MultipartFile 생성
-            MultipartFile jsonPart = new DtoMultipartFile(
-                    "book",
-                    "book.json",
-                    "application/json",
-                    jsonRequest.getBytes(StandardCharsets.UTF_8)
-            );
-
-            // 3. Client 호출 -> Gateway(/api/admin/books)로 전달
             bookClient.createBook(jsonPart, file);
-            log.info(">>>> [프런트] 도서 등록 성공");
 
             return "redirect:/admin?success=true";
         } catch (Exception e) {
-            log.error(">>>> [프런트] 도서 등록 실패", e);
+            log.error(">>>> 도서 등록 실패", e);
             return "redirect:/admin?error=create_failed";
         }
     }
 
-    /**
-     * ISBN 검색 (GET /admin/books/isbn/{isbn})
-     * JS fetch: /admin/books/isbn/...
-     */
-    @GetMapping("/books/isbn/{isbn}")
+    @GetMapping("/admin/books/isbn/{isbn}")
     @ResponseBody
     public ResponseEntity<BookCreateRequest> getBookInfoByIsbn(@PathVariable("isbn") String isbn) {
         try {
-            log.info(">>>> [프런트] ISBN 검색 요청 수신: {}", isbn);
-            // 실제 데이터는 Feign Client가 Gateway를 통해 가져옴
-            BookCreateRequest bookInfo = bookClient.getBookInfoByIsbn(isbn);
-            log.info(">>>> [프런트] ISBN 데이터 수신 완료: {}", bookInfo.getBookName());
-            return ResponseEntity.ok(bookInfo);
+            return ResponseEntity.ok(bookClient.getBookInfoByIsbn(isbn));
         } catch (Exception e) {
-            log.error(">>>> [프런트] ISBN 검색 실패 (Gateway/Backend 통신 오류): {}", isbn, e);
-            // 502를 리턴하면 HTML JS에서 catch로 잡음
             return ResponseEntity.status(502).build();
         }
     }
 
-    /**
-     * 카테고리 검색 (GET /admin/categories/search)
-     * JS fetch: /admin/categories/search?keyword=...
-     */
-    @GetMapping("/categories/search")
+    @GetMapping("/admin/categories/search")
     @ResponseBody
     public ResponseEntity<List<CategorySearchResponse>> searchCategories(@RequestParam("keyword") String keyword) {
         try {
-            log.info(">>>> [프런트] 카테고리 검색 요청: {}", keyword);
-            List<CategorySearchResponse> categories = bookClient.searchCategories(keyword);
-            return ResponseEntity.ok(categories);
+            return ResponseEntity.ok(bookClient.searchCategories(keyword));
         } catch (Exception e) {
-            log.error(">>>> [프런트] 카테고리 검색 실패", e);
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    // Helper Class for Multipart
+    // DTO Wrapper Class
     private static class DtoMultipartFile implements MultipartFile {
         private final String name;
         private final String originalFilename;
@@ -145,8 +189,6 @@ public class AdminController {
         @Override public long getSize() { return content.length; }
         @Override public byte[] getBytes() throws IOException { return content; }
         @Override public InputStream getInputStream() throws IOException { return new ByteArrayInputStream(content); }
-        @Override public void transferTo(File dest) throws IOException, IllegalStateException {
-            throw new UnsupportedOperationException("TransferTo not supported");
-        }
+        @Override public void transferTo(File dest) throws IOException, IllegalStateException { throw new UnsupportedOperationException(); }
     }
 }
