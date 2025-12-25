@@ -13,8 +13,18 @@
 package com.nhnacademy.frontserver.order.util;
 
 public enum OrderStatus {
-    PENDING,    // 결제 대기
-    COMPLETED,  // 결제 완료
-    CANCELED,   // 모든 상품 취소/환불
-    FAILED      // 주문 생성 실패
+    PENDING("결제 대기"),    // 결제 대기
+    COMPLETED("결제 완료"),  // 결제 완료
+    CANCELED("주문 취소"),   // 모든 상품 취소/환불
+    FAILED("주문 실패");      // 주문 생성 실패
+
+    private final String title;
+
+    OrderStatus(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
+    }
 }

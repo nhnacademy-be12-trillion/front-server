@@ -31,7 +31,7 @@ public interface OrderClient {
                                                             @RequestParam("size") int size,
                                                             @RequestParam("sort") String sort);
 
-    // 환불, 환불 요청된 주문 전체 조회
+    // 환불, 환불 요청된 주문 상품 전체 조회
     @GetMapping("/api/order-items/refunds")
     PageResponse<OrderItemResponse> getAllRefundedOrderItemsByMember(@RequestParam("page") int page,
                                                                      @RequestParam("size") int size,
