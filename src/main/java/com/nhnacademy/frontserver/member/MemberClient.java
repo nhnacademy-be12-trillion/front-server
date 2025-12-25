@@ -15,10 +15,21 @@ public interface MemberClient {
     @GetMapping("/api/members")
     MemberResponse getMember();
 
-    @PutMapping("/api/members/social-info")
-    void updateSocialMember(@RequestBody SocialInfoUpdateRequest request);
+    @GetMapping("/api/members/social/{oauthId}")
+    MemberResponse getMemberByOauthId(@PathVariable("oauthId") String oauthId);
 
-    // 소셜 로그인애서 추가 정보 입력해야 GUEST -> MEMBER로 변경
+    // 휴면 해제 인증번호 요청
+    @PostMapping("/api/members/dormant/request")
+    void requestDormantCode(@RequestBody DormantCodeRequest request);
+
+    // 휴면 해제 검증 및 상태 변경
+    @PostMapping("/api/members/dormant/verify")
+    void verifyDormantCode(@RequestBody DormantVerifyRequest request);
+
+    // 소셜 로그인애서 추가 정보 입력하면 GUEST -> MEMBER로 변경
+    @PostMapping("/api/members/social-info")
+    void signupSocialMember(@RequestBody SocialSignupRequest request);
+
     @PutMapping("/api/members/social-info")
     void updateSocialMember(@RequestBody SocialSignupRequest request);
 
