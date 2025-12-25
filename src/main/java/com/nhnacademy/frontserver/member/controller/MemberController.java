@@ -6,6 +6,7 @@ import com.nhnacademy.frontserver.auth.util.CookieUtils;
 import com.nhnacademy.frontserver.member.*;
 import com.nhnacademy.frontserver.order.OrderResponse;
 import com.nhnacademy.frontserver.order.client.OrderClient;
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -56,6 +57,7 @@ public class MemberController {
             return "signup";
         }
     }
+
 
     // 비밀번호 재설정 페이지 이동
     @GetMapping("/password/reset")
@@ -117,8 +119,17 @@ public class MemberController {
 
     // 주소 추가 (Form Submit)
     @PostMapping("/addresses")
-    public String addAddress(@ModelAttribute AddressCreateRequest request) {
-        memberClient.addAddress(request);
+    public String addAddress(@ModelAttribute AddressCreateRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            memberClient.addAddress(request);
+        } catch (FeignException.BadRequest e) {
+            // 400 에러 발생 시 (주소 최대 개수 초과)
+            log.warn("주소 추가 실패: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "주소는 최대 10개까지만 등록할 수 있습니다.");
+        } catch (Exception e) {
+            log.error("주소 추가 중 알 수 없는 오류", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "주소 등록 중 오류가 발생했습니다.");
+        }
         return "redirect:/members/my-page";
     }
 
@@ -156,21 +167,6 @@ public class MemberController {
 
         forceLogout(response);
         return "redirect:/";
-    }
-
-    // 소셜 회원가입 추가 정보 입력 페이지
-    @GetMapping("/social-signup")
-    public String socialSignupForm() {
-        return "social-signup";
-    }
-
-    // 소셜 추가 정보 저장 처리
-    @PostMapping("/social-signup")
-    public String submitSocialInfo(@ModelAttribute SocialInfoUpdateRequest request, // DTO 이름 확인 필요
-                                   HttpServletResponse response) {
-        memberClient.updateSocialMember(request);
-        forceLogout(response); // 정보 갱신 후 재로그인 유도
-        return "redirect:/login?social_complete=true";
     }
 
     // 등급 조회

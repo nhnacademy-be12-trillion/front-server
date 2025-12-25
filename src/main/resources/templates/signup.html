@@ -51,7 +51,10 @@
 
                 <div class="form-group">
                     <label>비밀번호</label>
-                    <input type="password" id="memberPassword" th:field="*{memberPassword}" class="form-control" placeholder="비밀번호 (8자 이상)" required oninput="checkPasswordMatch()">
+                    <input type="password" id="memberPassword" th:field="*{memberPassword}" class="form-control" placeholder="8자 이상, 영문/숫자/특수문자 포함" required oninput="checkPasswordMatch()">
+                    <div class="invalid-feedback" id="passwordComplexityMsg">
+                        비밀번호는 8~15자이며, 영문, 숫자, 특수문자를 모두 포함해야 합니다.
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -71,7 +74,8 @@
 
                 <div class="form-group">
                     <label>전화번호</label>
-                    <input type="text" th:field="*{memberContact}" class="form-control" placeholder="010-0000-0000 (하이픈 포함)" required>
+                    <input type="text" id="memberContact" th:field="*{memberContact}" class="form-control"
+                           placeholder="010-0000-0000" maxlength="13" required oninput="autoHyphen(this)">
                 </div>
 
                 <div class="form-group">
@@ -114,7 +118,7 @@
                 <button type="submit" class="btn btn-primary btn-block py-3 font-weight-bold mt-4" style="font-size: 1.1rem;">가입하기</button>
 
                 <div class="text-center mt-3">
-                    <span class="text-secondary">이미 계정이 있으신가요?</span>
+                    <span class="text-dark">이미 계정이 있으신가요?</span>
                     <a href="/login" class="text-primary font-weight-bold ml-2">로그인</a>
                 </div>
 
@@ -125,18 +129,38 @@
 <th:block layout:fragment="script">
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
+        // 전화번호 자동 하이픈 생성 함수
+        function autoHyphen(target) {
+            target.value = target.value
+                .replace(/[^0-9]/g, '') // 숫자 이외의 문자 제거
+                .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3") // 3-4-4 자리 하이픈 처리
+                .replace(/(\-{1,2})$/g, ""); // 끝에 남은 하이픈 제거
+        }
+
         // 비밀번호 일치 확인 (실시간)
         function checkPasswordMatch() {
-            const pw = document.getElementById('memberPassword').value;
-            const pwConfirm = document.getElementById('passwordConfirm').value;
+            const pwInput = document.getElementById('memberPassword');
+            const pwConfirm = document.getElementById('passwordConfirm');
             const msgBox = document.getElementById('pwMatchMsg');
+            const complexityMsg = document.getElementById('passwordComplexityMsg');
 
-            if (pwConfirm === "") {
+            // 비밀번호 복잡도 검사 (실시간 에러 메시지 표시)
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/;
+            if (pwInput.value && !passwordRegex.test(pwInput.value)) {
+                pwInput.classList.add('is-invalid');
+                complexityMsg.style.display = 'block';
+            } else {
+                pwInput.classList.remove('is-invalid');
+                complexityMsg.style.display = 'none';
+            }
+
+            // 비밀번호 일치 검사
+            if (pwConfirm.value === "") {
                 msgBox.innerText = "";
                 return;
             }
 
-            if (pw === pwConfirm) {
+            if (pwInput.value === pwConfirm.value) {
                 msgBox.innerText = "비밀번호가 일치합니다.";
                 msgBox.className = "text-success font-weight-bold mt-1 d-block";
             } else {
@@ -149,20 +173,37 @@
         function validateForm() {
             const pw = document.getElementById('memberPassword').value;
             const pwConfirm = document.getElementById('passwordConfirm').value;
+            const phone = document.getElementById('memberContact').value;
 
+            // 비밀번호 일치 확인
             if (pw !== pwConfirm) {
                 alert("비밀번호가 일치하지 않습니다.");
                 document.getElementById('passwordConfirm').focus();
                 return false;
             }
+
+            // 비밀번호 복잡도 확인
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/;
+            if (!passwordRegex.test(pw)) {
+                alert("비밀번호는 8~15자이며, 영문/숫자/특수문자를 포함해야 합니다.");
+                document.getElementById('memberPassword').focus();
+                return false;
+            }
+
+            // 전화번호 형식 확인
+            const phoneRegex = /^01(?:0|1|[6-9])-(?:\d{3}|\d{4})-\d{4}$/;
+            if (!phoneRegex.test(phone)) {
+                alert("올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)");
+                document.getElementById('memberContact').focus();
+                return false;
+            }
+
             return true;
         }
 
         function sendEmail() {
             const memberEmail = document.getElementById('memberEmail').value;
             if(!memberEmail) { alert("이메일을 입력해주세요."); return; }
-
-            isEmailVerified = false;
 
             fetch('/members/api/email/send', {
                 method: 'POST',

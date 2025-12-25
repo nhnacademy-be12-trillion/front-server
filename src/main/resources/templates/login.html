@@ -68,12 +68,10 @@
         <p class="text-muted">로그인하여 더 많은 혜택을 누리세요</p>
       </div>
 
-      <div class="bg-light p-4 p-md-5 rounded shadow-sm">
-        <div th:if="${message}" class="alert alert-success text-center py-2 mb-4" role="alert" th:text="${message}"></div>
-
-        <div th:if="${param.error}" class="alert alert-danger text-center py-2 mb-4" role="alert">
-          아이디 또는 비밀번호를 확인해주세요.
-        </div>
+      <div th:if="${message}" class="alert alert-success text-center py-2 mb-4" role="alert" th:text="${message}"></div>
+      <div th:if="${param.error}" class="alert alert-danger text-center py-2 mb-4" role="alert">
+        아이디 또는 비밀번호를 확인해주세요.
+      </div>
 
       <form action="/login" method="post" id="loginForm" novalidate>
         <div class="form-group">
@@ -86,8 +84,10 @@
         <div class="form-group">
           <label for="memberPassword" class="sr-only">비밀번호</label>
           <input type="password" class="form-control" id="memberPassword" name="memberPassword"
-                 placeholder="비밀번호" required style="height: 50px;">
-          <div class="invalid-feedback">비밀번호를 입력해주세요.</div>
+                 placeholder="8자 이상, 영문/숫자/특수문자 포함" required style="height: 50px;">
+          <div class="invalid-feedback" id="passwordError">
+            비밀번호는 8~15자이며, 영문, 숫자, 특수문자를 모두 포함해야 합니다.
+          </div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold mb-4" style="height: 50px;">로그인</button>
@@ -107,12 +107,12 @@
         <span class="text-muted bg-light px-2" style="position: relative; top: -13px;">SNS 계정으로 간편 로그인</span>
       </div>
 
-      <a href="/api/auth/oauth2/authorization/google" class="btn social-btn google-btn">
+      <a th:href="@{${@environment.getProperty('gateway.url')} + '/api/oauth2/authorization/google'}" class="btn social-btn google-btn">
         <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" width="20">
         <span>Google로 로그인</span>
       </a>
 
-      <a href="/api/auth/oauth2/authorization/payco" class="btn social-btn payco-btn">
+      <a href="/api/oauth2/authorization/payco" class="btn social-btn payco-btn">
         <span class="payco-text">PAYCO</span>
         <span class="ml-2">로그인</span>
       </a>
@@ -127,6 +127,7 @@
       const emailInput = document.getElementById('memberEmail');
       const pwInput = document.getElementById('memberPassword');
 
+      // 이메일 검증
       if (!emailInput.value.trim()) {
         emailInput.classList.add('is-invalid');
         isValid = false;
@@ -134,10 +135,20 @@
         emailInput.classList.remove('is-invalid');
       }
 
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/;
+
       if (!pwInput.value.trim()) {
+        // 입력값이 없는 경우
+        document.getElementById('passwordError').innerText = "비밀번호를 입력해주세요.";
+        pwInput.classList.add('is-invalid');
+        isValid = false;
+      } else if (!passwordRegex.test(pwInput.value)) {
+        // 정규식 조건 불만족
+        document.getElementById('passwordError').innerText = "비밀번호는 8~15자이며, 영문/숫자/특수문자를 포함해야 합니다.";
         pwInput.classList.add('is-invalid');
         isValid = false;
       } else {
+        // 통과
         pwInput.classList.remove('is-invalid');
       }
 
@@ -147,6 +158,7 @@
       }
     });
 
+    // 사용자가 입력 시작하면 빨간 테두리(에러 상태) 제거
     document.querySelectorAll('.form-control').forEach(input => {
       input.addEventListener('input', function() {
         this.classList.remove('is-invalid');

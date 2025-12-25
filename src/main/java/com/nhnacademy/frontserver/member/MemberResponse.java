@@ -10,5 +10,6 @@ public record MemberResponse(
         LocalDate memberBirth,
         String memberState, // ENUM -> String
         Integer memberPoint,
-        String gradeName    // ENUM -> String
+        String gradeName,    // ENUM -> String
+        String memberOauthId
 ) {}
