@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+  <title>Trillion-Shop | 위시리스트</title>
+</head>
+
+<body>
+<div layout:fragment="content" class="container mt-5">
+  <h2>휴면 해제</h2>
+
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+  <div th:if="${step == null or step == 'request'}">
+    <form action="/members/dormant/request" method="post">
+      <label>아이디(이메일)</label>
+      <input type="memberEmail" name="memberEmail" class="form-control" required>
+
+      <label>두레이 훅 URL</label>
+      <input type="text" name="doorayHookUrl" class="form-control" required placeholder="https://hook.dooray.com/...">
+
+      <button type="submit" class="btn btn-primary mt-2">인증번호 받기</button>
+    </form>
+  </div>
+
+  <div th:if="${step == 'verify'}">
+    <form action="/members/dormant/verify" method="post">
+      <input type="hidden" name="memberEmail" th:value="${memberEmail}">
+      <label>인증번호</label>
+      <input type="text" name="verificationCode" class="form-control" required>
+      <button type="submit" class="btn btn-success mt-2">확인</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>
