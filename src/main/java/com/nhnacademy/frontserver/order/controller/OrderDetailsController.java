@@ -37,7 +37,7 @@ public class OrderDetailsController {
     @PostMapping("/{orderId}/cancel")
     public String cancelOrder(@PathVariable Long orderId) {
         orderClient.cancelOrderByMember(orderId);
-        return "redirect:/api/members/my-page";
+        return "redirect:/my-page/history";
     }
 
     @PostMapping("/{orderId}/items/{itemId}/return")
