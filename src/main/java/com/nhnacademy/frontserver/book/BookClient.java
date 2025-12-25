@@ -59,6 +59,14 @@ public interface BookClient {
     @GetMapping("/api/books/{book_id}")
     BookDetailResponse getBookDetail(@PathVariable("book_id") Long bookId);
 
+    // 리뷰 등록 API
+    @PostMapping(value = "/api/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    Long createReview(
+            @RequestPart("request") ReviewRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    );
+
+    // 특정 도서의 리뷰 목록 조회
     @GetMapping("/api/books/{book_id}/reviews")
     PageResponse<ReviewResponse> getReviews(@PathVariable("book_id") Long bookId,
                                             @RequestParam("page") int page,
@@ -94,27 +102,28 @@ public interface BookClient {
     List<BookListResponse> getBestSellers();
 
     // 찜하기 토글
-    @PostMapping("/api/books/wishlists/{bookId}")
-    Map<String, Object> toggleWishlist(@PathVariable("bookId") Long bookId);
+    @PostMapping("/api/books/wishlists/{book-id}")
+    Map<String, Object> toggleWishlist(
+            @PathVariable("book-id") Long bookId,
+            @RequestHeader("X-Member-Id") Long memberId
+    );
 
     // 위시리스트 목록 조회 (페이지용 + 뱃지 카운트용)
     @GetMapping("/api/books/wishlists")
-    List<BookListResponse> getWishlists();
+    List<BookListResponse> getWishlists(
+            @RequestHeader("X-Member-Id") Long memberId
+    );
 
     @PostMapping(value = "/api/admin/books", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Long createBook(
             @RequestPart("book") MultipartFile bookJson,
             @RequestPart(value = "file", required = false) MultipartFile file
     );
-    /**
-     * [추가됨] ISBN으로 도서 정보 조회 (AI/알라딘)
-     * Backend: AdminBookController#getBookInfoByIsbn
-     */
+     // ISBN으로 도서 정보 조회 (AI/알라딘)
     @GetMapping("/api/admin/books/isbn/{isbn}")
     BookCreateRequest getBookInfoByIsbn(@PathVariable("isbn") String isbn);
 
     @GetMapping("/api/admin/categories/search")
     List<CategorySearchResponse> searchCategories(@RequestParam("keyword") String keyword);
-
 
 }

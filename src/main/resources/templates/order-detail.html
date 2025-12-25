@@ -172,7 +172,7 @@
             </div>
 
             <!-- ... (우측 주문 요약 정보 및 취소 버튼 영역 유지) ... -->
-             <div class="col-lg-4">
+            <div class="col-lg-4">
 
                 <div class="card mb-4">
                     <div class="card-header bg-light">
@@ -329,13 +329,13 @@
             if (isNonMember) {
                 // 비회원 경로
                 form.action = '/orders/non-members/' + orderId + '/items/' + itemId + '/return';
-                
+
                 // 비회원 인증 정보 추가
                 var inputOrdNum = document.createElement('input');
                 inputOrdNum.type = 'hidden';
                 inputOrdNum.name = 'orderNumber';
                 inputOrdNum.value = orderNumber;
-                
+
                 var inputPwd = document.createElement('input');
                 inputPwd.type = 'hidden';
                 inputPwd.name = 'password';
