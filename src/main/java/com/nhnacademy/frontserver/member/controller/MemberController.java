@@ -181,20 +181,6 @@ public class MemberController {
         return "grade-list";
     }
 
-    // 주문 내역 조회
-    @GetMapping("/orders")
-    public String myPageOrders(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size,
-            Model model
-    ) {
-        String sort = "bookId,desc";
-        PageResponse<OrderResponse> orders = orderClient.getAllOrderByMember(page, size, sort);
-        model.addAttribute("orders", orders);
-        model.addAttribute("activeTab", "orders");
-        return "/my/my-orders";
-    }
-
     // 리뷰 조회
     @GetMapping("/reviews")
     public String getReviews() {
