@@ -126,7 +126,7 @@ public class CheckoutController {
                 }
 
                 orderCreateRequest = new OrderCreateRequest(
-                        member.memberName(), member.memberContact(), // 주문자
+                        member.memberName(), member.memberContact(), member.memberEmail(), // 주문자 + 이메일
                         null, // deliveryDate
                         member.memberName(), member.memberContact(), // 수령인 (기본값)
                         combinedAddress,
@@ -139,11 +139,11 @@ public class CheckoutController {
             } catch (Exception e) {
                 log.error("회원 추가 정보(주소 등) 조회 실패", e);
                 // 실패 시 기본 빈 객체
-                orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, 0, null, null);
+                orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, null, 0, null, null);
             }
         } else {
             // 비회원
-            orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, 0, null, null);
+            orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, null, 0, null, null);
         }
 
         // 4. 포장 정보 조회

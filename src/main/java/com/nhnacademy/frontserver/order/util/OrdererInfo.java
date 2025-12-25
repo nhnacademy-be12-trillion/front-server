@@ -14,5 +14,6 @@ package com.nhnacademy.frontserver.order.util;
 
 public record OrdererInfo(
     String ordererName,
-    String ordererContact
+    String ordererContact,
+    String ordererEmail
 ) {}
