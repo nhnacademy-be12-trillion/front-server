@@ -110,11 +110,9 @@
         const clientKey = [[${tossClientKey}]];
         const tossPayments = TossPayments(clientKey);
 
-        // [수정] orderId(PK)가 아닌 orderNumber(주문번호)를 사용
         const orderId = [[${order.orderNumber}]];
         const amount = [[${order.totalPrice}]];
 
-        // 주문명 생성
         const firstItemName = [[${order.orderItems[0].bookName}]];
         const totalCount = [[${order.orderItems.size()}]];
         const orderName = totalCount > 1 ? firstItemName + ' 외 ' + (totalCount - 1) + '건' : firstItemName;
@@ -122,19 +120,34 @@
         const customerName = "구매자";
 
         function requestPayment() {
+            // 1. [검증] 결제 금액 음수 불가
+            if (amount < 0) {
+                alert("결제 금액은 0원 이상이어야 합니다. 관리자에게 문의하세요.");
+                return;
+            }
+
             const methodSelect = document.getElementById("paymentMethod");
             const method = methodSelect.value;
-
-            // Provider 정보 설정
             const providerInfo = 'TOSS';
-
-            // 리다이렉트 URL 설정 (Provider 포함)
             const successUrl = window.location.origin + '/payments/success?provider=' + providerInfo;
             const failUrl = window.location.origin + '/payments/fail';
 
+            // 2. [수정] 0원 결제 로직 (중복 키 방지 적용)
+            if (amount === 0) {
+                if(confirm("최종 결제 금액이 0원입니다. 결제를 진행하시겠습니까?")) {
+                    // [핵심] DB 중복 에러 방지를 위해 'ZERO_' 뒤에 주문번호를 붙여 고유 키 생성
+                    const uniquePaymentKey = "ZERO_" + orderId;
+
+                    // PG사 없이 바로 성공 URL로 이동
+                    location.href = successUrl + "&paymentKey=" + uniquePaymentKey + "&orderId=" + orderId + "&amount=0";
+                }
+                return;
+            }
+
+            // 3. 기존 결제 로직 (0원 초과)
             tossPayments.requestPayment(method, {
                 amount: amount,
-                orderId: orderId, // 여기에는 이제 orderNumber가 들어갑니다.
+                orderId: orderId,
                 orderName: orderName,
                 customerName: customerName,
                 successUrl: successUrl,

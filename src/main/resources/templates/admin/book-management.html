@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+  <meta charset="utf-8">
+  <title>Trillion-Shop | 관리자 - 도서 관리</title>
+  <th:block layout:fragment="head">
+    <style>
+      body { background-color: #f5f5f5; }
+      .admin-container { padding-top: 50px; padding-bottom: 50px; }
+      .nav-pills .nav-link { border-radius: 0.25rem; margin-bottom: 5px; background-color: #e9ecef; color: #3D464D; transition: 0.3s; }
+      .nav-pills .nav-link.active, .nav-pills .nav-link:hover { background-color: #FFD333; color: #3D464D; font-weight: bold; }
+      .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+      .table thead th { border-top: none; background-color: #f8f9fa; color: #333; font-weight: 600; }
+      .table td { vertical-align: middle; }
+      .badge-status-waiting { background-color: #ffc107; color: #212529; }
+      .badge-status-completed { background-color: #28a745; color: #fff; }
+      .badge-status-canceled { background-color: #dc3545; color: #fff; }
+      .badge-status-shipping { background-color: #17a2b8; color: #fff; }
+      .badge-status-returned { background-color: #6c757d; color: #fff; }
+    </style>
+  </th:block>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+  <div class="container-fluid admin-container">
+    <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
+
+    <div class="row px-xl-5">
+      <th:block th:replace="~{admin/fragments/sidebar :: sidebar('book-management')}"></th:block>
+
+      <div class="col-lg-9 col-md-8">
+        <div class="content-box">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-primary mb-0">도서 관리 (수정/삭제)</h4>
+            <a href="/admin/books/register" class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-plus"></i> 신규 도서 등록
+            </a>
+          </div>
+
+          <div class="input-group mb-4">
+            <input type="text" class="form-control" id="manageBookIdInput" placeholder="관리할 도서 ID (Book ID)를 입력하세요">
+            <div class="input-group-append">
+              <button class="btn btn-primary" type="button" id="btn-find-book">
+                <i class="fas fa-search"></i> 조회
+              </button>
+            </div>
+          </div>
+          <small class="text-muted d-block mb-4">※ 정확한 Book ID를 입력하여 도서를 조회한 후 수정 또는 삭제(판매종료) 할 수 있습니다.</small>
+
+          <div id="manageBookResult" style="display:none;" class="book-card">
+            <div class="row">
+              <div class="col-md-3 text-center">
+                <img id="manageBookImg" src="" class="book-img mb-2" alt="Book Image">
+                <div class="small text-muted" id="manageBookIsbn">ISBN</div>
+              </div>
+              <div class="col-md-9">
+                <h5 id="manageBookTitle" class="font-weight-bold mb-3">도서 제목</h5>
+
+                <dl class="row mb-1">
+                  <dt class="col-sm-3">도서 ID</dt>
+                  <dd class="col-sm-9" id="manageBookId"></dd>
+
+                  <dt class="col-sm-3">현재 상태</dt>
+                  <dd class="col-sm-9"><span id="manageBookState" class="badge badge-info"></span></dd>
+
+                  <dt class="col-sm-3">정가 / 판매가</dt>
+                  <dd class="col-sm-9">
+                    <span id="manageRegularPrice" style="text-decoration: line-through; color: #999;"></span> /
+                    <span id="manageSalePrice" class="text-danger font-weight-bold"></span>
+                  </dd>
+
+                  <dt class="col-sm-3">재고</dt>
+                  <dd class="col-sm-9"><span id="manageBookStock"></span> 권</dd>
+                </dl>
+
+                <div class="mt-4 text-right">
+                  <button class="btn btn-warning mr-2" onclick="openBookUpdateModal()">
+                    <i class="fas fa-edit"></i> 정보 수정
+                  </button>
+                  <button class="btn btn-danger" onclick="deleteBook()">
+                    <i class="fas fa-trash-alt"></i> 도서 삭제 (판매종료)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="bookUpdateModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-white">
+          <h5 class="modal-title"><i class="fas fa-edit mr-2"></i>도서 정보 수정</h5>
+          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="bookUpdateForm">
+            <input type="hidden" id="editBookId">
+            <input type="hidden" id="editBookImage">
+
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">도서명</label>
+              <div class="col-sm-9"><input type="text" class="form-control" id="editBookName" required></div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">설명</label>
+              <div class="col-sm-9"><textarea class="form-control" id="editBookDescription" rows="5"></textarea></div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">목차</label>
+              <div class="col-sm-9"><textarea class="form-control" id="editBookIndex" rows="3"></textarea></div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">재고 수량</label>
+              <div class="col-sm-9"><input type="number" class="form-control" id="editBookStock" required></div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">할인율 (%)</label>
+              <div class="col-sm-9">
+                <input type="number" class="form-control" id="editDiscountRate" placeholder="예: 10">
+                <small class="text-muted">입력한 할인율에 따라 판매가가 자동 계산됩니다.</small>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">판매 상태</label>
+              <div class="col-sm-9">
+                <select class="form-control" id="editBookState">
+                  <option value="ON_SALE">판매중 (ON_SALE)</option>
+                  <option value="SOLD_OUT">품절 (SOLD_OUT)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-sm-3 col-form-label">포장 가능 여부</label>
+              <div class="col-sm-9">
+                <select class="form-control" id="editBookPackaging">
+                  <option value="true">가능</option>
+                  <option value="false">불가능</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+          <button type="button" class="btn btn-warning" onclick="submitBookUpdate()">수정 완료</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="script">
+  <script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+      // 1. 도서 조회 (Book ID로)
+      $('#btn-find-book').on('click', function() {
+        const bookId = $('#manageBookIdInput').val().trim();
+        if(!bookId) { alert("Book ID를 입력해주세요."); return; }
+
+        fetch('/admin/books/' + bookId + '/detail')
+                .then(res => {
+                  if(!res.ok) throw new Error("도서를 찾을 수 없습니다.");
+                  return res.json();
+                })
+                .then(data => {
+                  $('#manageBookResult').show();
+                  $('#manageBookId').text(data.bookId);
+                  $('#manageBookTitle').text(data.bookName);
+                  $('#manageBookIsbn').text("ISBN: " + data.isbn);
+                  $('#manageBookStock').text(data.bookStock);
+                  $('#manageBookState').text(data.bookState);
+
+                  $('#manageRegularPrice').text(new Intl.NumberFormat().format(data.bookRegularPrice) + "원");
+                  $('#manageSalePrice').text(new Intl.NumberFormat().format(data.bookSalePrice) + "원");
+
+                  if(data.bookImageList && data.bookImageList.length > 0) {
+                    $('#manageBookImg').attr('src', data.bookImageList[0].fileUrl);
+                  } else {
+                    $('#manageBookImg').attr('src', '/img/no-image.png');
+                  }
+
+                  // 데이터 저장 (수정/삭제용)
+                  $('#manageBookResult').data('book', data);
+                })
+                .catch(err => {
+                  alert(err.message);
+                  $('#manageBookResult').hide();
+                });
+      });
+
+      // 엔터키 검색 지원
+      $('#manageBookIdInput').on('keypress', function(e) {
+        if(e.which == 13) $('#btn-find-book').click();
+      });
+
+      // 2. 수정 모달 열기
+      window.openBookUpdateModal = function() {
+        const bookData = $('#manageBookResult').data('book');
+        if(!bookData) return;
+
+        $('#editBookId').val(bookData.bookId);
+        $('#editBookName').val(bookData.bookName);
+        $('#editBookDescription').val(bookData.bookDescription);
+        $('#editBookIndex').val(bookData.bookIndex);
+        $('#editBookStock').val(bookData.bookStock);
+
+        // 할인율 계산 (역산)
+        let calculatedDiscount = 0;
+        if(bookData.bookRegularPrice > 0 && bookData.bookSalePrice < bookData.bookRegularPrice) {
+          calculatedDiscount = ((bookData.bookRegularPrice - bookData.bookSalePrice) / bookData.bookRegularPrice) * 100;
+          calculatedDiscount = Math.round(calculatedDiscount * 10) / 10;
+        }
+        $('#editDiscountRate').val(calculatedDiscount);
+
+        $('#editBookState').val(bookData.bookState);
+        $('#editBookPackaging').val(bookData.bookPackaging ? "true" : "false");
+
+        if(bookData.bookImageList && bookData.bookImageList.length > 0) {
+          $('#editBookImage').val(bookData.bookImageList[0].fileUrl);
+        }
+
+        $('#bookUpdateModal').modal('show');
+      };
+
+      // 3. 수정 요청 (PUT)
+      window.submitBookUpdate = function() {
+        const bookId = $('#editBookId').val();
+        const requestData = {
+          bookName: $('#editBookName').val(),
+          bookDescription: $('#editBookDescription').val(),
+          bookIndex: $('#editBookIndex').val(),
+          bookStock: parseInt($('#editBookStock').val()),
+          discountRate: parseFloat($('#editDiscountRate').val() || 0),
+          bookState: $('#editBookState').val(),
+          bookPackaging: $('#editBookPackaging').val() === 'true',
+          bookImage: $('#editBookImage').val()
+        };
+        updateBookRequest(bookId, requestData, "수정되었습니다.");
+      };
+
+      // 4. 삭제 요청 -> SALE_END 상태 업데이트
+      window.deleteBook = function() {
+        const bookData = $('#manageBookResult').data('book');
+        if(!bookData) return;
+
+        if(!confirm("정말 이 도서를 판매 종료(SALE_END) 처리하시겠습니까? (목록에서 숨겨질 수 있습니다)")) return;
+
+        let calculatedDiscount = 0;
+        if(bookData.bookRegularPrice > 0 && bookData.bookSalePrice < bookData.bookRegularPrice) {
+          calculatedDiscount = ((bookData.bookRegularPrice - bookData.bookSalePrice) / bookData.bookRegularPrice) * 100;
+        }
+
+        const requestData = {
+          bookName: bookData.bookName,
+          bookDescription: bookData.bookDescription,
+          bookIndex: bookData.bookIndex,
+          bookStock: bookData.bookStock,
+          discountRate: calculatedDiscount,
+          bookState: 'SALE_END', // [핵심] 상태 강제 변경
+          bookPackaging: bookData.bookPackaging,
+          bookImage: (bookData.bookImageList && bookData.bookImageList.length > 0) ? bookData.bookImageList[0].fileUrl : ''
+        };
+        updateBookRequest(bookData.bookId, requestData, "판매 종료(SALE_END) 처리되었습니다.");
+      };
+
+      // 공통 API 요청 함수
+      function updateBookRequest(bookId, requestData, successMsg) {
+        fetch('/admin/books/' + bookId, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData)
+        })
+                .then(res => {
+                  if(res.ok) {
+                    alert(successMsg);
+                    $('#bookUpdateModal').modal('hide');
+                    $('#btn-find-book').click();
+                  } else {
+                    res.text().then(msg => alert("처리 실패: " + msg));
+                  }
+                })
+                .catch(err => alert("오류 발생: " + err));
+      }
+    });
+  </script>
+</th:block>
+
+</body>
+</html>

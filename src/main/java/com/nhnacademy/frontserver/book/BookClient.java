@@ -123,7 +123,16 @@ public interface BookClient {
     @GetMapping("/api/admin/books/isbn/{isbn}")
     BookCreateRequest getBookInfoByIsbn(@PathVariable("isbn") String isbn);
 
+    // [관리자] 도서 수정 (추가됨)
+    @PutMapping("/api/admin/books/{bookId}")
+    void updateBook(@PathVariable("bookId") Long bookId, @RequestBody Map<String, Object> request);
+
+    // [관리자] 도서 삭제 (추가됨)
+    @DeleteMapping("/api/admin/books/{bookId}")
+    void deleteBook(@PathVariable("bookId") Long bookId);
+
     @GetMapping("/api/admin/categories/search")
     List<CategorySearchResponse> searchCategories(@RequestParam("keyword") String keyword);
+
 
 }
