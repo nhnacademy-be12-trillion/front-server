@@ -6,15 +6,21 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Trillion-Shop | 관리자 - 정책 설정</title>
+    <title>Trillion-Shop | 관리자 - 정책 관리</title>
     <th:block layout:fragment="head">
         <style>
             body { background-color: #f5f5f5; }
             .admin-container { padding-top: 50px; padding-bottom: 50px; }
-            .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 30px; }
-            .policy-card-title { font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #FFD333; padding-bottom: 10px; display: inline-block; }
-            .table th { background-color: #f8f9fa; vertical-align: middle; }
+            .nav-pills .nav-link { border-radius: 0.25rem; margin-bottom: 5px; background-color: #e9ecef; color: #3D464D; transition: 0.3s; }
+            .nav-pills .nav-link.active, .nav-pills .nav-link:hover { background-color: #FFD333; color: #3D464D; font-weight: bold; }
+            .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .table thead th { border-top: none; background-color: #f8f9fa; color: #333; font-weight: 600; }
             .table td { vertical-align: middle; }
+            .badge-status-waiting { background-color: #ffc107; color: #212529; }
+            .badge-status-completed { background-color: #28a745; color: #fff; }
+            .badge-status-canceled { background-color: #dc3545; color: #fff; }
+            .badge-status-shipping { background-color: #17a2b8; color: #fff; }
+            .badge-status-returned { background-color: #6c757d; color: #fff; }
         </style>
     </th:block>
 </head>
