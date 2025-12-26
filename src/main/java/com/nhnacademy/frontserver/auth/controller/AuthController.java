@@ -4,6 +4,7 @@ import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.dto.LoginRequest;
 import com.nhnacademy.frontserver.auth.dto.TokenResponse;
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
+import com.nhnacademy.frontserver.cart.client.CartClient;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,18 @@ public class AuthController {
 
     private final AuthClient authClient;
 
+    private final CartClient cartClient;
+
     @GetMapping("/login")
     public String loginForm() {
         return "login";
     }
 
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
+    public String login(
+            @CookieValue(name = "guestId", required = false) String guestId,
+            @ModelAttribute LoginRequest loginRequest,
+                        HttpServletResponse response) {
         try {
             // FeignClient로 Gateway 호출 -> 토큰 받기
             TokenResponse tokens = authClient.login(loginRequest);
@@ -37,7 +43,7 @@ public class AuthController {
             response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-            return "redirect:/";
+            return "redirect:/carts/merge";
         }catch (FeignException.Forbidden e){
             String responseBody = e.contentUTF8();
             if (responseBody.contains("DORMANT")) {

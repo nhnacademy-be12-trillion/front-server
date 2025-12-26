@@ -31,9 +31,9 @@ public class CartWebController {
     @Getter
     @AllArgsConstructor
     public static class CartItemDetailDto {
-        private Long id; // bookId (HTML에서 item.id로 사용)
+        private long id; // bookId
         private BookDetailResponse book; // 책 상세 정보
-        private int quantity; // 수량
+        private long quantity; // 수량
         private long subtotal; // 소계 (가격 * 수량)
     }
 
@@ -44,8 +44,8 @@ public class CartWebController {
     @AllArgsConstructor
     public static class CartTotalSummaryDto {
         private long subTotal;     // 상품 총 금액
-        private long shippingFee;  // 배송비
-        private long totalPrice;   // 최종 결제 금액
+        private long lineCount;      // 종류 수
+        private long totalQuantity;  // 전체 수량
     }
 
     /**
@@ -54,15 +54,18 @@ public class CartWebController {
     @GetMapping
     public String viewCartList(Model model) {
 
-        // 1. 장바구니 목록 조회 (bookId만 있음)
+        // 장바구니 목록 조회 (bookId만 있음)
         List<CartResponseDto> cartItems = cartClient.getCartItems().getBody();
-
         List<CartItemDetailDto> viewItems = new ArrayList<>();
-        long totalItemPrice = 0;
+        long totalItemPrice = 0; // 소계
+        long lineCount = cartItems != null ? cartItems.size() : 0;      // 종류 수
+        long totalQuantity = 0;  // 전체 수량
 
-        // 2. 각 항목별 책 상세 정보 조회 및 가격 계산
+        // 각 장바구니 아이템별 책 상세 정보 조회 및 가격 계산
+        // TODO. N+1 문제 발생중.
         if (cartItems != null) {
             for (CartResponseDto item : cartItems) {
+                totalQuantity += item.getCartQuantity();
                 // FeignClient로 책 정보 조회
                 BookDetailResponse bookInfo = bookClient.getBookDetail(item.getBookId());
 
@@ -80,14 +83,9 @@ public class CartWebController {
             }
         }
 
-        // 3. 배송비 정책 (예: 3만원 이상 무료, 아니면 5000원) -> 비즈니스 로직에 맞게 수정 필요
-        //long shippingFee = (totalItemPrice > 0 && totalItemPrice < 30000) ? 5000 : 0;
-        long shippingFee = 5000;
-        long finalPrice = totalItemPrice + shippingFee;
-
-        // 4. 모델에 담기
+        // 모델에 등록
         model.addAttribute("cartItems", viewItems); // 리스트
-        model.addAttribute("cart", new CartTotalSummaryDto(totalItemPrice, shippingFee, finalPrice)); // 요약 정보
+        model.addAttribute("cart", new CartTotalSummaryDto(totalItemPrice, lineCount, totalQuantity)); // 요약 정보
 
         return "cart";
     }
@@ -131,5 +129,14 @@ public class CartWebController {
     public String clearCart() {
         cartClient.clearCart();
         return "redirect:/carts";
+    }
+
+    /**
+     * [동작] 회원/비회원 장바구니 병합
+     */
+    @GetMapping("/merge")
+    public String mergeCart() {
+        cartClient.mergeCart();
+        return "redirect:/";
     }
 }
