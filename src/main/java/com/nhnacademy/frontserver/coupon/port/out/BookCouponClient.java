@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "gateway-coupon",
         url = "${gateway.url}",
-        path = "/book-coupons")
+        path = "/book-coupons",
+        contextId = "bookCoupon")
 public interface BookCouponClient {
     //북쿠폰 조회
     @GetMapping("{book-id}")
