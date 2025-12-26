@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
         name = "gateway-coupon",
         url = "${gateway.url}",
         path = "/coupons",
-        contextId = "adminCouponPolicy"
+        contextId = "coupon"
 )
 public interface CouponClient {
     @PostMapping()
