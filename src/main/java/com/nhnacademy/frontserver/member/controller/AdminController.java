@@ -38,10 +38,16 @@ public class AdminController {
     private final ObjectMapper objectMapper;
 
     // =================================================================================
-    // 1. 관리자 페이지 화면 (View) - GET /admin
+    // 1. 관리자 페이지 화면 (View)
     // =================================================================================
+
     @GetMapping("/admin")
-    public String adminPage(Model model) {
+    public String adminRoot() {
+        return "redirect:/admin/orders";
+    }
+
+    @GetMapping("/admin/orders")
+    public String adminOrders(Model model) {
 
         List<OrderResponse> orderList = Collections.emptyList();
         try {
@@ -59,34 +65,67 @@ public class AdminController {
         }
 
         model.addAttribute("orders", orderList);
+        model.addAttribute("activeMenu", "orders");
 
         // 상태 변경을 위한 Enum 값 전달
         model.addAttribute("itemStatuses", OrderItemStatus.values());
 
-        // 상태값 한글 매핑 맵 생성
+        // 상태값 한글 매핑 맵 생성 (Enum의 getTitle() 활용)
         Map<String, String> statusMap = new HashMap<>();
-        statusMap.put("PENDING", "결제 대기");
-        statusMap.put("COMPLETED", "결제 완료");
-        statusMap.put("CANCELED", "주문 취소");
-        statusMap.put("FAILED", "주문 실패");
-        statusMap.put("PREPARING", "상품 준비중");
-        statusMap.put("SHIPPED", "배송중");
-        statusMap.put("DELIVERED", "배송 완료");
-        statusMap.put("RETURNED", "반품 완료");
-        statusMap.put("CONFIRMED", "구매 확정");
-        statusMap.put("RETURN_REQUESTED_CHANGE_OF_MIND", "반품 요청 (변심)");
-        statusMap.put("RETURN_REQUESTED_DAMAGED", "반품 요청 (파손)");
+        
+        // OrderStatus 매핑
+        for (com.nhnacademy.frontserver.order.util.OrderStatus status : com.nhnacademy.frontserver.order.util.OrderStatus.values()) {
+            statusMap.put(status.name(), status.getTitle());
+        }
+        
+        // OrderItemStatus 매핑
+        for (OrderItemStatus status : OrderItemStatus.values()) {
+            statusMap.put(status.name(), status.getTitle());
+        }
 
         model.addAttribute("statusMap", statusMap);
 
-        // 기타 데이터 설정
-        model.addAttribute("shippingPolicy", Map.of("shippingFee", 3000, "freeShippingCondition", 50000));
-        model.addAttribute("packagingList", Collections.emptyList());
-        model.addAttribute("pointPolicy", Map.of("basePointRate", 1.0));
-        model.addAttribute("memberGrades", Collections.emptyList());
-        model.addAttribute("memberInfo", null);
+        return "admin/orders";
+    }
 
-        return "admin";
+    @GetMapping("/admin/policies")
+    public String adminPolicies(Model model) {
+        model.addAttribute("activeMenu", "policies");
+
+        try {
+            // 배송비 정책 조회
+            model.addAttribute("deliveryPolicy", orderClient.getDeliveryPolicy());
+        } catch (Exception e) {
+            log.error("배송비 정책 조회 실패", e);
+            model.addAttribute("deliveryPolicy", null);
+        }
+
+        try {
+            // 포장 정책 조회 (최대 100건 조회)
+            model.addAttribute("packagingList", orderClient.getAllPackaging(0, 100, "packagingId,asc"));
+        } catch (Exception e) {
+            log.error("포장 정책 조회 실패", e);
+            model.addAttribute("packagingList", Collections.emptyList());
+        }
+
+        // TODO: 포인트 정책 연동 필요
+        model.addAttribute("pointPolicy", Map.of("basePointRate", 1.0));
+
+        return "admin/policies";
+    }
+
+    @GetMapping("/admin/members")
+    public String adminMembers(Model model) {
+        model.addAttribute("activeMenu", "members");
+        // 회원 목록 로딩 로직 추가 가능
+        model.addAttribute("memberGrades", Collections.emptyList());
+        return "admin/members";
+    }
+
+    @GetMapping("/admin/books")
+    public String adminBookRegister(Model model) {
+        model.addAttribute("activeMenu", "books");
+        return "admin/book-register";
     }
 
     // =================================================================================

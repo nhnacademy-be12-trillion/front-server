@@ -141,9 +141,15 @@
                                                th:text="${item.orderId}">ORD-001</a>
                                         </td>
                                         <td class="align-middle" th:text="${item.quantity} + '개'">1개</td>
-                                        <td class="align-middle font-weight-bold text-danger" 
-                                            th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA')} + '원'">
-                                            15,000원
+                                        <td class="align-middle font-weight-bold text-danger">
+                                            <th:block th:with="isChangeOfMind=${item.orderItemStatus.name() == 'RETURN_REQUESTED_CHANGE_OF_MIND'},
+                                                                 deduction=${isChangeOfMind and deliveryPolicy != null ? deliveryPolicy.deliveryPolicyFee : 0},
+                                                                 finalRefund=${item.totalItemSalePrice - deduction}">
+                                                <span th:text="${#numbers.formatInteger(finalRefund > 0 ? finalRefund : 0, 0, 'COMMA')} + '원'">15,000원</span>
+                                                <div th:if="${isChangeOfMind}" class="small text-muted" style="font-size: 0.75rem;">
+                                                    (반품 배송비 <span th:text="${#numbers.formatInteger(deduction, 0, 'COMMA')}">3,000</span>원 차감)
+                                                </div>
+                                            </th:block>
                                         </td>
                                         <td class="align-middle">
                                             <span class="badge badge-warning px-2 py-1" th:text="${item.orderItemStatus.title}">반품요청</span>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+    <meta charset="utf-8">
+    <title>Trillion-Shop | 관리자 - 정책 설정</title>
+    <th:block layout:fragment="head">
+        <style>
+            body { background-color: #f5f5f5; }
+            .admin-container { padding-top: 50px; padding-bottom: 50px; }
+            .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 30px; }
+            .policy-card-title { font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #FFD333; padding-bottom: 10px; display: inline-block; }
+            .table th { background-color: #f8f9fa; vertical-align: middle; }
+            .table td { vertical-align: middle; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <div class="container-fluid admin-container">
+        <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show container" role="alert">
+            <i class="fas fa-check-circle mr-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show container" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="row px-xl-5">
+            <!-- Sidebar Fragment -->
+            <th:block th:replace="~{admin/fragments/sidebar :: sidebar('policies')}"></th:block>
+
+            <div class="col-lg-9 col-md-8">
+
+                <!-- 1. 배송비 정책 설정 -->
+                <div class="content-box">
+                    <h4 class="text-primary policy-card-title"><i class="fas fa-truck mr-2"></i>배송비 정책</h4>
+                    
+                    <div class="mb-4" th:if="${deliveryPolicy != null}">
+                        <div class="p-3 bg-light rounded border d-flex align-items-center">
+                            <div class="mr-4">
+                                <span class="badge badge-secondary p-2">현재 설정</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-muted mr-3">기본 배송비: </span>
+                                <strong class="text-dark mr-4" th:text="${#numbers.formatInteger(deliveryPolicy.deliveryPolicyFee, 0, 'COMMA')} + '원'">3,000원</strong>
+                                
+                                <span class="text-muted mr-3">무료 배송 기준: </span>
+                                <strong class="text-dark" th:text="${#numbers.formatInteger(deliveryPolicy.deliveryPolicyThreshold, 0, 'COMMA')} + '원'">50,000원</strong>
+                            </div>
+                            <div class="text-info small">
+                                <i class="fas fa-info-circle mr-1"></i>수정하려면 아래 값을 입력 후 저장하세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/admin/policies/delivery}" method="post">
+                        <div class="form-row" th:if="${deliveryPolicy != null}">
+                            <div class="form-group col-md-5">
+                                <label for="deliveryFee">기본 배송비 (원)</label>
+                                <input type="number" class="form-control" id="deliveryFee" name="deliveryPolicyFee" 
+                                       th:value="${deliveryPolicy.deliveryPolicyFee}" required min="0" step="100">
+                            </div>
+                            <div class="form-group col-md-5">
+                                <label for="freeThreshold">무료 배송 기준 금액 (원)</label>
+                                <input type="number" class="form-control" id="freeThreshold" name="deliveryPolicyThreshold" 
+                                       th:value="${deliveryPolicy.deliveryPolicyThreshold}" required min="0" step="1000">
+                            </div>
+                            <div class="form-group col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary btn-block">저장</button>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning" th:unless="${deliveryPolicy != null}">
+                            배송비 정책 정보를 불러오지 못했습니다.
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. 포장 정책 설정 -->
+                <div class="content-box">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-primary policy-card-title mb-0"><i class="fas fa-gift mr-2"></i>포장 정책</h4>
+                        <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addPackagingModal">
+                            <i class="fas fa-plus"></i> 포장지 추가
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover text-center">
+                            <thead>
+                            <tr>
+                                <th style="width: 10%;">ID</th>
+                                <th style="width: 40%;">포장지 종류</th>
+                                <th style="width: 30%;">가격</th>
+                                <th style="width: 20%;">관리</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="packaging : ${packagingList}">
+                                <td th:text="${packaging.packagingId}">1</td>
+                                <td class="text-left pl-4 font-weight-bold" th:text="${packaging.packagingType}">일반 포장</td>
+                                <td th:text="${#numbers.formatInteger(packaging.packagingPrice, 0, 'COMMA')} + '원'">0원</td>
+                                <td>
+                                    <button class="btn btn-outline-info btn-sm mr-1" 
+                                            th:onclick="openEditPackagingModal([[${packaging.packagingId}]], [[${packaging.packagingType}]], [[${packaging.packagingPrice}]])">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form th:action="@{/admin/policies/packaging/{id}/delete(id=${packaging.packagingId})}" method="post" class="d-inline"
+                                          onsubmit="return confirm('이 포장지를 삭제하시겠습니까?');">
+                                        <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(packagingList)}">
+                                <td colspan="4" class="text-muted py-4">등록된 포장지가 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. 포인트 정책 (Dummy for now) -->
+                <div class="content-box">
+                    <h4 class="text-primary policy-card-title"><i class="fas fa-coins mr-2"></i>포인트 적립 정책</h4>
+                    <div class="alert alert-secondary">
+                        <i class="fas fa-info-circle mr-2"></i>현재 포인트 정책은 준비 중입니다.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Packaging Modal -->
+    <div class="modal fade" id="addPackagingModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">새 포장지 추가</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form th:action="@{/admin/policies/packaging}" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>포장지 이름</label>
+                            <input type="text" name="packagingType" class="form-control" placeholder="예: 크리스마스 선물 포장" required>
+                        </div>
+                        <div class="form-group">
+                            <label>가격 (원)</label>
+                            <input type="number" name="packagingPrice" class="form-control" placeholder="0" required min="0" step="100">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">추가하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Packaging Modal -->
+    <div class="modal fade" id="editPackagingModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">포장지 수정</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form id="editPackagingForm" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>포장지 이름</label>
+                            <input type="text" id="editPackagingType" class="form-control" readonly style="background-color: #e9ecef;">
+                            <small class="text-muted">포장지 이름은 수정할 수 없습니다.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>가격 (원)</label>
+                            <input type="number" id="editPackagingPrice" name="packagingPrice" class="form-control" required min="0" step="100">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">수정 완료</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        function openEditPackagingModal(id, type, price) {
+            document.getElementById('editPackagingType').value = type;
+            document.getElementById('editPackagingPrice').value = price;
+            
+            // Set form action URL dynamically
+            // Note: Using Thymeleaf syntax for base URL is tricky in JS, constructing manually or using data attributes is better.
+            // Here we assume context path is root or handled by browser. 
+            // Better to use a placeholder in form action or replace it.
+            var form = document.getElementById('editPackagingForm');
+            form.action = '/admin/policies/packaging/' + id + '/update';
+            
+            $('#editPackagingModal').modal('show');
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

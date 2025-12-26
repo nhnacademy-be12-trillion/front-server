@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+    <meta charset="utf-8">
+    <title>Trillion-Shop | 관리자 - 회원 관리</title>
+    <th:block layout:fragment="head">
+        <style>
+            body { background-color: #f5f5f5; }
+            .admin-container { padding-top: 50px; padding-bottom: 50px; }
+            .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        </style>
+    </th:block>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <div class="container-fluid admin-container">
+        <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
+
+        <div class="row px-xl-5">
+            <!-- Sidebar Fragment -->
+            <th:block th:replace="~{admin/fragments/sidebar :: sidebar('members')}"></th:block>
+
+            <div class="col-lg-9 col-md-8">
+                <div class="content-box">
+                    <h4 class="mb-4 text-primary">회원 관리</h4>
+                    <div class="alert alert-info">
+                        회원 관리 페이지입니다.
+                        <br>
+                        기존 코드가 유지되는 영역입니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

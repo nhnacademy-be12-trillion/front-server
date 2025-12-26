@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="sidebar(activeMenu)" class="col-lg-3 col-md-4 mb-4">
+    <h5 class="section-title position-relative text-uppercase mb-4">
+        <span class="bg-secondary pr-3">관리 메뉴</span>
+    </h5>
+    <div class="nav flex-column nav-pills" id="admin-tab" role="tablist" aria-orientation="vertical">
+        <a class="nav-link" th:classappend="${activeMenu == 'orders'} ? 'active' : ''" th:href="@{/admin/orders}">
+            <i class="fas fa-shopping-bag mr-2"></i>주문 관리
+        </a>
+        <a class="nav-link" th:classappend="${activeMenu == 'policies'} ? 'active' : ''" th:href="@{/admin/policies}">
+            <i class="fas fa-cog mr-2"></i>정책 설정
+        </a>
+        <a class="nav-link" th:classappend="${activeMenu == 'members'} ? 'active' : ''" th:href="@{/admin/members}">
+            <i class="fas fa-users mr-2"></i>회원 관리
+        </a>
+        <a class="nav-link" th:classappend="${activeMenu == 'books'} ? 'active' : ''" th:href="@{/admin/books}">
+            <i class="fas fa-book mr-2"></i>도서 등록
+        </a>
+    </div>
+</div>
+</html>
