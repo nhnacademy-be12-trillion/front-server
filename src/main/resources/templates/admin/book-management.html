@@ -11,16 +11,10 @@
     <style>
       body { background-color: #f5f5f5; }
       .admin-container { padding-top: 50px; padding-bottom: 50px; }
-      .nav-pills .nav-link { border-radius: 0.25rem; margin-bottom: 5px; background-color: #e9ecef; color: #3D464D; transition: 0.3s; }
-      .nav-pills .nav-link.active, .nav-pills .nav-link:hover { background-color: #FFD333; color: #3D464D; font-weight: bold; }
       .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-      .table thead th { border-top: none; background-color: #f8f9fa; color: #333; font-weight: 600; }
-      .table td { vertical-align: middle; }
-      .badge-status-waiting { background-color: #ffc107; color: #212529; }
-      .badge-status-completed { background-color: #28a745; color: #fff; }
-      .badge-status-canceled { background-color: #dc3545; color: #fff; }
-      .badge-status-shipping { background-color: #17a2b8; color: #fff; }
-      .badge-status-returned { background-color: #6c757d; color: #fff; }
+      /* 도서 관리 전용 추가 스타일 (등록 페이지와 통일) */
+      .book-card { border: 1px solid #eee; padding: 20px; border-radius: 8px; background-color: #fafafa; }
+      .book-img { max-width: 150px; height: auto; border: 1px solid #ddd; object-fit: cover; }
     </style>
   </th:block>
 </head>
@@ -56,7 +50,8 @@
           <div id="manageBookResult" style="display:none;" class="book-card">
             <div class="row">
               <div class="col-md-3 text-center">
-                <img id="manageBookImg" src="" class="book-img mb-2" alt="Book Image">
+                <img id="manageBookImg" src="" class="book-img mb-2" alt="Book Image"
+                     onerror="this.onerror=null; this.src='https://dummyimage.com/150x200/ced4da/6c757d.jpg&text=No+Image';">
                 <div class="small text-muted" id="manageBookIsbn">ISBN</div>
               </div>
               <div class="col-md-9">
@@ -185,8 +180,15 @@
                   $('#manageRegularPrice').text(new Intl.NumberFormat().format(data.bookRegularPrice) + "원");
                   $('#manageSalePrice').text(new Intl.NumberFormat().format(data.bookSalePrice) + "원");
 
+                  // [중요 수정] 이미지 URL에 '/trillion-bucket/' 접두사 추가
                   if(data.bookImageList && data.bookImageList.length > 0) {
-                    $('#manageBookImg').attr('src', data.bookImageList[0].fileUrl);
+                    const imgPath = data.bookImageList[0].fileUrl;
+                    // 경로가 http로 시작하지 않으면 bucket 경로 추가
+                    if (imgPath && !imgPath.startsWith('http')) {
+                      $('#manageBookImg').attr('src', '/trillion-bucket/' + imgPath);
+                    } else {
+                      $('#manageBookImg').attr('src', imgPath);
+                    }
                   } else {
                     $('#manageBookImg').attr('src', '/img/no-image.png');
                   }
