@@ -12,7 +12,7 @@
       body { background-color: #f5f5f5; }
       .admin-container { padding-top: 50px; padding-bottom: 50px; }
       .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-      /* 도서 관리 전용 추가 스타일 (등록 페이지와 통일) */
+      /* 도서 관리 전용 추가 스타일 */
       .book-card { border: 1px solid #eee; padding: 20px; border-radius: 8px; background-color: #fafafa; }
       .book-img { max-width: 150px; height: auto; border: 1px solid #ddd; object-fit: cover; }
     </style>
@@ -159,6 +159,10 @@
   <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
 
+      // [타임리프 문법 적용] 서버 컨텍스트 경로를 포함한 이미지 기본 경로 생성
+      // 이 코드는 '/trillion-bucket/' 경로를 안전하게 생성합니다.
+      const bucketBaseUrl = [[@{/trillion-bucket/}]];
+
       // 1. 도서 조회 (Book ID로)
       $('#btn-find-book').on('click', function() {
         const bookId = $('#manageBookIdInput').val().trim();
@@ -180,17 +184,24 @@
                   $('#manageRegularPrice').text(new Intl.NumberFormat().format(data.bookRegularPrice) + "원");
                   $('#manageSalePrice').text(new Intl.NumberFormat().format(data.bookSalePrice) + "원");
 
-                  // [핵심 수정] 무조건 /trillion-bucket/ 경로 사용
-                  if(data.bookImageList && data.bookImageList.length > 0) {
-                    const imgPath = data.bookImageList[0].fileUrl;
-                    // 값이 있으면 무조건 bucket 경로를 붙임
-                    $('#manageBookImg').attr('src', '/trillion-bucket/' + imgPath);
-                  } else {
-                    // 이미지가 없으면 기본 이미지
-                    $('#manageBookImg').attr('src', '/img/no-image.png');
+                  // [이미지 경로 처리]
+                  // DB에 저장된 파일명을 가져옵니다.
+                  let imgFileName = null;
+                  if (data.bookImage) {
+                    imgFileName = data.bookImage;
+                  } else if (data.bookImageList && data.bookImageList.length > 0) {
+                    imgFileName = data.bookImageList[0].fileUrl;
                   }
 
-                  // 데이터 저장 (수정/삭제용)
+                  if (imgFileName) {
+                    // [핵심] 파일명 앞에 bucketBaseUrl(/trillion-bucket/)을 붙여서 경로 완성
+                    // book-detail.html과 동일한 방식으로 동작하게 됩니다.
+                    $('#manageBookImg').attr('src', bucketBaseUrl + imgFileName);
+                  } else {
+                    $('#manageBookImg').attr('src', 'https://dummyimage.com/150x200/ced4da/6c757d.jpg&text=No+Image');
+                  }
+
+                  // 데이터 저장
                   $('#manageBookResult').data('book', data);
                 })
                 .catch(err => {
@@ -215,7 +226,7 @@
         $('#editBookIndex').val(bookData.bookIndex);
         $('#editBookStock').val(bookData.bookStock);
 
-        // 할인율 계산 (역산)
+        // 할인율 계산
         let calculatedDiscount = 0;
         if(bookData.bookRegularPrice > 0 && bookData.bookSalePrice < bookData.bookRegularPrice) {
           calculatedDiscount = ((bookData.bookRegularPrice - bookData.bookSalePrice) / bookData.bookRegularPrice) * 100;
@@ -226,9 +237,12 @@
         $('#editBookState').val(bookData.bookState);
         $('#editBookPackaging').val(bookData.bookPackaging ? "true" : "false");
 
-        if(bookData.bookImageList && bookData.bookImageList.length > 0) {
-          $('#editBookImage').val(bookData.bookImageList[0].fileUrl);
+        // 이미지 정보 유지
+        let currentImage = bookData.bookImage;
+        if (!currentImage && bookData.bookImageList && bookData.bookImageList.length > 0) {
+          currentImage = bookData.bookImageList[0].fileUrl;
         }
+        $('#editBookImage').val(currentImage);
 
         $('#bookUpdateModal').modal('show');
       };
@@ -261,15 +275,20 @@
           calculatedDiscount = ((bookData.bookRegularPrice - bookData.bookSalePrice) / bookData.bookRegularPrice) * 100;
         }
 
+        let currentImage = bookData.bookImage;
+        if (!currentImage && bookData.bookImageList && bookData.bookImageList.length > 0) {
+          currentImage = bookData.bookImageList[0].fileUrl;
+        }
+
         const requestData = {
           bookName: bookData.bookName,
           bookDescription: bookData.bookDescription,
           bookIndex: bookData.bookIndex,
           bookStock: bookData.bookStock,
           discountRate: calculatedDiscount,
-          bookState: 'SALE_END', // [핵심] 상태 강제 변경
+          bookState: 'SALE_END', // 상태 강제 변경
           bookPackaging: bookData.bookPackaging,
-          bookImage: (bookData.bookImageList && bookData.bookImageList.length > 0) ? bookData.bookImageList[0].fileUrl : ''
+          bookImage: currentImage
         };
         updateBookRequest(bookData.bookId, requestData, "판매 종료(SALE_END) 처리되었습니다.");
       };
