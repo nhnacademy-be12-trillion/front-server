@@ -18,7 +18,7 @@ public class DormantController {
     @GetMapping
     public String dormantPage(Model model) {
         model.addAttribute("step", "request");
-        return "/dormant";
+        return "dormant";
     }
 
     // 이메일 + 두레이 훅 URL 입력 -> 인증번호 발송 요청
@@ -31,11 +31,11 @@ public class DormantController {
             model.addAttribute("message", "입력하신 두레이 훅으로 인증번호가 발송되었습니다.");
             model.addAttribute("memberEmail", memberEmail);
             model.addAttribute("step", "verify"); // 뷰에서 화면 전환용
-            return "/dormant";
+            return "dormant";
         } catch (Exception e) {
             model.addAttribute("error", "발송 실패. 이메일과 훅 URL을 확인해주세요: " + e.getMessage());
             model.addAttribute("step", "request");
-            return "/dormant";
+            return "dormant";
         }
     }
 
@@ -51,7 +51,7 @@ public class DormantController {
             model.addAttribute("error", "인증번호가 일치하지 않습니다.");
             model.addAttribute("step", "verify");
             model.addAttribute("memberEmail", memberEmail);
-            return "/dormant";
+            return "dormant";
         }
     }
 }
