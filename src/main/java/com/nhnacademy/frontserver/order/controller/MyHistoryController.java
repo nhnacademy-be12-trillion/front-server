@@ -49,6 +49,14 @@ public class MyHistoryController {
             model.addAttribute("refundedItems", null);
         }
 
+        // 3. 배송비 정책 조회 (단순 변심 반품 배송비 계산용)
+        try {
+            model.addAttribute("deliveryPolicy", orderClient.getDeliveryPolicy());
+        } catch (Exception e) {
+            log.error("배송비 정책 조회 실패", e);
+            model.addAttribute("deliveryPolicy", null);
+        }
+
         model.addAttribute("activeTab", "history");
         return "my/my-history";
     }

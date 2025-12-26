@@ -90,16 +90,13 @@
                                         <!-- 공통 상태 이름 출력 -->
                                         <span class="d-block font-weight-bold mb-2" th:text="${item.orderItemStatus.title}">상태</span>
 
-                                        <!-- 버튼이 필요한 특수 상태들 -->
-                                        <div th:if="${item.orderItemStatus.name() == 'SHIPPED'}">
-                                            <button class="btn btn-sm btn-info w-100">배송 조회</button>
-                                        </div>
-
                                         <div th:if="${item.orderItemStatus.name() == 'DELIVERED'}">
-                                            <form th:action="@{/orders/{orderId}/items/{itemId}/confirm(orderId=${order.orderId}, itemId=${item.orderItemId})}"
-                                                  method="post" class="mb-1">
-                                                <button type="submit" class="btn btn-sm btn-primary w-100">구매 확정</button>
-                                            </form>
+                                            <!-- 구매 확정 버튼: 모달 트리거로 변경 -->
+                                            <button type="button" class="btn btn-sm btn-primary w-100 mb-1"
+                                                    th:onclick="openConfirmModal([[${order.orderId}]], [[${item.orderItemId}]], [[${item.bookName}]])">
+                                                구매 확정
+                                            </button>
+                                            
                                             <button class="btn btn-sm btn-outline-danger w-100"
                                                     th:onclick="openReturnModal([[${order.orderId}]], [[${item.orderItemId}]], false)">
                                                 반품하기
@@ -288,29 +285,81 @@
     <!-- 반품 사유 선택 모달 -->
     <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="returnModalLabel">반품 사유 선택</h5>
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title font-weight-bold" id="returnModalLabel">
+                        <i class="fas fa-undo mr-2 text-danger"></i>반품 신청
+                    </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <form id="returnForm" method="post">
-                    <div class="modal-body">
-                        <p>반품 사유를 선택해주세요.</p>
-                        <!-- 비회원용 필드 (동적으로 추가/제거 또는 hidden으로 유지) -->
+                    <div class="modal-body p-4">
+                        <!-- 정책 안내 영역 -->
+                        <div class="alert alert-info small mb-4" th:if="${isMember}">
+                            <i class="fas fa-info-circle mr-1"></i> <strong>알림:</strong> 회원의 경우 반품 완료 시 환불 금액은 <strong>Trillion 포인트</strong>로 적립됩니다.
+                        </div>
+
+                        <p class="font-weight-bold mb-2">반품 사유를 선택해주세요.</p>
+                        
+                        <!-- 비회원용 필드 -->
                         <div id="nonMemberFields"></div>
 
-                        <div class="form-group">
-                            <select class="form-control" name="reason" required>
+                        <div class="form-group mb-4">
+                            <select class="form-control form-control-lg" name="reason" id="returnReasonSelect" required onchange="updatePolicyInfo()">
                                 <option value="CHANGE_OF_MIND">단순 변심</option>
-                                <option value="DAMAGED">상품 파손</option>
+                                <option value="DAMAGED">상품 파손 / 오배송</option>
                             </select>
                         </div>
+
+                        <!-- 사유별 상세 정책 안내 -->
+                        <div id="policyInfoBox" class="p-3 bg-light rounded border">
+                            <div id="policy-CHANGE_OF_MIND">
+                                <h6 class="font-weight-bold text-dark mb-1"><i class="fas fa-user-tag mr-2"></i>단순 변심</h6>
+                                <p class="text-muted small mb-0">반품 배송비는 <strong>구매자 부담</strong>입니다.<br>승인 시점에 배송비만큼 차감된 포인트가 적립됩니다.</p>
+                            </div>
+                            <div id="policy-DAMAGED" style="display: none;">
+                                <h6 class="font-weight-bold text-success mb-1"><i class="fas fa-check-circle mr-2"></i>상품 파손 / 오배송</h6>
+                                <p class="text-muted small mb-0">반품 배송비는 <strong>판매자 부담</strong>입니다.<br>결제하신 금액 전액이 포인트로 적립됩니다.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-                        <button type="submit" class="btn btn-danger">반품 신청</button>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-danger px-4 font-weight-bold">반품 신청하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 구매 확정 확인 모달 -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bold" id="confirmModalLabel">
+                        <i class="fas fa-check-double mr-2"></i>구매 확정
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="confirmForm" method="post">
+                    <div class="modal-body p-4 text-center">
+                        <i class="fas fa-coins fa-3x text-warning mb-3"></i>
+                        <h5 class="font-weight-bold mb-3">정말 구매 확정을 하시겠습니까?</h5>
+                        <p class="text-dark mb-1"><strong id="confirmBookName">상품명</strong></p>
+                        <hr>
+                        <div class="text-left bg-light p-3 rounded">
+                            <p class="small mb-1"><i class="fas fa-info-circle text-primary mr-2"></i>구매 확정 시 <strong>회원 등급에 따른 포인트</strong>가 즉시 적립됩니다.</p>
+                            <p class="small mb-0 text-danger"><i class="fas fa-exclamation-triangle mr-2"></i>구매 확정 이후에는 <strong>반품 및 교환이 불가능</strong>하므로 상품을 확인하신 후 진행해 주세요.</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary px-4 font-weight-bold">확정하기</button>
                     </div>
                 </form>
             </div>
@@ -321,10 +370,27 @@
 
 <th:block layout:fragment="script">
     <script>
+        function openConfirmModal(orderId, itemId, bookName) {
+            var form = document.getElementById('confirmForm');
+            document.getElementById('confirmBookName').innerText = bookName;
+            form.action = '/orders/' + orderId + '/items/' + itemId + '/confirm';
+            $('#confirmModal').modal('show');
+        }
+
+        function updatePolicyInfo() {
+            var reason = document.getElementById('returnReasonSelect').value;
+            document.getElementById('policy-CHANGE_OF_MIND').style.display = (reason === 'CHANGE_OF_MIND' ? 'block' : 'none');
+            document.getElementById('policy-DAMAGED').style.display = (reason === 'DAMAGED' ? 'block' : 'none');
+        }
+
         function openReturnModal(orderId, itemId, isNonMember, orderNumber, password) {
             var form = document.getElementById('returnForm');
             var nonMemberDiv = document.getElementById('nonMemberFields');
             nonMemberDiv.innerHTML = ''; // 초기화
+            
+            // 초기 정책 정보 설정
+            document.getElementById('returnReasonSelect').value = 'CHANGE_OF_MIND';
+            updatePolicyInfo();
 
             if (isNonMember) {
                 // 비회원 경로

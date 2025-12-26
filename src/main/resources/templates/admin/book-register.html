@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+    <meta charset="utf-8">
+    <title>Trillion-Shop | 관리자 - 도서 등록</title>
+    <th:block layout:fragment="head">
+        <style>
+            body { background-color: #f5f5f5; }
+            .admin-container { padding-top: 50px; padding-bottom: 50px; }
+            .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        </style>
+    </th:block>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <div class="container-fluid admin-container">
+        <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
+
+        <div class="row px-xl-5">
+            <!-- Sidebar Fragment -->
+            <th:block th:replace="~{admin/fragments/sidebar :: sidebar('books')}"></th:block>
+
+            <div class="col-lg-9 col-md-8">
+                <div class="content-box">
+                    <h4 class="mb-4 text-primary">신규 도서 등록 (AI 지원)</h4>
+                    <div class="policy-group">
+                        <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data">
+
+                            <input type="hidden" name="bookState" value="ON_SALE">
+                            <input type="hidden" name="isPackaging" value="true">
+
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">ISBN</label>
+                                <div class="col-sm-9">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="isbnInput" name="bookIsbn" placeholder="ISBN 13자리를 입력하세요" required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-info" type="button" id="btn-ai-search">
+                                                <i class="fas fa-magic"></i> AI 검색
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">ISBN 입력 후 검색 버튼을 누르면 알라딘과 AI가 정보를 채워줍니다.</small>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">도서명</label>
+                                <div class="col-sm-9"><input type="text" class="form-control" name="bookName" required></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">저자</label>
+                                <div class="col-sm-9"><input type="text" class="form-control" name="bookAuthor" required></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">출판사</label>
+                                <div class="col-sm-9"><input type="text" class="form-control" name="bookPublisher" required></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">출판일</label>
+                                <div class="col-sm-9"><input type="date" class="form-control" name="bookDate" required></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">정가 (원)</label>
+                                <div class="col-sm-9"><input type="number" class="form-control" name="bookRegularPrice" required></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">판매가 (원)</label>
+                                <div class="col-sm-9"><input type="number" class="form-control" name="bookSalePrice" required></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">재고 수량</label>
+                                <div class="col-sm-9"><input type="number" class="form-control" name="bookStock" required></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">카테고리</label>
+                                <div class="col-sm-9">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="categoryId" id="categoryIdInput" placeholder="ID" required readonly style="max-width: 100px;">
+                                        <input type="text" class="form-control" id="categoryNameDisplay" placeholder="검색하여 선택" readonly style="background-color: #fff;">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-secondary" type="button" data-toggle="modal" data-target="#categorySearchModal">
+                                                <i class="fas fa-search"></i> 검색
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">도서 설명 (AI)</label>
+                                <div class="col-sm-9"><textarea class="form-control" name="bookDescription" rows="8"></textarea></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">목차 (AI)</label>
+                                <div class="col-sm-9"><textarea class="form-control" name="bookIndex" rows="5"></textarea></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">태그</label>
+                                <div class="col-sm-9"><input type="text" class="form-control" name="tags" placeholder="태그1, 태그2"></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">도서 이미지</label>
+                                <div class="col-sm-9">
+                                    <input type="hidden" name="bookImage" id="hiddenBookImageUrl">
+                                    <input type="file" class="form-control-file mb-2" name="bookImageFile" onchange="previewFile(this)">
+                                    <div id="imagePreviewContainer" style="display: none;">
+                                        <p class="text-muted small mb-1">미리보기:</p>
+                                        <img id="imagePreview" src="" alt="미리보기" style="max-height: 200px; border: 1px solid #ddd; padding: 5px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-primary">도서 등록</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Search Modal -->
+    <div class="modal fade" id="categorySearchModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">카테고리 검색</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="categoryKeyword" placeholder="검색어 (예: 소설)">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" id="btn-search-category">찾기</button>
+                        </div>
+                    </div>
+                    <div class="list-group" id="categoryResultList" style="max-height: 300px; overflow-y: auto;">
+                        <a href="#" class="list-group-item list-group-item-action text-center text-muted">검색어를 입력하세요.</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // [중요 수정] AI 검색 중복 요청 방지 로직 적용
+            let isSearching = false;
+
+            $('#btn-ai-search').off('click').on('click', function () {
+                if (isSearching) return; // 이미 검색 중이면 무시
+
+                const isbn = $('#isbnInput').val().trim();
+                if (!isbn) { alert("ISBN 입력"); return; }
+
+                isSearching = true; // 검색 시작 플래그 ON
+                const $btn = $(this);
+                const orgText = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 검색 중...');
+
+                fetch([[@{/admin/books/isbn/}]] + isbn)
+                    .then(async res => {
+                        if (res.ok) return res.json();
+                        if (res.status === 429) throw new Error("AI 요청 한도 초과: 잠시 후(약 1분 뒤) 다시 시도해주세요.");
+                        throw new Error("검색 결과가 없거나 서버 응답이 없습니다.");
+                    })
+                    .then(data => {
+                        $('input[name="bookName"]').val(data.bookName);
+                        $('input[name="bookAuthor"]').val(data.bookAuthor);
+                        $('input[name="bookPublisher"]').val(data.bookPublisher);
+                        $('input[name="bookDate"]').val(data.bookPublicationDate);
+                        $('input[name="bookRegularPrice"]').val(data.bookRegularPrice);
+                        $('input[name="bookSalePrice"]').val(data.bookSalePrice);
+                        $('textarea[name="bookDescription"]').val(data.bookDescription);
+                        $('textarea[name="bookIndex"]').val(data.bookIndex);
+                        $('input[name="tags"]').val(data.tags);
+
+                        if (typeof data.isPackaging !== 'undefined') {
+                            $('input[name="isPackaging"]').val(data.isPackaging);
+                        } else {
+                            $('input[name="isPackaging"]').val('true');
+                        }
+
+                        if (data.categoryIdList && data.categoryIdList.length > 0) {
+                            $('#categoryIdInput').val(data.categoryIdList[0]);
+                            $('#categoryNameDisplay').val("추천 ID: " + data.categoryIdList[0]);
+                        }
+                        if (data.bookImage) {
+                            $('#hiddenBookImageUrl').val(data.bookImage);
+                            $('#imagePreview').attr('src', data.bookImage);
+                            $('#imagePreviewContainer').show();
+                        }
+                        alert("성공적으로 불러왔습니다.");
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert("오류 발생: " + err.message);
+                    })
+                    .finally(() => {
+                        isSearching = false; // 검색 종료 플래그 OFF
+                        $btn.prop('disabled', false).html(orgText);
+                    });
+            });
+
+            // [도서 등록] 카테고리 검색
+            $('#btn-search-category').off('click').on('click', function() {
+                const keyword = $('#categoryKeyword').val().trim();
+                if (!keyword) { alert("검색어 입력"); return; }
+                const $list = $('#categoryResultList');
+                $list.html('검색중...');
+
+                fetch([[@{/admin/categories/search}]] + '?keyword=' + encodeURIComponent(keyword))
+                    .then(res => res.json())
+                    .then(data => {
+                        $list.empty();
+                        if (!data || data.length === 0) {
+                            $list.html('결과 없음'); return;
+                        }
+                        data.forEach(cat => {
+                            const item = $(`<a href="#" class="list-group-item list-group-item-action">${cat.categoryName} <small>(ID: ${cat.categoryId})</small></a>`);
+                            item.on('click', function(e) {
+                                e.preventDefault();
+                                $('#categoryIdInput').val(cat.categoryId);
+                                $('#categoryNameDisplay').val(cat.categoryName);
+                                $('#categorySearchModal').modal('hide');
+                            });
+                            $list.append(item);
+                        });
+                    })
+                    .catch(() => $list.html('오류 발생'));
+            });
+
+            $('#categoryKeyword').on('keypress', function(e) {
+                if (e.which == 13) $('#btn-search-category').click();
+            });
+
+            window.previewFile = function(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#imagePreview').attr('src', e.target.result);
+                        $('#imagePreviewContainer').show();
+                        $('#hiddenBookImageUrl').val('');
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            };
+        });
+    </script>
+</th:block>
+
+</body>
+</html>
