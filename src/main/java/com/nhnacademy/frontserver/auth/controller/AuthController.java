@@ -12,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
@@ -33,7 +30,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(
-            @RequestHeader(name="X-Guest-Id", required = false) String guestId,
+            @CookieValue(name = "guestId", required = false) String guestId,
             @ModelAttribute LoginRequest loginRequest,
                         HttpServletResponse response) {
         try {
@@ -48,18 +45,13 @@ public class AuthController {
 
             if (guestId != null && !guestId.isBlank()) {
                 try {
-                    // 토큰 헤더 생성 (Bearer 포함)
+                    // 토큰 헤더 생성
                     String authHeader = tokens.getAccessToken();
 
                     // 게이트웨이로 병합 요청 전송 (토큰 + 게스트ID 직접 주입)
                     cartClient.mergeCart(authHeader, guestId);
 
                     log.info("로그인 병합 성공 - GuestId: {}", guestId);
-
-                    // 병합 성공 후 게스트 쿠키 삭제 가능
-                    //ResponseCookie deleteGuest = CookieUtils.deleteCookie("guestId");
-                    //response.addHeader(HttpHeaders.SET_COOKIE, deleteGuest.toString());
-
                 } catch (Exception e) {
                     // 로그인 자체는 성공했으므로, 장바구니 병합 실패가 로그인을 막으면 안 될 듯
                     log.error("장바구니 병합 실패 (로그인은 정상 처리됨): {}", e.getMessage());
