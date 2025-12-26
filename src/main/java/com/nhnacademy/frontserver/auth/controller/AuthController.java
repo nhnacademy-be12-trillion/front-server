@@ -43,21 +43,7 @@ public class AuthController {
             response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-            if (guestId != null && !guestId.isBlank()) {
-                try {
-                    // 토큰 헤더 생성
-                    String authHeader = tokens.getAccessToken();
-
-                    // 게이트웨이로 병합 요청 전송 (토큰 + 게스트ID 직접 주입)
-                    cartClient.mergeCart(authHeader, guestId);
-
-                    log.info("로그인 병합 성공 - GuestId: {}", guestId);
-                } catch (Exception e) {
-                    // 로그인 자체는 성공했으므로, 장바구니 병합 실패가 로그인을 막으면 안 될 듯
-                    log.error("장바구니 병합 실패 (로그인은 정상 처리됨): {}", e.getMessage());
-                }
-            }
-            return "redirect:/";
+            return "redirect:/carts/merge";
         }catch (FeignException.Forbidden e){
             String responseBody = e.contentUTF8();
             if (responseBody.contains("DORMANT")) {

@@ -130,4 +130,13 @@ public class CartWebController {
         cartClient.clearCart();
         return "redirect:/carts";
     }
+
+    /**
+     * [동작] 회원/비회원 장바구니 병합
+     */
+    @GetMapping("/merge")
+    public String mergeCart() {
+        cartClient.mergeCart();
+        return "redirect:/";
+    }
 }
