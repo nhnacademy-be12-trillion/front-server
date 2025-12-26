@@ -107,7 +107,7 @@
         <span class="text-muted bg-light px-2" style="position: relative; top: -13px;">SNS 계정으로 간편 로그인</span>
       </div>
 
-      <a th:href="@{${@environment.getProperty('gateway.url')} + '/api/oauth2/authorization/google'}" class="btn social-btn google-btn">
+      <a href="/api/oauth2/authorization/google" class="btn social-btn google-btn">
         <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" width="20">
         <span>Google로 로그인</span>
       </a>
