@@ -20,9 +20,7 @@ import java.util.stream.Collectors;
 public class OrderController {
 
     private final OrderClient orderClient;
-    private final PageArgumentResolver pageArgumentResolver;
 
-    // [기존 코드] 주문 생성
     @PostMapping
     public String createOrder(@ModelAttribute OrderCreateRequest request,
                               @RequestParam("address1") String address1,
@@ -39,7 +37,7 @@ public class OrderController {
         String fullAddress = address1 + " " + address2;
 
         OrderCreateRequest finalRequest = new OrderCreateRequest(
-                request.ordererName(), request.ordererContact(), request.deliveryDate(),
+                request.ordererName(), request.ordererContact(), request.ordererEmail(), request.deliveryDate(),
                 request.receiverName(), request.receiverContact(),
                 fullAddress,
                 request.receiverPostCode(), request.nonMemberPassword(), request.pointUsage(),

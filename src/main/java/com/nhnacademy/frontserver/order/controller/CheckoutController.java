@@ -5,7 +5,9 @@ import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.CartResponseDto;
+import com.nhnacademy.frontserver.member.AddressResponse;
 import com.nhnacademy.frontserver.member.MemberClient;
+import com.nhnacademy.frontserver.member.MemberResponse;
 import com.nhnacademy.frontserver.order.CheckoutItemView;
 import com.nhnacademy.frontserver.order.DeliveryPolicyResponse;
 import com.nhnacademy.frontserver.order.OrderCreateRequest;
@@ -45,6 +47,7 @@ public class CheckoutController {
 
         List<CheckoutItemView> items = new ArrayList<>();
 
+        // ... (Item processing logic remains same) ...
         // 1) 즉시 결제 흐름: bookId + quantity 가 넘어온 경우
         if (bookId != null && quantity != null) {
             BookDetailResponse book = bookClient.getBookDetail(bookId);
@@ -100,18 +103,48 @@ public class CheckoutController {
         int totalPrice = subTotal + shippingFee;
         OrderSummary orderSummary = new OrderSummary(subTotal, shippingFee, totalPrice);
 
-        // 2. isMember 플래그 확인
-        boolean isMember = false;
-        try {
-            if (memberClient.getMember() != null) {
-                isMember = true;
-            }
-        } catch (Exception e) {
-            isMember = false;
-        }
+        // 2. 회원 정보 확인 (GlobalControllerAdvice에서 주입된 member 활용)
+        MemberResponse member = (MemberResponse) model.getAttribute("member");
+        boolean isMember = (member != null);
+        
+        OrderCreateRequest orderCreateRequest;
+        List<AddressResponse> addresses = Collections.emptyList();
+        AddressResponse defaultAddress = null;
 
-        // 3. 배송 정보 폼은 항상 비어있는 OrderCreateRequest 로 준비
-        OrderCreateRequest orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, 0, null, null);
+        if (isMember) {
+            try {
+                addresses = memberClient.getAllAddresses();
+                if (!addresses.isEmpty()) {
+                    defaultAddress = addresses.get(0); // 첫 번째 주소를 기본값으로 사용
+                }
+
+                String combinedAddress = null;
+                String postCode = null;
+                if (defaultAddress != null) {
+                    combinedAddress = defaultAddress.addressBase() + " " + defaultAddress.addressDetail();
+                    postCode = defaultAddress.addressPostCode();
+                }
+
+                orderCreateRequest = new OrderCreateRequest(
+                        member.memberName(), member.memberContact(), member.memberEmail(), // 주문자 + 이메일
+                        null, // deliveryDate
+                        member.memberName(), member.memberContact(), // 수령인 (기본값)
+                        combinedAddress,
+                        postCode,
+                        null, // nonMemberPassword
+                        0, // pointUsage
+                        null, // couponId
+                        null  // orderItems
+                );
+            } catch (Exception e) {
+                log.error("회원 추가 정보(주소 등) 조회 실패", e);
+                // 실패 시 기본 빈 객체
+                orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, null, 0, null, null);
+            }
+        } else {
+            // 비회원
+            orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, null, 0, null, null);
+        }
 
         // 4. 포장 정보 조회
         List<PackagingResponse> packagings = Collections.emptyList();
@@ -128,9 +161,13 @@ public class CheckoutController {
         model.addAttribute("items", items);
         model.addAttribute("orderSummary", orderSummary);
         model.addAttribute("orderCreateRequest", orderCreateRequest);
-        model.addAttribute("isMember", isMember);
+        model.addAttribute("isMember", isMember); // Model에 이미 있지만 명시적으로 유지
+        model.addAttribute("addresses", addresses);
+        if (defaultAddress != null) {
+            model.addAttribute("defaultAddress", defaultAddress);
+        }
         model.addAttribute("packagings", packagings);
-        model.addAttribute("deliveryPolicy", policy); // 배송 정책 정보를 모델에 추가
+        model.addAttribute("deliveryPolicy", policy);
         session.setAttribute("checkoutItems", items);
 
         return "checkout";

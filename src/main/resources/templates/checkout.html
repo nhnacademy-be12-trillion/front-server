@@ -38,6 +38,10 @@
                                 <label>주문자 연락처</label>
                                 <input class="form-control" type="text" th:field="*{ordererContact}" placeholder="010-0000-0000" required>
                             </div>
+                            <div class="col-md-12 form-group">
+                                <label>주문자 이메일</label>
+                                <input class="form-control" type="email" th:field="*{ordererEmail}" placeholder="example@email.com" required>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -51,21 +55,41 @@
                             </div>
                         </div>
 
+                        <!-- 배송지 선택 (회원인 경우) -->
+                        <div class="row" th:if="${addresses != null and !addresses.empty}">
+                            <div class="col-md-12 form-group">
+                                <label>배송지 선택</label>
+                                <select class="form-control" id="addressSelect" onchange="changeAddress(this)">
+                                    <option value="">새로 입력</option>
+                                    <option th:each="addr : ${addresses}"
+                                            th:value="${addr.addressId}"
+                                            th:data-postcode="${addr.addressPostCode}"
+                                            th:data-road="${addr.addressBase}"
+                                            th:data-detail="${addr.addressDetail}"
+                                            th:text="${addr.addressAlias != null ? addr.addressAlias : addr.addressBase} + ' (' + ${addr.addressDetail} + ')'"
+                                            th:selected="${defaultAddress != null and defaultAddress.addressId == addr.addressId}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-12 form-group">
                                 <label>우편번호</label>
                                 <div class="d-flex">
-                                    <input class="form-control" type="text" name="postcode" th:field="*{receiverPostCode}" id="postcode" placeholder="우편번호" readonly required>
+                                    <input class="form-control" type="text" name="postcode" th:field="*{receiverPostCode}" id="receiverPostCode" placeholder="우편번호" readonly required>
                                     <button type="button" class="btn btn-outline-primary ml-2" onclick="execDaumPostcode()">주소 검색</button>
                                 </div>
                             </div>
                             <div class="col-md-12 form-group">
                                 <label>주소</label>
-                                <input class="form-control" type="text" name="address1" id="roadAddress" placeholder="기본 주소" readonly required>
+                                <input class="form-control" type="text" name="address1" id="roadAddress" placeholder="기본 주소" readonly required
+                                       th:value="${defaultAddress != null ? defaultAddress.addressBase : ''}">
                             </div>
                             <div class="col-md-12 form-group">
                                 <label>상세주소</label>
-                                <input class="form-control" type="text" name="address2" id="detailAddress" placeholder="상세 주소를 입력해주세요" required>
+                                <input class="form-control" type="text" name="address2" id="detailAddress" placeholder="상세 주소를 입력해주세요" required
+                                       th:value="${defaultAddress != null ? defaultAddress.addressDetail : ''}">
                             </div>
                         </div>
 
@@ -153,6 +177,11 @@
                                 <h6 class="font-weight-medium">배송비</h6>
                                 <h6 id="summary-shipping" class="font-weight-medium" th:text="${orderSummary != null and orderSummary.shippingFee > 0 ? #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">0원</h6>
                             </div>
+                            <!-- 포인트 사용 표시 추가 -->
+                            <div class="d-flex justify-content-between mt-3" th:if="${isMember}">
+                                <h6 class="font-weight-medium">포인트 사용</h6>
+                                <h6 id="summary-point-usage" class="font-weight-medium text-danger">0원</h6>
+                            </div>
                         </div>
                         <div class="pt-2">
                             <div class="d-flex justify-content-between mt-2">
@@ -164,13 +193,25 @@
 
                     <div class="bg-light p-30 mb-5">
                         <div class="row" th:if="${isMember}">
-                            <div class="col-md-6 form-group">
-                                <label>사용 포인트</label>
-                                <input class="form-control" type="number" th:field="*{pointUsage}" min="0">
+                            <div class="col-md-12 form-group">
+                                <label>사용 포인트 <span id="point-display" class="text-muted small" th:if="${member != null}" th:text="| (보유: ${#numbers.formatInteger(member.memberPoint, 0, 'COMMA')}P)|"></span></label>
+                                <span id="available-point" th:if="${member != null}" th:data-point="${member.memberPoint}" style="display:none;"></span>
+                                <div class="input-group">
+                                    <input class="form-control" type="number" th:field="*{pointUsage}" id="pointUsage" min="0" placeholder="0" oninput="checkPointLimit(this)">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="button" onclick="useAllPoints()">전액 사용</button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-12 form-group">
                                 <label>쿠폰 ID</label>
-                                <input class="form-control" type="text" th:field="*{couponId}" placeholder="쿠폰 코드 입력">
+                                <div class="input-group">
+                                    <input class="form-control" type="text" th:field="*{couponId}" placeholder="쿠폰 코드 입력">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button" disabled>쿠폰 조회 불가</button>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">현재 쿠폰 목록 조회 기능이 점검 중입니다. 코드를 직접 입력해주세요.</small>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-block btn-primary font-weight-bold my-3 py-3">
@@ -185,6 +226,98 @@
 
 <th:block layout:fragment="script">
     <script>
+        // [자체 추가] 전역 유틸리티 함수
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // [자체 추가] 실시간 가격 업데이트 로직 (전역 함수로 분리)
+        function updateTotals() {
+            const summaryBox = document.getElementById('summary-box');
+            if (!summaryBox) return;
+
+            const policyFee = parseInt(summaryBox.dataset.policyFee, 10) || 3000;
+            const policyThreshold = parseInt(summaryBox.dataset.policyThreshold, 10) || 50000;
+
+            let subTotal = 0;
+            let totalPackagingFee = 0;
+            const itemRows = document.querySelectorAll('tbody tr');
+
+            itemRows.forEach(row => {
+                const price = parseInt(row.dataset.price, 10);
+                const quantityInput = row.querySelector('.quantity-input');
+                if (!quantityInput) return;
+                
+                const quantity = parseInt(quantityInput.value, 10);
+                const rowTotalCell = row.querySelector('.row-total');
+
+                if (!isNaN(price) && !isNaN(quantity)) {
+                    const rowTotal = price * quantity;
+                    if (rowTotalCell) rowTotalCell.textContent = formatNumber(rowTotal) + '원';
+                    subTotal += rowTotal;
+                }
+
+                const packagingSelect = row.querySelector('.packaging-select');
+                if (packagingSelect) {
+                    const selectedOption = packagingSelect.options[packagingSelect.selectedIndex];
+                    const packagingPrice = parseInt(selectedOption.dataset.price, 10);
+                    if (!isNaN(packagingPrice)) {
+                        totalPackagingFee += packagingPrice * quantity;
+                    }
+                }
+            });
+
+            const baseForShipping = subTotal + totalPackagingFee;
+            const shippingFee = (baseForShipping >= policyThreshold || baseForShipping === 0) ? 0 : policyFee;
+            
+            // 포인트 차감 전 순수 결제 금액
+            const totalBeforePoint = subTotal + totalPackagingFee + shippingFee;
+
+            // 포인트 사용액 계산 및 보정
+            const pointInput = document.getElementById('pointUsage');
+            let pointUsage = 0;
+            if (pointInput) {
+                pointUsage = parseInt(pointInput.value, 10) || 0;
+
+                const availableSpan = document.getElementById('available-point');
+                const availablePoint = availableSpan ? parseInt(availableSpan.dataset.point, 10) || 0 : 0;
+                
+                if (pointUsage > availablePoint) {
+                    pointUsage = availablePoint;
+                    pointInput.value = pointUsage;
+                }
+                
+                if (pointUsage > totalBeforePoint) {
+                    pointUsage = totalBeforePoint;
+                    pointInput.value = pointUsage;
+                }
+                
+                if (pointUsage < 0) {
+                    pointUsage = 0;
+                    pointInput.value = 0;
+                }
+            }
+
+            const total = totalBeforePoint - pointUsage;
+
+            const subTotalElem = document.getElementById('summary-subtotal');
+            if (subTotalElem) subTotalElem.textContent = formatNumber(subTotal) + '원';
+            
+            const packagingElem = document.getElementById('summary-packaging');
+            if (packagingElem) packagingElem.textContent = formatNumber(totalPackagingFee) + '원';
+            
+            const shippingElem = document.getElementById('summary-shipping');
+            if (shippingElem) shippingElem.textContent = shippingFee > 0 ? formatNumber(shippingFee) + '원' : '무료';
+            
+            const summaryPoint = document.getElementById('summary-point-usage');
+            if (summaryPoint) {
+                summaryPoint.textContent = '-' + formatNumber(pointUsage) + '원';
+            }
+
+            const totalElem = document.getElementById('summary-total');
+            if (totalElem) totalElem.textContent = formatNumber(total) + '원';
+        }
+
         // [통합] 페이지 로드 시 및 동적 업데이트 로직
         document.addEventListener('DOMContentLoaded', function () {
             // [커밋 80312e22] 희망 배송일의 최소값을 '오늘'로 설정하는 로직
@@ -198,52 +331,6 @@
                 dateInput.setAttribute('min', minDate);
             }
 
-            // [자체 추가] 실시간 가격 업데이트 로직
-            const summaryBox = document.getElementById('summary-box');
-            const policyFee = parseInt(summaryBox.dataset.policyFee, 10);
-            const policyThreshold = parseInt(summaryBox.dataset.policyThreshold, 10);
-
-            function formatNumber(num) {
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            }
-
-            function updateTotals() {
-                let subTotal = 0;
-                let totalPackagingFee = 0;
-                const itemRows = document.querySelectorAll('tbody tr');
-
-                itemRows.forEach(row => {
-                    const price = parseInt(row.dataset.price, 10);
-                    const quantityInput = row.querySelector('.quantity-input');
-                    const quantity = parseInt(quantityInput.value, 10);
-                    const rowTotalCell = row.querySelector('.row-total');
-
-                    if (!isNaN(price) && !isNaN(quantity)) {
-                        const rowTotal = price * quantity;
-                        rowTotalCell.textContent = formatNumber(rowTotal) + '원';
-                        subTotal += rowTotal;
-                    }
-
-                    const packagingSelect = row.querySelector('.packaging-select');
-                    if (packagingSelect) {
-                        const selectedOption = packagingSelect.options[packagingSelect.selectedIndex];
-                        const packagingPrice = parseInt(selectedOption.dataset.price, 10);
-                        if (!isNaN(packagingPrice)) {
-                            totalPackagingFee += packagingPrice * quantity;
-                        }
-                    }
-                });
-
-                const baseForShipping = subTotal + totalPackagingFee;
-                const shippingFee = baseForShipping >= policyThreshold ? 0 : policyFee;
-                const total = subTotal + totalPackagingFee + shippingFee;
-
-                document.getElementById('summary-subtotal').textContent = formatNumber(subTotal) + '원';
-                document.getElementById('summary-packaging').textContent = formatNumber(totalPackagingFee) + '원';
-                document.getElementById('summary-shipping').textContent = shippingFee > 0 ? formatNumber(shippingFee) + '원' : '무료';
-                document.getElementById('summary-total').textContent = formatNumber(total) + '원';
-            }
-
             const quantityInputs = document.querySelectorAll('.quantity-input');
             quantityInputs.forEach(input => {
                 input.addEventListener('change', updateTotals);
@@ -254,10 +341,54 @@
             packagingSelects.forEach(select => {
                 select.addEventListener('change', updateTotals);
             });
+            
+            // 포인트 입력 리스너 추가 (직접 입력 시 즉시 보정 및 반영)
+            const pointInput = document.getElementById('pointUsage');
+            if (pointInput) {
+                pointInput.addEventListener('input', updateTotals);
+            }
 
             // 페이지 최초 로드 시 총액 계산 실행
             updateTotals();
         });
+
+        // [자체 추가] 포인트 한도 체크 (HTML oninput에서 호출 중)
+        function checkPointLimit(input) {
+            // updateTotals()에서 상세 보정을 수행하므로 여기선 음수 체크만 유지
+            if (parseInt(input.value, 10) < 0) {
+                input.value = 0;
+            }
+        }
+
+        // [자체 추가] 포인트 전액 사용
+        function useAllPoints() {
+            const availableSpan = document.getElementById('available-point');
+            const pointInput = document.getElementById('pointUsage');
+            if (!availableSpan || !pointInput) return;
+
+            // 1. 현재 결제해야 할 순수 금액(포인트 제외) 계산
+            let subTotalText = document.getElementById('summary-subtotal').textContent;
+            let subTotal = parseInt(subTotalText.replace(/[^0-9]/g, ''), 10) || 0;
+            
+            let packagingText = document.getElementById('summary-packaging').textContent;
+            let packaging = parseInt(packagingText.replace(/[^0-9]/g, ''), 10) || 0;
+            
+            let shippingText = document.getElementById('summary-shipping').textContent;
+            let shipping = 0;
+            if (shippingText !== '무료') {
+                shipping = parseInt(shippingText.replace(/[^0-9]/g, ''), 10) || 0;
+            }
+            
+            let totalBeforePoint = subTotal + packaging + shipping;
+            let availablePoint = parseInt(availableSpan.dataset.point, 10) || 0;
+            
+            // 2. 보유 포인트와 결제 금액 중 작은 값을 선택
+            let maxUsable = Math.min(availablePoint, totalBeforePoint);
+            
+            // 3. 입력창에 값 세팅 후 업데이트 트리거
+            pointInput.value = maxUsable;
+            updateTotals(); 
+        }
 
         // [커밋 80312e22] 주소 검색 함수
         function execDaumPostcode() {
@@ -269,11 +400,25 @@
                     } else {
                         addr = data.jibunAddress;
                     }
-                    document.getElementById('postcode').value = data.zonecode;
+                    document.getElementById('receiverPostCode').value = data.zonecode;
                     document.getElementById("roadAddress").value = addr;
                     document.getElementById("detailAddress").focus();
                 }
             }).open();
+        }
+
+        // [자체 추가] 배송지 변경 함수
+        function changeAddress(select) {
+            var option = select.options[select.selectedIndex];
+            if (option.value === "") {
+                document.getElementById('receiverPostCode').value = "";
+                document.getElementById('roadAddress').value = "";
+                document.getElementById('detailAddress').value = "";
+                return;
+            }
+            document.getElementById('receiverPostCode').value = option.dataset.postcode;
+            document.getElementById('roadAddress').value = option.dataset.road;
+            document.getElementById('detailAddress').value = option.dataset.detail;
         }
         
         // [커밋 80312e22] 폼 제출 전 데이터 준비 함수

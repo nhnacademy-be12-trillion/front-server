@@ -25,17 +25,17 @@ public class BookDetailsController {
     @GetMapping("/{book_id}")
     public String bookDetail(@PathVariable("book_id") Long bookId,
                              @RequestParam(name = "page", defaultValue = "0") int page,
-                             @RequestParam(name = "size", defaultValue = "10") int size, // 리뷰는 보통 10개씩
+                             @RequestParam(name = "size", defaultValue = "10") int size,
                              Model model) {
 
-        // 1. 도서 상세 정보 조회
+        // 도서 상세 정보 조회
         BookDetailResponse bookDetail = bookClient.getBookDetail(bookId);
 
-        // 2. 리뷰 리스트 조회 (정렬 기준은 최신순 등 상황에 맞게)
+        // 리뷰 리스트 조회 (정렬 기준은 최신순 등 상황에 맞게)
         String sort = "reviewId,desc";
         PageResponse<ReviewResponse> review = bookClient.getReviews(bookId, page, size, sort);
 
-        // 3. 리뷰 요약 통계 조회 (에러 방지를 위해 try-catch 혹은 null 처리 권장)
+        // 리뷰 요약 통계 조회 (에러 방지를 위해 try-catch 혹은 null 처리 권장)
         ReviewSummaryResponse reviewSummary = null;
         try {
             reviewSummary = reviewSummaryClient.getReviewSummary(bookId.toString());

@@ -3,13 +3,17 @@ package com.nhnacademy.frontserver.book;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// [수정됨] 도서 서버의 응답 필드명(writerName, reviewRate, reviewContents)에 맞춤
 public record ReviewResponse(
         Long reviewId,
-        int reviewRate,         // 기존 score -> reviewRate
-        String reviewContents,  // 기존 content -> reviewContents
+        Long bookId,
+        String bookName,
+        int reviewRate,
+        String reviewContents,
         LocalDateTime createdAt,
-        String writerName,       // 기존 reviewerName -> writerName
+        String writerName,
         List<String> imageUrls
 ) {
+    public ReviewResponse withWriterName(String name) {
+        return new ReviewResponse(reviewId, bookId, bookName, reviewRate, reviewContents, createdAt, name, imageUrls);
+    }
 }
