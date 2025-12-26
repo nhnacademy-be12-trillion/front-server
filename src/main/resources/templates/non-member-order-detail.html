@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>주문 상세 내역</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container pt-5 pb-5">
+
+        <h2 class="mb-4">주문 상세 내역</h2>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">주문 정보</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>주문 번호:</strong> <span th:text="${order.orderNumber}"></span>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <strong>주문 일시:</strong> <span th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></span>
+                    </div>
+                </div>
+                <hr>
+
+                <div th:each="item : ${order.orderItems}" class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="d-flex align-items-center">
+                        <img th:src="${!#strings.isEmpty(item.bookImage) ? '/trillion-bucket/' + item.bookImage : '/img/default-book.png'}"
+                             width="50" height="70"
+                             class="mr-2 rounded border"
+                             alt="책 이미지"
+                             style="object-fit: cover;">
+
+                        <span class="ml-2">
+                            <span th:text="${item.bookName}" class="font-weight-bold">책 제목</span>
+                            <span class="text-muted ml-1" th:text="' x ' + ${item.quantity} + '개'"></span>
+                        </span>
+                    </span>
+                    <span class="font-weight-bold" th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA') + '원'}"></span>
+                </div>
+
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <h5 class="text-danger font-weight-bold">총 결제 금액</h5>
+                    <h5 class="text-danger font-weight-bold" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA') + '원'}"></h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="/" class="btn btn-outline-dark px-4">홈으로</a>
+
+            <button type="button" class="btn btn-danger px-4 ml-2" data-toggle="modal" data-target="#cancelModal">
+                결제 취소
+            </button>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="cancelModalLabel">결제 취소 요청</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form th:action="@{/payments/cancel}" method="post">
+                    <div class="modal-body">
+
+                        <input type="hidden" name="orderId" th:value="${order.orderId}">
+                        <input type="hidden" name="orderNumber" th:value="${order.orderNumber}">
+                        <input type="hidden" name="cancelAmount" th:value="${order.totalPrice}">
+
+                        <input type="hidden" name="nonMemberPassword" th:value="${nonMemberPassword}">
+
+                        <div class="form-group">
+                            <label for="cancelReason" class="col-form-label font-weight-bold">취소 사유</label>
+                            <select class="custom-select" id="cancelReason" name="cancelReason" required>
+                                <option value="" disabled selected>사유를 선택하세요</option>
+                                <option value="단순 변심">단순 변심</option>
+                                <option value="상품 불량">상품 불량</option>
+                                <option value="주문 실수">주문 실수</option>
+                                <option value="기타">기타</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-form-label font-weight-bold">환불 예정 금액</label>
+                            <input type="text" class="form-control"
+                                   th:value="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA') + '원'}" readonly>
+                            <small class="text-muted">전액 취소만 가능합니다.</small>
+                        </div>
+
+                        <div class="alert alert-warning mt-3">
+                            <small><i class="fas fa-exclamation-triangle mr-1"></i> 취소 후에는 되돌릴 수 없습니다.</small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                        <button type="submit" class="btn btn-danger">취소 확정</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

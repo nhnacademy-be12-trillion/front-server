@@ -1,15 +1,3 @@
-<!--
-  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
-  ~ + * While every precaution has been taken in the preparation of this resource,  assumes no
-  ~ + responsibility for errors or omissions, or for damages resulting from the use of the information
-  ~ + contained herein
-  ~ + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
-  ~ + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
-  ~ + prior written permission.
-  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-  -->
-
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
@@ -19,30 +7,13 @@
 <head>
     <meta charset="utf-8">
     <title>Trillion-Shop | 장바구니</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="도서 쇼핑몰, 장바구니, Trillion-Shop" name="keywords">
-    <meta content="Trillion-Shop 온라인 도서 쇼핑몰 장바구니 페이지" name="description">
-
-    <!-- base.html 에서 favicon, style.min.css 는 이미 포함됨 -->
-    <th:block layout:fragment="head">
-        <!-- 이 페이지에서만 필요한 추가 CSS가 있으면 여기 넣기 -->
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-              rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css"
-              rel="stylesheet">
-        <link th:href="@{/lib/animate/animate.min.css}" rel="stylesheet">
-        <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
-    </th:block>
 </head>
 
 <body>
 <div layout:fragment="content">
 
-    <!-- 장바구니 본문 -->
     <div class="container-fluid">
         <div class="row px-xl-5">
-            <!-- 왼쪽: 장바구니 목록 -->
             <div class="col-lg-8 mb-5">
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">장바구니</span>
@@ -59,71 +30,61 @@
                         </tr>
                         </thead>
                         <tbody class="align-middle">
-                        <!-- 장바구니에 담긴 도서가 있을 때 -->
+
                         <tr th:if="${cartItems != null and !cartItems.empty}"
                             th:each="item : ${cartItems}">
+
                             <td class="align-middle text-left">
-                                <img th:src="${item.book.thumbnailUrl != null ? item.book.thumbnailUrl : '/img/product-1.jpg'}"
+                                <img th:src="${!#strings.isEmpty(item.book.bookImage) ? '/trillion-bucket/' + item.book.bookImage : '/img/default-book.png'}"
                                      alt="" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover;">
-                                <a th:href="@{/books/{id}(id=${item.book.id})}"
-                                   class="text-dark ml-2"
-                                   th:text="${item.book.title}">
-                                    도서 제목
-                                </a>
-                            </td>
-                            <td class="align-middle"
-                                th:text="${#numbers.formatInteger(item.book.price, 0, 'COMMA')} + '원'">
-                                12,000원
+                                <a th:href="@{/books/{id}(id=${item.book.bookId})}"
+                                   class="text-dark ml-2" th:text="${item.book.bookName}">도서 제목</a>
                             </td>
 
+                            <td class="align-middle"
+                                th:text="${#numbers.formatInteger(item.book.bookSalePrice, 0, 'COMMA')} + '원'">0원</td>
+
                             <td class="align-middle">
-                                <div class="input-group quantity mx-auto" style="width: 100px;">
+                                <div class="input-group mx-auto" style="width: 100px;">
                                     <div class="input-group-btn">
-                                        <form th:action="@{/carts/update}" method="post" style="display:inline;">
-                                            <input type="hidden" name="cartItemId" th:value="${item.id}">
+                                        <form th:action="@{/carts/update}" method="post" style="display:inline;"
+                                              th:onsubmit="'if(' + ${item.quantity} + ' <= 1) { alert(\'최소 수량은 1개입니다.\'); return false; }'">
+                                            <input type="hidden" name="bookId" th:value="${item.book.bookId}">
                                             <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
-                                            <button type="submit" class="btn btn-sm btn-primary btn-minus">
+                                            <button type="submit" class="btn btn-sm btn-primary">
                                                 <i class="fa fa-minus"></i>
                                             </button>
                                         </form>
                                     </div>
-                                    <input type="text"
-                                           class="form-control form-control-sm bg-secondary border-0 text-center"
+
+                                    <input type="text" class="form-control form-control-sm bg-secondary border-0 text-center"
                                            th:value="${item.quantity}" readonly>
+
                                     <div class="input-group-btn">
-                                        <form th:action="@{/api/carts/update}" method="post" style="display:inline;">
-                                            <input type="hidden" name="cartItemId" th:value="${item.id}">
+                                        <form th:action="@{/carts/update}" method="post" style="display:inline;">
+                                            <input type="hidden" name="bookId" th:value="${item.book.bookId}">
                                             <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
-                                            <button type="submit" class="btn btn-sm btn-primary btn-plus">
+                                            <button type="submit" class="btn btn-sm btn-primary">
                                                 <i class="fa fa-plus"></i>
                                             </button>
                                         </form>
                                     </div>
                                 </div>
                             </td>
-                            <td class="align-middle"
-                                th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">
-                                24,000원
-                            </td>
+
+                            <td class="align-middle font-weight-bold" th:text="${#numbers.formatInteger(item.subtotal, 0, 'COMMA')} + '원'">0원</td>
+
                             <td class="align-middle">
-                                <form th:action="@{/api/carts/{id}/remove(id=${item.id})}"
-                                      method="post"
-                                      style="display:inline;">
-                                    <input type="hidden" name="_method" value="delete">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="fa fa-times"></i>
-                                    </button>
+                                <form th:action="@{/carts/delete/{id}(id=${item.book.bookId})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></button>
                                 </form>
                             </td>
                         </tr>
 
-                        <!-- 장바구니가 비어 있을 때 -->
                         <tr th:if="${cartItems == null or cartItems.empty}">
                             <td colspan="5" class="align-middle py-5 text-center">
-                                <h5 class="m-0 text-muted">장바구니에 담긴 도서가 없습니다.</h5>
-                                <a th:href="@{/api/books}" class="btn btn-sm btn-primary mt-3">
-                                    도서 둘러보기
-                                </a>
+                                <h5 class="m-0 text-muted">장바구니가 비어있습니다.</h5>
+                                <a th:href="@{/books}" class="btn btn-sm btn-primary mt-3">쇼핑 계속하기</a>
                             </td>
                         </tr>
                         </tbody>
@@ -131,75 +92,42 @@
                 </div>
             </div>
 
-            <!-- 오른쪽: 쿠폰 + 요약 -->
             <div class="col-lg-4">
-                <!-- 쿠폰 적용 -->
-                <form class="mb-30" th:action="@{/api/coupons/apply}" method="post">
-                    <h5 class="section-title position-relative text-uppercase mb-3">
-                        <span class="bg-secondary pr-3">쿠폰 적용</span>
-                    </h5>
-                    <div class="bg-light p-30 mb-5">
-                        <div class="input-group">
-                            <input type="text" class="form-control border-0 p-4"
-                                   name="couponCode" placeholder="쿠폰 코드를 입력하세요">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-primary">
-                                    쿠폰 적용
-                                </button>
-                            </div>
-                        </div>
-                        <small class="form-text text-muted mt-2">
-                            보유하신 쿠폰 번호를 입력하면 할인 금액이 장바구니에 반영됩니다.
-                        </small>
-                    </div>
-                </form>
-
-                <!-- 장바구니 요약 -->
                 <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">장바구니 요약</span>
+                    <span class="bg-secondary pr-3">결제 예상 금액</span>
                 </h5>
-                <div class="bg-light p-30 mb-5">
-                    <div class="border-bottom pb-2">
-                        <div class="d-flex justify-content-between mb-3">
-                            <h6>상품 금액</h6>
-                            <h6 th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">
-                                72,000원
-                            </h6>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <h6 class="font-weight-medium">배송비</h6>
-                            <h6 class="font-weight-medium"
-                                th:text="${cart.shippingFee > 0 ? #numbers.formatInteger(cart.shippingFee, 0, 'COMMA') + '원' : '무료'}">
-                                3,000원
-                            </h6>
-                        </div>
-                    </div>
-                    <div class="pt-2">
-                        <div class="d-flex justify-content-between mt-2">
-                            <h5>총 결제 예정 금액</h5>
-                            <h5 th:text="${#numbers.formatInteger(cart.totalPrice, 0, 'COMMA')} + '원'">
-                                75,000원
-                            </h5>
-                        </div>
+                <div class="bg-light p-4 mb-5 shadow-sm"> <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="font-weight-bold m-0 text-dark">총 상품 금액</h5>
+                    <h3 class="font-weight-bold m-0 text-primary"
+                        th:text="${#numbers.formatInteger(cart.subTotal, 0, 'COMMA')} + '원'">
+                        0원
+                    </h3>
+                </div>
 
-                        <a th:href="@{/api/orders/checkout}"
-                           class="btn btn-block btn-primary font-weight-bold my-3 py-3">
+                    <div class="alert alert-secondary p-2 mb-4 text-center small" role="alert">
+                        <i class="fa fa-info-circle mr-1"></i>
+                        배송비는 <strong>주문서 작성</strong> 단계에서<br>최종 결제 금액에 포함됩니다.
+                    </div>
+
+                    <div>
+                        <a th:href="@{/checkout}"
+                           class="btn btn-block btn-primary font-weight-bold py-3 mb-3"
+                           style="font-size: 1.1rem;"
+                           th:classappend="${cartItems == null or cartItems.empty} ? 'disabled' : ''">
                             주문서 작성하기
                         </a>
+
+                        <form th:action="@{/carts/clear}" method="post" th:if="${cartItems != null and !cartItems.empty}">
+                            <button type="submit" class="btn btn-block btn-outline-secondary font-weight-bold py-2">
+                                장바구니 비우기
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
 
         </div>
     </div>
-
 </div>
-
-<!-- 이 페이지 전용 JS가 필요하면 여기에 -->
-<th:block layout:fragment="script">
-    <!-- 예: 장바구니에서만 쓰는 JS -->
-    <!-- <script th:src="@{/js/cart.js}"></script> -->
-</th:block>
-
 </body>
 </html>

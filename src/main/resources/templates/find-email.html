@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<div layout:fragment="content">
+
+  <div class="container-fluid">
+    <div class="row px-xl-5">
+      <div class="col-12">
+        <nav class="breadcrumb bg-light mb-30">
+          <a class="breadcrumb-item text-dark" href="/">Home</a>
+          <span class="breadcrumb-item active">아이디 찾기</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mb-5" style="max-width: 550px;">
+
+    <h2 class="section-title position-relative text-uppercase text-center mb-4">
+      <span class="bg-secondary px-3">아이디 찾기</span>
+    </h2>
+
+    <div class="bg-light p-4 p-md-5 rounded shadow-sm">
+
+      <div th:if="${foundEmail}" class="alert alert-success mb-4" role="alert">
+        <p class="mb-0">회원님의 이메일은 <strong class="text-dark">[[${foundEmail}]]</strong> 입니다.</p>
+        <hr>
+        <div class="text-center">
+          <a href="/auth/login" class="btn btn-sm btn-primary">로그인 하러가기</a>
+          <a href="/members/password/reset" class="btn btn-sm btn-outline-dark ml-2">비밀번호 찾기</a>
+        </div>
+      </div>
+
+      <div th:if="${error}" class="alert alert-danger mb-4" role="alert" th:text="${error}"></div>
+
+      <form action="/members/find/email" method="post" th:unless="${foundEmail}" onsubmit="return validateFindIdForm()">
+        <div class="form-group">
+          <label>이름</label>
+          <input type="text" name="memberName" id="memberName" class="form-control" placeholder="이름" required style="height: 50px;">
+        </div>
+
+        <div class="form-group">
+          <label>연락처</label>
+          <input type="text" name="memberContact" id="memberContact" class="form-control"
+                 placeholder="010-0000-0000" maxlength="13" required oninput="autoHyphen(this)" style="height: 50px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold mt-4" style="height: 50px;">아이디 찾기</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="script">
+  <script>
+    // 전화번호 자동 하이픈
+    function autoHyphen(target) {
+      target.value = target.value
+              .replace(/[^0-9]/g, '') // 숫자 이외 제거
+              .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3") // 3-4-4 자리 하이픈
+              .replace(/(\-{1,2})$/g, ""); // 끝에 남은 하이픈 제거
+    }
+
+    // 폼 제출 전 유효성 검사
+    function validateFindIdForm() {
+      const phoneInput = document.getElementById('memberContact');
+      const phoneValue = phoneInput.value;
+
+      // 전화번호 정규식 (010, 011 등 - 3/4자리 - 4자리)
+      const phoneRegex = /^01(?:0|1|[6-9])-(?:\d{3}|\d{4})-\d{4}$/;
+
+      if (!phoneRegex.test(phoneValue)) {
+        alert("올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)");
+        phoneInput.focus();
+        return false; // 제출 막기
+      }
+
+      return true; // 제출 허용
+    }
+  </script>
+</th:block>
+</html>

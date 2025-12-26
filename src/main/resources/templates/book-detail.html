@@ -1,15 +1,3 @@
-<!--
-  ~ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ~ + Copyright 2025. NHN Academy Corp. All rights reserved.
-  ~ + * While every precaution has been taken in the preparation of this resource,  assumes no
-  ~ + responsibility for errors or omissions, or for damages resulting from the use of the information
-  ~ + contained herein
-  ~ + No part of this resource may be reproduced, stored in a retrieval system, or transmitted, in any
-  ~ + form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the
-  ~ + prior written permission.
-  ~ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-  -->
-
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
@@ -18,208 +6,447 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Trillion-Shop | 도서 목록</title>
+    <title th:text="${book.bookName} + ' | Trillion-Shop'">도서 상세</title>
 
     <th:block layout:fragment="head">
+        <style>
+            .detail-img { width: 100%; max-height: 500px; object-fit: contain; background: #f8f9fa; }
+
+            /* 리뷰 이미지 썸네일 스타일 */
+            .review-img-thumb {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 5px;
+                cursor: pointer;
+                border: 1px solid #ddd;
+                transition: 0.2s;
+            }
+            .review-img-thumb:hover {
+                opacity: 0.8;
+                border-color: #007bff;
+                transform: scale(1.05);
+            }
+
+            /* 요청하신 리뷰 이미지 배경 스타일 */
+            .review-img-bg {
+                background-color: #f0f0f0; /* 배경색 (원하는 이미지나 색상으로 변경 가능) */
+                padding: 5px;
+                border-radius: 5px;
+                display: inline-block;
+                margin-right: 10px;
+                margin-bottom: 10px;
+            }
+
+            /* 별점 입력 스타일 */
+            .star-rating .star-icon {
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: #FFD333;
+                margin-right: 2px;
+            }
+
+            /* 구분선 스타일 커스텀 */
+            hr.my-4 {
+                border-top: 1px solid #eaeaea;
+            }
+
+            /* YES24 스타일 Breadcrumb 커스텀 */
+            .custom-breadcrumb {
+                background-color: transparent !important;
+                padding: 15px 0;
+                margin-bottom: 0;
+                font-size: 14px;
+            }
+
+            .custom-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+                content: ">";
+                color: #999;
+                font-family: sans-serif;
+            }
+
+            .custom-breadcrumb .breadcrumb-item a {
+                color: #666;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+
+            .custom-breadcrumb .breadcrumb-item a:hover {
+                color: #333;
+                text-decoration: underline;
+            }
+
+            .custom-breadcrumb .breadcrumb-item.active {
+                color: #111;
+                font-weight: 700;
+            }
+
+            .home-icon {
+                font-size: 16px;
+                color: #555;
+            }
+        </style>
     </th:block>
-    <link href="/static/css/style.min.css" rel="stylesheet">
-    <link th:href="@{/css/style.min.css}" rel="stylesheet">
 </head>
 
 <body>
 <div layout:fragment="content">
 
-    <div class="container-fluid">
+    <div class="container-fluid bg-white">
         <div class="row px-xl-5">
-
-            <!-- ====== 왼쪽 카테고리(옵션) ====== -->
-            <div class="col-lg-3 col-md-4">
-                <h5 class="section-title position-relative text-uppercase mb-3">
-                    <span class="bg-secondary pr-3">도서 메뉴</span>
-                </h5>
-
-                <div class="nav flex-column nav-pills book-menu" role="tablist">
-                    <a class="nav-link active" data-toggle="pill" href="#tab-all">전체 도서</a>
-                    <a class="nav-link" href="#" th:href="@{/books?sort=best}">베스트</a>
-                    <a class="nav-link" href="#" th:href="@{/books?sort=new}">최근 발매</a>
-                    <a class="nav-link" href="#" th:href="@{/books/birthday}">생일책</a>
-                </div>
-            </div>
-
-            <!-- ====== 오른쪽 리스트 영역 ====== -->
-            <div class="col-lg-9 col-md-8">
-
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="section-title position-relative text-uppercase mb-0">
-                        <span class="bg-secondary pr-3">도서 목록</span>
-                    </h5>
-
-                    <!-- 카드형 / 열거형 전환 버튼 -->
-                    <div class="btn-group view-toggle-group" role="group" aria-label="View toggle">
-                        <button type="button" id="btn-grid" class="btn btn-sm btn-primary">
-                            <i class="fa fa-th-large mr-1"></i> 카드형
-                        </button>
-                        <button type="button" id="btn-list" class="btn btn-sm btn-light">
-                            <i class="fa fa-list mr-1"></i> 열거형
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ====== 카드형 뷰 ====== -->
-                <!-- ✅ 카드형 그리드 뷰 (hover 시 장바구니/좋아요 노출, CSS만 사용) -->
-                <div id="book-grid-view" class="row w-100">
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1" th:each="book : ${books}">
-                        <div class="product-item bg-light mb-4 h-100">
-                            <div class="product-img position-relative overflow-hidden">
-                                <img class="img-fluid w-100"
-                                     th:src="${book.bookImage != null ? book.bookImage : '/img/product-1.jpg'}"
-                                     alt="" style="aspect-ratio: 1/1.4; object-fit: cover;">
-
-                                <!-- 🔹 이 부분이 호버 시 나오는 버튼들 (CSS에 이미 있음) -->
-                                <div class="product-action">
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/carts/add(bookId=${book.bookId})}">
-                                        <i class="fa fa-shopping-cart"></i>
-                                    </a>
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/members/likes/add(bookId=${book.bookId})}">
-                                        <i class="far fa-heart"></i>
-                                    </a>
-                                    <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/books/{id}(id=${book.bookId})}">
-                                        <i class="fa fa-search"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="text-center py-4">
-                                <a class="h6 text-decoration-none text-truncate"
-                                   th:href="@{/books/{id}(id=${book.bookId})}"
-                                   th:text="${book.bookName}"
-                                   style="display:block; max-width:90%; margin:0 auto;">
-                                    Book Title
-                                </a>
-
-                                <div class="d-flex align-items-center justify-content-center mt-2">
-                                    <h5 th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
-                                    <h6 class="text-muted ml-2">
-                                        <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">
-                                            15,000원
-                                        </del>
-                                    </h6>
-                                </div>
-
-                                <div class="d-flex align-items-center justify-content-center mb-1">
-                                    <small class="text-muted mr-2" th:text="${book.bookAuthor}">Author</small>
-                                    <small class="text-muted" th:text="${book.bookPublisher}">Publisher</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- ✅ 리스트형 뷰 (우측에 버튼들) -->
-                <div id="book-list-view" class="d-none w-100">
-                    <div class="bg-light mb-3 p-3 d-flex align-items-stretch"
-                         th:each="book : ${books}">
-                        <!-- 썸네일 -->
-                        <div class="mr-3" style="width:120px;">
-                            <a th:href="@{/books/{id}(id=${book.bookId})}">
-                                <img class="img-fluid"
-                                     th:src="${book.bookImage != null ? book.bookImage : '/img/product-1.jpg'}"
-                                     alt="" style="aspect-ratio: 1/1.4; object-fit: cover;">
-                            </a>
-                        </div>
-
-                        <!-- 내용 -->
-                        <div class="flex-grow-1 d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <a class="h6 text-decoration-none text-dark"
-                                       th:href="@{/books/{id}(id=${book.bookId})}"
-                                       th:text="${book.bookName}">
-                                        Book Title
-                                    </a>
-                                    <div class="small text-muted" th:text="${book.bookAuthor}">Author</div>
-                                    <div class="small text-muted" th:text="${book.bookPublisher}">Publisher</div>
-                                </div>
-
-                                <div class="text-right">
-                                    <div class="font-weight-bold"
-                                         th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">
-                                        12,000원
-                                    </div>
-                                    <div class="small text-muted">
-                                        <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">
-                                            15,000원
-                                        </del>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 짧은 설명 -->
-                            <p class="mt-2 mb-2 small text-muted text-truncate"
-                               style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;"
-                               th:text="${book.shortDescription}">
-                                짧은 설명이 들어가는 영역입니다. 최대 두 줄 정도까지만 보여줍니다.
-                            </p>
-
-                            <!-- 🔹 우측 버튼들 (색상 다른 버튼) -->
-                            <div class="d-flex justify-content-end mt-auto">
-                                <a class="btn btn-sm btn-outline-dark mr-2"
-                                   th:href="@{/carts/add(bookId=${book.bookId})}">
-                                    장바구니
-                                </a>
-                                <a class="btn btn-sm btn-outline-dark mr-2"
-                                   th:href="@{/members/likes/add(bookId=${book.bookId})}">
-                                    찜
-                                </a>
-                                <a class="btn btn-sm btn-primary"
-                                   th:href="@{/books/{id}(id=${book.bookId})}">
-                                    상세보기
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb custom-breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="/"><i class="fa fa-home home-icon"></i></a>
+                        </li>
+                        <th:block th:if="${book.categoryPath != null}" th:each="cat : ${book.categoryPath}">
+                            <li class="breadcrumb-item">
+                                <a th:href="@{/books(categoryId=${cat.categoryId})}"
+                                   th:text="${cat.categoryName}">카테고리</a>
+                            </li>
+                        </th:block>
+                    </ol>
+                </nav>
             </div>
         </div>
     </div>
 
+    <div class="container-fluid pb-5 pt-3">
+        <div class="row px-xl-5">
+
+            <div class="col-lg-5 mb-30">
+                <div class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner bg-light border">
+                        <div class="carousel-item active">
+                            <img class="detail-img"
+                                 th:src="${book.bookImage != null ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                                 alt="Image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 h-auto mb-30">
+                <div class="h-100 bg-white p-30">
+                    <h3 th:text="${book.bookName}" style="letter-spacing: -1px; word-break: keep-all;">도서 제목</h3>
+
+                    <div class="d-flex mb-3 align-items-center">
+                        <div class="text-primary mr-2">
+                            <small class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
+                                   th:classappend="${book.bookReviewRate >= i} ? 'text-primary' : 'text-secondary'"></small>
+                        </div>
+                        <small class="pt-1 text-muted" th:text="'(' + ${book.viewCount} + ' Views)'">(99 Views)</small>
+                    </div>
+
+                    <h5 class="font-weight-semi-bold mb-4">
+                        <span class="text-danger font-weight-bold" style="font-size: 1.5rem;" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</span>
+
+                        <span class="text-muted ml-2" style="font-size: 1rem; text-decoration: line-through;"
+                              th:if="${book.bookSalePrice < book.bookRegularPrice}"
+                              th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</span>
+
+                        <span class="badge badge-danger ml-2" style="font-size: 0.9rem;"
+                              th:if="${book.bookSalePrice < book.bookRegularPrice}"
+                              th:text="${book.discountRate} + '%'">10%</span>
+                    </h5>
+
+                    <hr class="my-4">
+
+                    <ul class="list-unstyled mb-4 text-dark">
+                        <li class="mb-2 row">
+                            <strong class="col-3 col-md-2">저자</strong>
+                            <span class="col-9 col-md-10" th:text="${book.bookAuthor}">홍길동</span>
+                        </li>
+                        <li class="mb-2 row">
+                            <strong class="col-3 col-md-2">출판사</strong>
+                            <span class="col-9 col-md-10" th:text="${book.bookPublisher}">출판사</span>
+                        </li>
+                        <li class="mb-2 row">
+                            <strong class="col-3 col-md-2">출판일</strong>
+                            <span class="col-9 col-md-10" th:text="${book.bookPublicationDate}">2025-01-01</span>
+                        </li>
+                        <li class="mb-2 row">
+                            <strong class="col-3 col-md-2">ISBN</strong>
+                            <span class="col-9 col-md-10" th:text="${book.isbn}">123456789</span>
+                        </li>
+                        <li class="mb-2 row">
+                            <strong class="col-3 col-md-2">포장</strong>
+                            <span class="col-9 col-md-10">
+                                <span th:text="${book.bookPackaging ? '선물포장 가능' : '포장 불가'}"
+                                      class="badge"
+                                      th:classappend="${book.bookPackaging ? 'badge-primary' : 'badge-secondary'}">
+                                    가능
+                                </span>
+                            </span>
+                        </li>
+                    </ul>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex align-items-center mb-4 pt-2">
+                        <div class="input-group quantity mr-3" style="width: 130px;">
+                            <div class="input-group-btn">
+                                <button class="btn btn-outline-secondary btn-minus"><i class="fa fa-minus"></i></button>
+                            </div>
+                            <input type="text" class="form-control border-secondary text-center" id="cartQuantity" value="1">
+                            <div class="input-group-btn">
+                                <button class="btn btn-outline-secondary btn-plus"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary px-4 py-2 mr-2 font-weight-bold" id="btn-add-cart" th:data-book-id="${book.bookId}">
+                            <i class="fa fa-shopping-cart mr-1"></i> 장바구니
+                        </button>
+
+                        <form th:action="@{/checkout}" method="get" class="mr-2">
+                            <input type="hidden" name="bookId" th:value="${book.bookId}" />
+                            <input type="hidden" name="quantity" id="buyNowQuantity" value="1" />
+                            <button type="submit" class="btn btn-dark px-3 py-2 font-weight-bold">
+                                <i class="fa fa-credit-card mr-1"></i> 바로 구매
+                            </button>
+                        </form>
+
+                        <button class="btn btn-outline-danger px-3 py-2 font-weight-bold" id="btn-add-like" th:data-book-id="${book.bookId}" type="button">
+                            <i class="far fa-heart mr-1"></i> 찜하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row px-xl-5">
+            <div class="col">
+                <div class="bg-white p-30 border">
+                    <div class="nav nav-tabs mb-4">
+                        <a class="nav-item nav-link active" data-toggle="tab" href="#tab-pane-1">상세 설명</a>
+                        <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-2">정보</a>
+                        <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-3"
+                           th:text="'리뷰 (' + (${reviews != null ? reviews.totalElements : 0}) + ')'">리뷰 (0)</a>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-pane-1">
+                            <h4 class="mb-3 border-bottom pb-2">도서 소개</h4>
+                            <p th:text="${book.bookDescription}" style="line-height: 1.8;">상세 내용</p>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-pane-2">
+                            <h4 class="mb-3 border-bottom pb-2">목차</h4>
+                            <p th:text="${book.bookIndex}" style="line-height: 1.8;">목차 내용이 없습니다.</p>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-pane-3">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="bg-light p-4 mb-5 rounded border">
+                                        <h4 class="mb-3">리뷰 작성</h4>
+                                        <form id="reviewForm" th:action="@{/reviews/add}" method="post">
+                                            <input type="hidden" name="bookId" th:value="${book.bookId}">
+
+                                            <div class="d-flex my-3 align-items-center">
+                                                <p class="mb-0 mr-3 font-weight-bold">별점 평가</p>
+                                                <div class="text-primary star-rating">
+                                                    <i class="fas fa-star star-icon" data-value="1"></i>
+                                                    <i class="fas fa-star star-icon" data-value="2"></i>
+                                                    <i class="fas fa-star star-icon" data-value="3"></i>
+                                                    <i class="fas fa-star star-icon" data-value="4"></i>
+                                                    <i class="fas fa-star star-icon" data-value="5"></i>
+                                                    <input type="hidden" name="reviewRate" id="reviewRateInput" value="5">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group mb-0">
+                                                <textarea id="reviewText" name="reviewContents" cols="30" rows="5"
+                                                          class="form-control mb-3"
+                                                          placeholder="배송 문의나 욕설 및 인신공격성 글은 상품 페이지에서 노출 제외처리됩니다."
+                                                          style="resize: none;"
+                                                          onclick="checkLoginAndFocus()"></textarea>
+
+                                                <div class="text-right">
+                                                    <button type="button" id="submitBtn" class="btn btn-primary px-4 py-2" onclick="submitReview()">
+                                                        등록하기
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <h4 class="mb-4 border-bottom pb-2"
+                                        th:text="${reviews != null ? reviews.totalElements + '개의 리뷰가 있습니다.' : '리뷰가 없습니다.'}">
+                                    </h4>
+
+                                    <div class="media mb-4 pb-4 border-bottom"
+                                         th:if="${reviews != null}"
+                                         th:each="review, reviewStat : ${reviews.content}">
+
+                                        <div class="media-body">
+                                            <div class="d-flex justify-content-between">
+                                                <h6 th:text="${review.writerName != null ? review.writerName : '익명'}">
+                                                    User Name
+                                                </h6>
+                                                <small class="text-muted" th:text="${review.createdAt}">01 Jan 2025</small>
+                                            </div>
+
+                                            <div class="text-primary mb-2">
+                                                <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
+                                                   th:classappend="${review.reviewRate >= i} ? 'text-primary' : 'text-secondary'"></i>
+                                            </div>
+
+                                            <p th:text="${review.reviewContents}" class="text-dark mt-2 mb-3" style="line-height: 1.6;">리뷰 내용</p>
+
+                                            <div th:if="${!#lists.isEmpty(review.imageUrls)}" class="d-flex flex-wrap mt-2">
+                                                <div th:each="imgUrl, imgStat : ${review.imageUrls}" class="review-img-bg">
+                                                    <img th:src="@{'/trillion-bucket/' + ${imgUrl}}"
+                                                         class="review-img-thumb m-0"
+                                                         alt="리뷰 이미지"
+                                                         data-toggle="modal"
+                                                         th:data-target="'#reviewModal-' + ${reviewStat.index}"
+                                                         th:onclick="'$(\'#reviewCarousel-' + ${reviewStat.index} + '\').carousel(' + ${imgStat.index} + ')'">
+                                                </div>
+                                            </div>
+
+                                            <div th:if="${!#lists.isEmpty(review.imageUrls)}"
+                                                 class="modal fade"
+                                                 th:id="'reviewModal-' + ${reviewStat.index}"
+                                                 tabindex="-1" role="dialog" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                    <div class="modal-content bg-transparent border-0">
+                                                        <div class="modal-body p-0 position-relative">
+                                                            <button type="button" class="close position-absolute text-white" data-dismiss="modal" aria-label="Close"
+                                                                    style="top: -30px; right: 0; z-index: 1050; opacity: 1;">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+
+                                                            <div th:id="'reviewCarousel-' + ${reviewStat.index}" class="carousel slide" data-ride="carousel" data-interval="false">
+                                                                <div class="carousel-inner">
+                                                                    <div th:each="modalImg, modalStat : ${review.imageUrls}"
+                                                                         class="carousel-item"
+                                                                         th:classappend="${modalStat.first} ? 'active'">
+                                                                        <img th:src="@{'/trillion-bucket/' + ${modalImg}}"
+                                                                             class="d-block w-100 rounded"
+                                                                             style="max-height: 80vh; object-fit: contain;"
+                                                                             alt="크게 보기">
+                                                                    </div>
+                                                                </div>
+
+                                                                <th:block th:if="${#lists.size(review.imageUrls) > 1}">
+                                                                    <a class="carousel-control-prev" th:href="'#reviewCarousel-' + ${reviewStat.index}" role="button" data-slide="prev">
+                                                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                                        <span class="sr-only">Previous</span>
+                                                                    </a>
+                                                                    <a class="carousel-control-next" th:href="'#reviewCarousel-' + ${reviewStat.index}" role="button" data-slide="next">
+                                                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                                        <span class="sr-only">Next</span>
+                                                                    </a>
+                                                                </th:block>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${reviews == null or reviews.content.isEmpty()}">
+                                        <p class="text-muted text-center py-5">첫 번째 리뷰의 주인공이 되어보세요!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<input type="hidden" id="isLoggedIn" th:value="${#authorization.expression('isAuthenticated()')}" />
 
 <th:block layout:fragment="script">
     <script>
-        // 뷰 전환 및 장바구니 Ajax 처리
-        (function () {
-            // 카드형 / 리스트형 토글
-            const $grid = $('#book-grid-view');
-            const $list = $('#book-list-view');
-            const $btnGrid = $('#btn-grid');
-            const $btnList = $('#btn-list');
+        // 리뷰 작성 관련 스크립트
+        // 1. 별점 UI 동작
+        document.querySelectorAll('.star-icon').forEach(star => {
+            star.addEventListener('click', function() {
+                let value = this.getAttribute('data-value');
+                document.getElementById('reviewRateInput').value = value;
 
-            $btnGrid.on('click', function () {
-                $grid.removeClass('d-none');
-                $list.addClass('d-none');
+                // 별 아이콘 채우기/비우기
+                let stars = this.parentElement.querySelectorAll('.star-icon');
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= value) {
+                        s.classList.remove('far'); // 빈 별 제거 (필요시 class 조정)
+                        s.classList.add('fas');    // 꽉 찬 별 추가
+                        s.classList.remove('text-secondary');
+                        s.classList.add('text-primary');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far'); // FontAwesome 버전에 따라 'far' 사용
+                        s.classList.remove('text-primary');
+                        s.classList.add('text-secondary');
+                    }
+                });
+            });
+        });
 
-                $btnGrid.removeClass('btn-light').addClass('btn-primary text-white');
-                $btnList.removeClass('btn-primary text-white').addClass('btn-light');
+        // 2. 로그인 체크 및 리다이렉트 함수
+        function checkLoginAndFocus() {
+            const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
+
+            if (!isLoggedIn) {
+                document.getElementById('reviewText').blur(); // 포커스 해제
+
+                const confirmLogin = confirm("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?");
+
+                if (confirmLogin) {
+                    // 현재 페이지 URL을 redirectURL 파라미터로 저장하여 이동
+                    const currentUrl = encodeURIComponent(window.location.href);
+                    window.location.href = '/login?redirectURL=' + currentUrl;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        // 3. 리뷰 등록
+        function submitReview() {
+            if (checkLoginAndFocus()) {
+                const text = document.getElementById('reviewText').value;
+                if(text.trim() === "") {
+                    alert("리뷰 내용을 입력해주세요.");
+                    return;
+                }
+                // 폼 전송
+                document.getElementById('reviewForm').submit();
+            }
+        }
+
+        $(document).ready(function () {
+            // 수량 조절 버튼 이벤트
+            $('.quantity button').off('click').on('click', function () {
+                var button = $(this);
+                var $input = button.parent().parent().find('input#cartQuantity');
+                var oldValue = $input.val();
+                var newVal;
+
+                if (button.hasClass('btn-plus')) {
+                    newVal = parseFloat(oldValue) + 1;
+                } else {
+                    if (oldValue > 1) {
+                        newVal = parseFloat(oldValue) - 1;
+                    } else {
+                        newVal = 1;
+                    }
+                }
+
+                $input.val(newVal);
+                $('#buyNowQuantity').val(newVal);
             });
 
-            $btnList.on('click', function () {
-                $grid.addClass('d-none');
-                $list.removeClass('d-none');
-
-                $btnList.removeClass('btn-light').addClass('btn-primary text-white');
-                $btnGrid.removeClass('btn-primary text-white').addClass('btn-light');
-            });
-
-            // 장바구니 Ajax 추가 (카드형 & 리스트형 공통)
-            $(document).on('click', '.btn-add-cart', function () {
+            // 장바구니 담기 AJAX
+            $('#btn-add-cart').off('click').on('click', function () {
                 const bookId = $(this).data('book-id');
-                const quantity = 1; // 리스트/카드에서 기본 1권
+                const quantity = $('#cartQuantity').val();
 
                 $.ajax({
                     url: '/carts/add',
@@ -227,28 +454,48 @@
                     contentType: 'application/json',
                     data: JSON.stringify({
                         bookId: bookId,
-                        cartQuantity: quantity
+                        cartQuantity: parseInt(quantity)
                     }),
                     success: function (res) {
-                        if (res && res.message) {
-                            alert(res.message);
-                        } else {
-                            alert('장바구니에 담았습니다.');
+                        if(confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
+                            location.href = '/carts';
                         }
-                        // TODO: 헤더 장바구니 개수 갱신 로직이 있다면 여기에서 호출
                     },
                     error: function (xhr) {
                         if (xhr.status === 401) {
                             alert('로그인이 필요합니다.');
-                            // location.href = '/api/auth/login';
+                            location.href = '/login';
                         } else {
-                            alert('장바구니 담기 중 오류가 발생했습니다.');
+                            alert('오류가 발생했습니다: ' + xhr.responseText);
                         }
                     }
                 });
             });
 
-        })();
+            // 찜하기 AJAX
+            $('#btn-add-like').off('click').on('click', function () {
+                const bookId = $(this).data('book-id');
+
+                $.ajax({
+                    url: '/wishlists/toggle?bookId=' + bookId,
+                    method: 'GET',
+                    success: function (res) {
+                        alert('찜 목록에 반영되었습니다.');
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 401) {
+                            if(confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) {
+                                location.href = '/login';
+                            }
+                        } else if (xhr.status === 409) {
+                            alert('이미 찜한 도서입니다.');
+                        } else {
+                            alert('오류가 발생했습니다.');
+                        }
+                    }
+                });
+            });
+        });
     </script>
 </th:block>
 

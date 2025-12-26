@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<div layout:fragment="content">
+    <style>
+        /* 공통 카드 스타일 */
+        .custom-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            border: 1px solid #f1f3f5;
+        }
+
+        /* 테이블 스타일 */
+        .my-table thead th {
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 700;
+            color: #495057;
+            padding-bottom: 15px;
+            background: transparent;
+        }
+        .my-table tbody td {
+            vertical-align: middle;
+            padding: 20px 15px;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        /* 내 정보 텍스트 스타일 */
+        .info-label {
+            font-size: 0.9rem;
+            color: #868e96;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #343a40;
+        }
+        .point-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #e67700; /* 포인트 강조 색상 */
+        }
+
+        /* 등급 뱃지 */
+        .grade-badge-pill {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            background-color: #e7f5ff;
+            color: #228be6;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* 사이드바 메뉴 활성화 스타일 (추가됨) */
+        .mypage-menu .nav-link.active {
+            background-color: #FFD333; /* 테마 메인 컬러 */
+            color: #3D464D;
+            font-weight: 700;
+        }
+        .mypage-menu .nav-link {
+            border-radius: 5px;
+            padding: 12px 20px;
+        }
+        .mypage-menu .nav-link:hover {
+            background-color: #f1f3f5;
+        }
+    </style>
+
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <a class="breadcrumb-item text-dark" href="/">Home</a>
+                    <span class="breadcrumb-item active">마이페이지</span>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+
+            <div class="col-lg-3 col-md-4 mb-5">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">MY 메뉴</span>
+                </h5>
+                <div class="bg-light p-30 rounded shadow-sm border">
+                    <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
+                        <a class="nav-link active mb-2" th:href="@{/members/my-page}">
+                            <i class="fa fa-user-circle mr-2"></i>내 정보 / 배송지
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/orders}">
+                            <i class="fa fa-shopping-bag mr-2"></i>주문/배송 조회
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/history}">
+                            <i class="fa fa-undo mr-2"></i>취소/반품 내역
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/wishlists}">
+                            <i class="fa fa-heart mr-2"></i>찜한 상품
+                        </a>
+                        <a class="nav-link text-dark" th:href="@{/members/reviews}">
+                            <i class="fa fa-edit mr-2"></i>내 리뷰
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8">
+
+                <h2 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">내 정보</span>
+                </h2>
+                <div class="custom-card mb-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-sm-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3 text-secondary"><i class="fas fa-user fa-2x"></i></div>
+                                        <div>
+                                            <div class="info-label">이름</div>
+                                            <div class="info-value" th:text="${member.memberName}">홍길동</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3 text-secondary"><i class="fas fa-crown fa-2x"></i></div>
+                                        <div>
+                                            <div class="info-label">등급</div>
+                                            <div class="grade-badge-pill">
+                                                <span th:text="${member.gradeName}">GOLD</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3 text-secondary"><i class="fas fa-envelope fa-2x"></i></div>
+                                        <div>
+                                            <div class="info-label">이메일</div>
+                                            <div class="info-value" th:text="${member.memberEmail}">email@example.com</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3 text-secondary"><i class="fas fa-coins fa-2x"></i></div>
+                                        <div>
+                                            <div class="info-label">보유 포인트</div>
+                                            <div class="point-value" th:text="${member.memberPoint} + ' P'">1,000 P</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 text-md-right mt-4 mt-md-0 border-left-md pl-md-4" style="border-left: 1px solid #f1f3f5;">
+                            <a href="/members/grades" class="btn btn-outline-info btn-block mb-2 font-weight-bold">
+                                <i class="fas fa-gift mr-2"></i>등급 혜택 보기
+                            </a>
+
+                            <form th:action="@{/members/withdraw}" method="post" class="d-inline" onsubmit="return confirm('정말 탈퇴하시겠습니까? 탈퇴 시 모든 정보가 삭제됩니다.');">
+                                <button class="btn btn-outline-danger btn-block font-weight-bold">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>회원 탈퇴
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">배송지 관리</span>
+                </h2>
+                <div class="custom-card mb-5">
+                    <div class="table-responsive">
+                        <table class="table my-table table-hover text-center mb-0">
+                            <thead>
+                            <tr>
+                                <th width="20%">별칭</th>
+                                <th width="60%">주소</th>
+                                <th width="20%">관리</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="addr : ${addresses}">
+                                <td class="align-middle">
+                                    <span class="font-weight-bold text-dark" th:text="${addr.addressAlias}">우리집</span>
+                                </td>
+                                <td class="align-middle text-left pl-5" th:text="'(' + ${addr.addressPostCode} + ') ' + ${addr.addressBase} + ' ' + ${addr.addressDetail}">
+                                    (12345) 서울시 강남구 테헤란로 123
+                                </td>
+                                <td class="align-middle">
+                                    <button class="btn btn-sm btn-outline-primary mr-1"
+                                            type="button"
+                                            data-toggle="modal"
+                                            th:data-target="'#editModal-' + ${addr.addressId}">
+                                        <i class="fa fa-edit"></i> 수정
+                                    </button>
+
+                                    <form th:action="@{'/members/addresses/' + ${addr.addressId} + '/delete'}" method="post" class="d-inline" onsubmit="return confirm('삭제하시겠습니까?');">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i> 삭제</button>
+                                    </form>
+
+                                    <div class="modal fade" th:id="'editModal-' + ${addr.addressId}" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content border-0 shadow">
+                                                <div class="modal-header bg-light">
+                                                    <h5 class="modal-title font-weight-bold">주소 수정</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <form th:action="@{'/members/addresses/' + ${addr.addressId} + '/update'}" method="post">
+                                                    <div class="modal-body text-left p-4">
+                                                        <div class="form-group">
+                                                            <label class="font-weight-bold">별칭</label>
+                                                            <input type="text" name="addressAlias" class="form-control" th:value="${addr.addressAlias}" required style="height: 45px;">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="font-weight-bold">우편번호</label>
+                                                            <input type="text" name="addressPostCode" class="form-control bg-light" th:value="${addr.addressPostCode}" readonly required style="height: 45px;">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="font-weight-bold">기본 주소</label>
+                                                            <input type="text" name="addressBase" class="form-control bg-light" th:value="${addr.addressBase}" readonly required style="height: 45px;">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="font-weight-bold">상세 주소</label>
+                                                            <input type="text" name="addressDetail" class="form-control" th:value="${addr.addressDetail}" required style="height: 45px;">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer bg-light border-0">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                                        <button type="submit" class="btn btn-primary font-weight-bold px-4">수정 완료</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(addresses)}">
+                                <td colspan="3" class="py-5 text-center text-muted">
+                                    <i class="fas fa-map-marker-alt fa-2x mb-3 d-block text-secondary"></i>
+                                    등록된 배송지가 없습니다.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h2 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">새 주소 추가</span>
+                </h2>
+                <div class="custom-card mb-5">
+                    <form th:action="@{/members/addresses}" method="post" th:object="${addressRequest}">
+                        <div class="row">
+                            <div class="col-md-2 form-group">
+                                <label class="small text-muted mb-1 ml-1">별칭</label>
+                                <input type="text" class="form-control" th:field="*{addressAlias}" placeholder="예: 회사" required style="height: 50px;">
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label class="small text-muted mb-1 ml-1">우편번호</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="newZipcode" th:field="*{addressPostCode}" placeholder="우편번호" readonly required onclick="execDaumPostcode()" style="height: 50px;">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-dark" onclick="execDaumPostcode()">찾기</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label class="small text-muted mb-1 ml-1">기본 주소</label>
+                                <input type="text" class="form-control bg-white" id="newAddressBase" th:field="*{addressBase}" placeholder="주소 찾기를 이용해주세요" readonly required style="height: 50px;">
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label class="small text-muted mb-1 ml-1">상세 주소</label>
+                                <input type="text" class="form-control" id="newAddressDetail" th:field="*{addressDetail}" placeholder="상세 주소를 입력하세요" required style="height: 50px;">
+                            </div>
+                            <div class="col-md-12 text-right mt-2">
+                                <button type="submit" class="btn btn-primary py-2 px-5 font-weight-bold shadow-sm" style="height: 50px;">
+                                    <i class="fas fa-plus mr-2"></i>주소 추가하기
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div> </div> </div> </div>
+
+<th:block layout:fragment="script">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function() {
+            var errorMessage = /*[[${errorMessage}]]*/ null;
+            if (errorMessage) {
+                alert(errorMessage);
+            }
+        });
+        /*]]>*/
+    </script>
+
+    <script>
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = '';
+                    var extraAddr = '';
+
+                    if (data.userSelectedType === 'R') {
+                        addr = data.roadAddress;
+                    } else {
+                        addr = data.jibunAddress;
+                    }
+
+                    if(data.userSelectedType === 'R'){
+                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                            extraAddr += data.bname;
+                        }
+                        if(data.buildingName !== '' && data.apartment === 'Y'){
+                            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        }
+                        if(extraAddr !== ''){
+                            addr += ' (' + extraAddr + ')';
+                        }
+                    }
+
+                    document.getElementById('newZipcode').value = data.zonecode;
+                    document.getElementById('newAddressBase').value = addr;
+                    document.getElementById('newAddressDetail').focus();
+                }
+            }).open();
+        }
+    </script>
+</th:block>
+</html>

@@ -1,39 +1,73 @@
 package com.nhnacademy.frontserver.member;
 
-import com.nhnacademy.frontserver.PageResponse;
 import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "gateway-member",
         url = "${gateway.url}")
 public interface MemberClient {
+    // 회원
+    @PostMapping("/api/members/signup")
+    void signup(@RequestBody MemberSignupRequest request);
 
     @GetMapping("/api/members")
     MemberResponse getMember();
 
-    @GetMapping("/api/members/addresses")
-    List<AddressResponse> getAddresses();
+    @GetMapping("/api/members/social/{oauthId}")
+    MemberResponse getMemberByOauthId(@PathVariable("oauthId") String oauthId);
 
-    @GetMapping("/api/members/reviews")
-    PageResponse<MemberReviewResponse> getReviews(@RequestParam("page") int page,
-                                                  @RequestParam("size") int size,
-                                                  @RequestParam(name = "sort", defaultValue = "reviewId,desc") String sort);
+    // 휴면 해제 인증번호 요청
+    @PostMapping("/api/members/dormant/request")
+    void requestDormantCode(@RequestBody DormantCodeRequest request);
 
-    //TODO 멤버 업데이트 시 업데이트 된 유저정보 반환 필요
-    @PostMapping("/api/members")
-    MemberResponse updateMember(@RequestBody MemberUpdateRequest memberUpdateRequest);
+    // 휴면 해제 검증 및 상태 변경
+    @PostMapping("/api/members/dormant/verify")
+    void verifyDormantCode(@RequestBody DormantVerifyRequest request);
 
-    @PostMapping("/api/auth/login")
-    void login(@RequestBody LoginRequest loginRequest);
+    // 소셜 로그인애서 추가 정보 입력하면 GUEST -> MEMBER로 변경
+    @PostMapping("/api/members/social-info")
+    void signupSocialMember(@RequestBody SocialSignupRequest request);
+
+    @PutMapping("/api/members/social-info")
+    void updateSocialMember(@RequestBody SocialSignupRequest request);
+
+    @PutMapping("/api/members/withdraw")
+    void withdrawMember();
+
+    // 비밀번호 재설정용 인증번호 발송 (가입된 이메일인지 체크)
+    @PostMapping("/api/members/emails/password")
+    void sendResetPasswordEmail(@RequestBody EmailRequest request);
+
+    // 비밀번호 재설정 (인증코드 검증 + 비밀번호 변경을 한번에 수행)
+    @PutMapping("/api/members/password/reset")
+    void resetPassword(@RequestBody PasswordResetRequest request);
 
     @PostMapping("/api/members/findEmail")
-    String findId(@RequestBody String email);
+    String findEmail(@RequestBody FindMemberIdRequest request);
 
-    @PostMapping("/api/members/signup")
-    String signup(@RequestBody MemberSignupRequest memberSignupRequest);
+    // 이메일 인증
+    @PostMapping("/api/members/emails/signup")
+    void sendSignupEmail(@RequestBody EmailRequest request);
 
+    @PostMapping("/api/members/emails/verify")
+    void verifyEmail(@RequestBody VerifyEmailRequest request);
+
+    // 주소
+    @GetMapping("/api/members/addresses")
+    List<AddressResponse> getAllAddresses();
+
+    @PostMapping("/api/members/addresses")
+    void addAddress(@RequestBody AddressCreateRequest request);
+
+    @DeleteMapping("/api/members/addresses/{addressId}")
+    void deleteAddress(@PathVariable Long addressId);
+
+    @PutMapping("/api/members/addresses/{addressId}")
+    void updateAddress(@PathVariable Long addressId, @RequestBody AddressUpdateRequest request);
+
+    // 등급
+    @GetMapping("/api/members/grades")
+    List<GradeResponse> getGrades();
 }

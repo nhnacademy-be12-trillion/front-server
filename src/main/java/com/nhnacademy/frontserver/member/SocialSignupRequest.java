@@ -1,12 +1,18 @@
 package com.nhnacademy.frontserver.member;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
-record SocialSignupRequest(
-        String email,
-        String name,
-        LocalDate birthDate,
-        String contact,
+public record SocialSignupRequest(
+        @NotBlank @Email
+        String memberEmail,
+        @NotBlank
+        String memberName,
+        LocalDate memberBirth,
+        @Pattern(regexp = "^01(?:0|1|[2-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = "연락처 형식이 올바르지 않습니다.")
+        String memberContact,
+        @NotBlank
         String memberOauthId,
-        AddressCreateRequest address
+        AddressCreateRequest memberAddress
 ) {}

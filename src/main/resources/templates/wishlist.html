@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+  <title>Trillion-Shop | 위시리스트</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+  <div class="container-fluid bg-secondary mb-5">
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 200px">
+      <h1 class="font-weight-semi-bold text-uppercase mb-3">나의 위시리스트</h1>
+      <div class="d-inline-flex">
+        <p class="m-0"><a th:href="@{/static}">Home</a></p>
+        <p class="m-0 px-2">-</p>
+        <p class="m-0">Wishlist</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid pt-5">
+    <div class="row px-xl-5">
+      <div class="col-12 table-responsive mb-5">
+        <table class="table table-light table-borderless table-hover text-center mb-0">
+          <thead class="thead-dark">
+          <tr>
+            <th>상품 이미지</th>
+            <th>상품명</th>
+            <th>가격</th>
+            <th>장바구니</th>
+            <th>삭제</th>
+          </tr>
+          </thead>
+          <tbody class="align-middle">
+
+          <tr th:if="${#lists.isEmpty(books)}">
+            <td colspan="5" class="py-5">찜한 도서가 없습니다.</td>
+          </tr>
+
+          <tr th:each="book : ${books}">
+            <td class="align-middle">
+              <img th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                   alt="" style="width: 50px;">
+            </td>
+            <td class="align-middle text-left pl-5">
+              <a th:href="@{/books/{id}(id=${book.bookId})}"
+                 class="text-dark font-weight-bold"
+                 th:text="${book.bookName}">책 제목</a>
+            </td>
+            <td class="align-middle"
+                th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">10,000원</td>
+            <td class="align-middle">
+              <button class="btn btn-sm btn-primary"
+                      th:onclick="'addToCart(' + ${book.bookId} + ')'">
+                <i class="fa fa-shopping-cart mr-1"></i> 담기
+              </button>
+            </td>
+            <td class="align-middle">
+              <button class="btn btn-sm btn-danger"
+                      th:onclick="'removeWishlist(' + ${book.bookId} + ')'">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="script">
+  <script>
+    // 삭제 버튼 (토글 기능 재사용)
+    function removeWishlist(bookId) {
+      if(!confirm('정말 삭제하시겠습니까?')) return;
+
+      fetch('/wishlists/toggle?bookId=' + bookId)
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  alert('삭제되었습니다.');
+                  location.reload(); // 목록 갱신을 위해 새로고침
+                } else {
+                  alert(data.message);
+                }
+              });
+    }
+
+    // 장바구니 담기 (기존 함수 재활용 가능하도록 base나 index에 있는 함수 확인)
+    function addToCart(bookId) {
+      fetch('/carts/add?bookId=' + bookId).then(res => {
+        if(res.ok) alert('장바구니에 담겼습니다.');
+        else alert('오류가 발생했습니다.');
+      });
+    }
+  </script>
+</th:block>
+</body>
+</html>

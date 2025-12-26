@@ -2,14 +2,14 @@ package com.nhnacademy.frontserver.member;
 
 import java.time.LocalDate;
 
-record MemberResponse(
+public record MemberResponse(
         Long memberId,
         String memberEmail,
         String memberName,
         String memberContact,
         LocalDate memberBirth,
-        MemberState memberState,
+        String memberState, // ENUM -> String
         Integer memberPoint,
-        String gradeName
-) {
-}
+        String gradeName,    // ENUM -> String
+        String memberOauthId
+) {}

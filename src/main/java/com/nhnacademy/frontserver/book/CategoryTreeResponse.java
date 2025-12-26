@@ -18,4 +18,11 @@ public record CategoryTreeResponse(
         Long categoryId,
         String categoryName,
         List<CategoryTreeResponse> children
-) {}
+
+
+) {
+    public Long getCategoryId() { return categoryId; }
+    public String getCategoryName() { return categoryName; }
+    public List<CategoryTreeResponse> getChildren() { return children; }
+
+}

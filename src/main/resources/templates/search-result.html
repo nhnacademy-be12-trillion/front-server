@@ -4,124 +4,562 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{base}">
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="utf-8">
     <title>Trillion-Shop | 검색 결과</title>
 
     <th:block layout:fragment="head">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="Book Store, Search" name="keywords">
+        <meta content="Search Result" name="description">
+
         <style>
-            .search-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 0; }
-            .search-form { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-            .search-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:14px; }
-            .card { border:1px solid #e5e5e5; border-radius:10px; overflow:hidden; background:#fff; }
-            .card-img { width:100%; aspect-ratio: 1/1.4; object-fit:cover; background:#f5f5f5; }
-            .card-body { padding:10px 12px; }
-            .title { font-weight:700; display:block; line-height:1.2; margin-bottom:6px; }
-            .meta { font-size:12px; color:#666; margin-bottom:6px; }
-            .tags { font-size:12px; color:#444; }
-            .pager { display:flex; gap:6px; justify-content:center; margin-top:18px; flex-wrap:wrap; }
-            .btn { padding:6px 10px; border:1px solid #ddd; border-radius:8px; background:#fff; text-decoration:none; color:#222; }
-            .btn.active { font-weight:700; border-color:#222; }
-            .btn.disabled { opacity:.4; pointer-events:none; }
-            .brand { font-weight:800; font-size:18px; text-decoration:none; color:inherit; }
-            .muted { color:#666; }
-            input, select { padding:7px 10px; border:1px solid #ddd; border-radius:8px; }
-            button { padding:7px 12px; border:1px solid #222; border-radius:8px; background:#222; color:#fff; }
+            .search-page-title {
+                font-size: 1.5rem;
+                font-weight: 800;
+                color: #222;
+                margin: 0;
+            }
+
+            .search-summary {
+                font-size: 0.95rem;
+                color: #666;
+            }
+
+            .search-meta {
+                font-size: 0.8rem;
+                color: #888;
+            }
+
+            .search-filter-form .form-control {
+                height: 32px;
+                padding: 3px 8px;
+                font-size: 0.85rem;
+            }
+
+            .search-filter-form .btn-apply {
+                height: 32px;
+                padding: 3px 10px;
+                font-size: 0.85rem;
+            }
+
+            .ai-pill {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: #eef3ff;
+                color: #1a3cff;
+                font-size: 0.7rem;
+                font-weight: 600;
+            }
+
+            /* 리스트형 아이템 */
+            .search-result-list {
+                border-top: 1px solid #eee;
+            }
+
+            .search-result-item {
+                display: flex;
+                padding: 18px 0;
+                border-bottom: 1px solid #f5f5f5;
+            }
+
+            .search-result-thumb {
+                flex: 0 0 130px;
+                margin-right: 18px;
+            }
+
+            .search-result-thumb img {
+                display: block;
+                width: 100%;
+                height: 190px;
+                object-fit: cover;
+                background: #f3f3f3;
+            }
+
+            .search-result-body {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .search-result-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #222;
+                margin-bottom: 4px;
+                text-decoration: none;
+            }
+
+            .search-result-title:hover {
+                text-decoration: underline;
+                color: #0056b3;
+            }
+
+            .search-result-meta {
+                font-size: 0.85rem;
+                color: #666;
+                margin-bottom: 4px;
+            }
+
+            .search-result-tags {
+                margin-top: 6px;
+            }
+
+            .search-result-tags .badge {
+                font-size: 0.7rem;
+                padding: 3px 8px;
+                border-radius: 999px;
+                background-color: #f5f5f5;
+                color: #555;
+                margin-right: 4px;
+                margin-bottom: 3px;
+            }
+
+            /* 가격 + 평점(왼쪽) */
+            .search-result-price-row {
+                margin-top: 4px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 4px 10px;
+            }
+
+            .price-now {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #e60012;
+            }
+
+            .price-regular {
+                font-size: 0.85rem;
+                color: #999;
+            }
+
+            .price-regular del {
+                color: #999;
+            }
+
+            .discount-badge-inline {
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: #e60012;
+            }
+
+            .search-result-rating {
+                font-size: 0.8rem;
+                color: #666;
+            }
+
+            .search-result-rating i.fa-star {
+                font-size: 0.85rem;
+            }
+
+            /* 오른쪽 버튼 영역 */
+            .action-block {
+                min-width: 140px;
+                margin-left: 15px;
+                text-align: right;
+            }
+
+            .action-block .btn {
+                display: block;
+                width: 100%;
+                font-size: 0.8rem;
+                font-weight: 600;
+                margin-bottom: 4px;
+                padding-top: 6px;
+                padding-bottom: 6px;
+            }
+
+            .action-block .input-group {
+                width: 100%;
+                margin-bottom: 6px;
+            }
+
+            .action-block .form-control {
+                padding: 2px 4px;
+                height: 28px;
+                font-size: 0.8rem;
+            }
+
+            .action-block .btn-qty {
+                padding: 0 8px;
+                font-size: 0.8rem;
+            }
+
+            @media (max-width: 767.98px) {
+                .search-result-item {
+                    flex-direction: row;
+                }
+                .action-block {
+                    margin-left: 0;
+                    margin-top: 8px;
+                    text-align: left;
+                }
+            }
         </style>
     </th:block>
 </head>
 
 <body>
-<div layout:fragment="content" class="container" style="max-width:1100px;">
+<div layout:fragment="content" class="search-page">
 
-    <!-- 상단 헤더 -->
-    <div class="search-header">
-        <a class="brand" th:href="@{/}">Trillion-Shop</a>
+    <!-- 검색 헤더 / 요약 영역 -->
+    <div class="container-fluid pt-5">
+        <div class="row px-xl-5">
+            <div class="col-12 mb-2 d-flex justify-content-between align-items-end flex-wrap">
+                <h2 class="search-page-title mb-2 mb-md-0">검색 결과</h2>
 
-        <!-- 검색 폼 -->
-        <form class="search-form" th:action="@{/search}" method="get">
-            <input type="text" name="query" placeholder="검색어 입력"
-                   th:value="${query}" />
+                <form class="search-filter-form form-inline d-flex flex-wrap justify-content-lg-end"
+                      th:action="@{/search}" method="get">
+                    <input type="hidden" name="query" th:value="${query}">
+                    <input type="hidden" name="mode"
+                           th:value="${mode != null ? mode : 'bm25'}">
+                    <input type="hidden" name="page" value="0"/>
 
-            <select name="sort">
-                <option value="RELEVANCE" th:selected="${sort == 'RELEVANCE'}">관련도</option>
-                <option value="NEW" th:selected="${sort == 'NEW'}">최신</option>
-                <option value="POPULARITY" th:selected="${sort == 'POPULARITY'}">인기</option>
-                <option value="LOW_PRICE" th:selected="${sort == 'LOW_PRICE'}">낮은 가격</option>
-                <option value="HIGH_PRICE" th:selected="${sort == 'HIGH_PRICE'}">높은 가격</option>
-                <option value="RATING" th:selected="${sort == 'RATING'}">평점</option>
-                <option value="REVIEW_COUNT" th:selected="${sort == 'REVIEW_COUNT'}">리뷰수</option>
-            </select>
+                    <div class="form-group mr-2 mb-2">
+                        <label class="mr-2 small text-muted">정렬</label>
+                        <select class="form-control" name="sort">
+                            <option value="RELEVANCE" th:selected="${sort == 'RELEVANCE'}">관련도</option>
+                            <option value="NEW" th:selected="${sort == 'NEW'}">최신</option>
+                            <option value="POPULARITY" th:selected="${sort == 'POPULARITY'}">인기</option>
+                            <option value="LOW_PRICE" th:selected="${sort == 'LOW_PRICE'}">낮은 가격</option>
+                            <option value="HIGH_PRICE" th:selected="${sort == 'HIGH_PRICE'}">높은 가격</option>
+                            <option value="RATING" th:selected="${sort == 'RATING'}">평점</option>
+                            <option value="REVIEW_COUNT" th:selected="${sort == 'REVIEW_COUNT'}">리뷰수</option>
+                        </select>
+                    </div>
 
-            <select name="size">
-                <option value="10" th:selected="${size == 10}">10개</option>
-                <option value="20" th:selected="${size == 20}">20개</option>
-                <option value="50" th:selected="${size == 50}">50개</option>
-            </select>
+                    <div class="form-group mb-2">
+                        <label class="mr-2 small text-muted">페이지당</label>
+                        <select class="form-control" name="size">
+                            <option value="10" th:selected="${size == 10}">10개</option>
+                            <option value="20" th:selected="${size == 20}">20개</option>
+                            <option value="50" th:selected="${size == 50}">50개</option>
+                        </select>
+                    </div>
 
-            <input type="hidden" name="page" value="0"/>
-            <button type="submit">검색</button>
-        </form>
+                    <button type="submit" class="btn btn-outline-secondary btn-apply ml-2 mb-2">
+                        적용
+                    </button>
+                </form>
+            </div>
+
+            <!-- 요약 문구 -->
+            <div class="col-12 mb-3">
+                <p class="search-summary mb-1">
+                    "<b th:text="${query}">-</b>" 검색 결과
+                    <b th:text="${totalCount}">0</b>건
+                </p>
+
+                <p class="search-meta mb-0">
+                    <span th:if="${mode == 'ai'}">
+                        <span class="ai-pill">AI 검색</span>
+                        <span th:if="${elapsedMs != null and elapsedMs > 0}">
+                            &nbsp;· 처리 시간
+                            <b th:text="${elapsedMs}">0</b>ms
+                        </span>
+                    </span>
+
+                    <span th:if="${mode != 'ai'}">
+                        (일반 검색)
+                    </span>
+                </p>
+            </div>
+        </div>
     </div>
-
-    <!-- 검색 요약 -->
-    <p class="muted" style="margin: 6px 0 14px;">
-        <b th:text="${query}">-</b> 검색 결과:
-        <b th:text="${totalCount}">0</b>건
-    </p>
 
     <!-- 결과 없음 -->
-    <div th:if="${result == null or #lists.isEmpty(result)}" style="padding:40px 0; text-align:center;">
-        <h3 style="margin:0 0 8px;">검색 결과가 없습니다.</h3>
-        <p class="muted" style="margin:0;">다른 검색어로 다시 시도해 주세요.</p>
+    <div class="container-fluid" th:if="${result == null or #lists.isEmpty(result)}">
+        <div class="row px-xl-5">
+            <div class="col-12 text-center py-5">
+                <h5 class="mb-2">검색 결과가 없습니다.</h5>
+                <p class="text-muted mb-0">다른 검색어로 다시 시도해 주세요.</p>
+            </div>
+        </div>
     </div>
 
-    <!-- 카드형 결과 -->
-    <div class="search-grid" th:if="${result != null and !#lists.isEmpty(result)}">
-        <div class="card" th:each="b : ${result}">
-            <a th:href="@{/api/books/{id}(id=${b.id})}">
-                <img class="card-img"
-                     th:src="${b.imageUrl != null ? b.imageUrl : '/img/product-1.jpg'}"
-                     alt="책 표지"/>
-            </a>
-            <div class="card-body">
-                <a class="title"
-                   th:href="@{/api/books/{id}(id=${b.id})}"
-                   th:text="${b.title != null ? b.title : '제목 정보 없음'}">제목</a>
+    <!-- 검색 결과 리스트 -->
+    <div class="container-fluid" th:if="${result != null and !#lists.isEmpty(result)}">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <div class="search-result-list">
+                    <div class="search-result-item" th:each="b : ${result}">
 
-                <div class="meta">
-                    <span th:text="${b.author != null ? b.author : '저자 정보 없음'}">저자</span>
-                    <span> · </span>
-                    <span th:text="${b.publisher != null ? b.publisher : '출판사 정보 없음'}">출판사</span>
-                </div>
+                        <!-- 썸네일 -->
+                        <div class="search-result-thumb">
+                            <a th:href="@{/books/{id}(id=${b.id})}">
+                                <img th:src="${#strings.isEmpty(b.imageUrl) ? '/img/default-book.png' : '/trillion-bucket/' + b.imageUrl}"
+                                     alt="책 표지">
+                            </a>
+                        </div>
 
-                <div class="meta" th:if="${b.price != null}">
-                    <b th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">0원</b>
-                </div>
+                        <!-- 본문 -->
+                        <div class="search-result-body">
+                            <div class="d-flex justify-content-between flex-wrap">
+                                <!-- 왼쪽: 정보 + 가격 + 평점 -->
+                                <div class="flex-grow-1 mr-2">
+                                    <a class="search-result-title"
+                                       th:href="@{/books/{id}(id=${b.id})}"
+                                       th:text="${b.title != null ? b.title : '제목 정보 없음'}">
+                                        책 제목
+                                    </a>
 
-                <div class="tags" th:if="${b.tags != null and !#lists.isEmpty(b.tags)}">
-          <span th:each="t, it : ${b.tags}">
-            <span th:text="${t}">tag</span><span th:if="${!it.last}"> · </span>
-          </span>
+                                    <div class="search-result-meta">
+                                        <span th:text="${b.author != null ? b.author : '저자 정보 없음'}">저자</span>
+                                        <span class="mx-1">|</span>
+                                        <span th:text="${b.publisher != null ? b.publisher : '출판사 정보 없음'}">출판사</span>
+                                    </div>
+
+                                    <!-- 가격 + 할인률 + 평점/리뷰 -->
+                                    <div class="search-result-price-row">
+
+                                        <!-- 할인가 있는 경우 -->
+                                        <th:block th:if="${b.salePrice != null}">
+                                            <span class="price-now"
+                                                  th:text="${#numbers.formatInteger(b.salePrice, 0, 'COMMA')} + '원'">
+                                                0원
+                                            </span>
+                                            <span class="price-regular" th:if="${b.price != null}">
+                                                <del th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">
+                                                    0원
+                                                </del>
+                                            </span>
+
+                                            <!-- 할인률 -->
+                                            <span class="discount-badge-inline"
+                                                  th:if="${b.price != null and b.salePrice < b.price}"
+                                                  th:text="${T(java.lang.Math).round((1.0 - (b.salePrice * 1.0 / b.price)) * 100)} + '% 할인'">
+                                                10% 할인
+                                            </span>
+                                        </th:block>
+
+                                        <!-- 할인가 없고 정가만 있는 경우 -->
+                                        <th:block th:if="${b.salePrice == null}">
+                                            <span class="price-now"
+                                                  th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">
+                                                0원
+                                            </span>
+                                        </th:block>
+
+                                        <!-- 평점 / 리뷰 수 -->
+                                        <span class="search-result-rating" th:if="${b.ratingAvg != null}">
+                                            <span class="text-warning">
+                                                <i class="fa fa-star"></i>
+                                            </span>
+                                            <span class="font-weight-bold ml-1"
+                                                  th:text="${#numbers.formatDecimal(b.ratingAvg, 1, 1)}">
+                                                0.0
+                                            </span>
+                                            <span class="ml-1">/ 5</span>
+
+                                            <span class="text-muted ml-1" th:if="${b.reviewCount != null}">
+                                                (<span th:text="${b.reviewCount}">0</span>개 리뷰)
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <!-- 태그 -->
+                                    <div class="search-result-tags"
+                                         th:if="${b.tags != null and !#lists.isEmpty(b.tags)}">
+                                        <span class="badge"
+                                              th:each="t : ${b.tags}"
+                                              th:text="${t}">
+                                            태그
+                                        </span>
+                                    </div>
+
+                                    <!-- AI 추천 정보 -->
+                                    <div class="mt-2" th:if="${mode == 'ai'}">
+                                        <span class="badge badge-info mr-2"
+                                              th:if="${b.recommended}">
+                                            AI 추천
+                                        </span>
+                                        <span class="text-muted small"
+                                              th:if="${b.recommendationReason != null}"
+                                              th:text="${b.recommendationReason}">
+                                            추천 이유
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 오른쪽: 수량 + 버튼들 -->
+                                <div class="action-block mt-2 mt-md-0">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <button class="btn btn-outline-secondary btn-qty js-qty-minus" type="button">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text"
+                                               class="form-control text-center js-qty-input"
+                                               value="1">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary btn-qty js-qty-plus" type="button">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="button"
+                                            class="btn btn-primary js-btn-cart mt-1"
+                                            th:data-book-id="${b.id}">
+                                        <i class="fa fa-shopping-cart mr-1"></i> 장바구니
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-dark js-btn-buy"
+                                            th:data-book-id="${b.id}">
+                                        <i class="fa fa-credit-card mr-1"></i> 바로 구매
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-outline-danger js-btn-like"
+                                            th:data-book-id="${b.id}">
+                                        <i class="far fa-heart mr-1"></i> 찜하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- each item -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 페이징 (간단) -->
-    <div th:if="${totalPages != null and totalPages > 1 and page != null}" class="pager">
-        <a class="btn" th:classappend="${page.first} ? ' disabled' : ''"
-           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${page.number - 1})}">이전</a>
+    <!-- 페이징 -->
+    <div class="container-fluid"
+         th:if="${totalPages != null and totalPages > 1 and page != null}">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav>
+                    <ul class="pagination justify-content-center mb-5 mt-3">
+                        <li class="page-item" th:classappend="${page.first} ? ' disabled'">
+                            <a class="page-link"
+                               th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${page.number - 1})}">
+                                이전
+                            </a>
+                        </li>
 
-        <a class="btn"
-           th:each="p : ${#numbers.sequence(T(java.lang.Math).max(0, page.number - 2), T(java.lang.Math).min(totalPages - 1, page.number + 2))}"
-           th:classappend="${p == page.number} ? ' active' : ''"
-           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${p})}"
-           th:text="${p + 1}">1</a>
+                        <li class="page-item"
+                            th:each="p : ${#numbers.sequence(T(java.lang.Math).max(0, page.number - 2), T(java.lang.Math).min(totalPages - 1, page.number + 2))}"
+                            th:classappend="${p == page.number} ? ' active'">
+                            <a class="page-link"
+                               th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${p})}"
+                               th:text="${p + 1}">
+                                1
+                            </a>
+                        </li>
 
-        <a class="btn" th:classappend="${page.last} ? ' disabled' : ''"
-           th:href="@{/search(query=${query}, sort=${sort}, size=${size}, page=${page.number + 1})}">다음</a>
+                        <li class="page-item" th:classappend="${page.last} ? ' disabled'">
+                            <a class="page-link"
+                               th:href="@{/search(query=${query}, sort=${sort}, size=${size}, mode=${mode}, page=${page.number + 1})}">
+                                다음
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
-
 </div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(function () {
+
+            function getRowQuantity($btn) {
+                const $row = $btn.closest('.search-result-item');
+                const $input = $row.find('.js-qty-input');
+                let val = parseInt($input.val(), 10);
+                if (isNaN(val) || val < 1) val = 1;
+                $input.val(val);
+                return val;
+            }
+
+            // 수량 +/-
+            $('.search-result-list').on('click', '.js-qty-plus, .js-qty-minus', function () {
+                const $row = $(this).closest('.search-result-item');
+                const $input = $row.find('.js-qty-input');
+                let val = parseInt($input.val(), 10);
+                if (isNaN(val) || val < 1) val = 1;
+
+                if ($(this).hasClass('js-qty-plus')) {
+                    val++;
+                } else {
+                    if (val > 1) {
+                        val--;
+                    }
+                }
+                $input.val(val);
+            });
+
+            // 장바구니 담기
+            $('.search-result-list').on('click', '.js-btn-cart', function () {
+                const bookId = $(this).data('book-id');
+                const quantity = getRowQuantity($(this));
+
+                $.ajax({
+                    url: '/carts/add',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        bookId: bookId,
+                        cartQuantity: quantity
+                    }),
+                    success: function () {
+                        if (confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
+                            location.href = '/carts';
+                        }
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 401) {
+                            alert('로그인이 필요합니다.');
+                            location.href = '/login';
+                        } else {
+                            alert('오류가 발생했습니다: ' + xhr.responseText);
+                        }
+                    }
+                });
+            });
+
+            // 바로 구매
+            $('.search-result-list').on('click', '.js-btn-buy', function () {
+                const bookId = $(this).data('book-id');
+                const quantity = getRowQuantity($(this));
+
+                const url = '/checkout?bookId=' + encodeURIComponent(bookId)
+                    + '&quantity=' + encodeURIComponent(quantity);
+
+                window.location.href = url;
+            });
+
+            // 찜하기
+            $('.search-result-list').on('click', '.js-btn-like', function () {
+                const bookId = $(this).data('book-id');
+
+                $.ajax({
+                    url: '/wishlists/toggle?bookId=' + bookId,
+                    method: 'GET',
+                    success: function () {
+                        alert('찜 목록에 반영되었습니다.');
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 401) {
+                            if (confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) {
+                                location.href = '/login';
+                            }
+                        } else if (xhr.status === 409) {
+                            alert('이미 찜한 도서입니다.');
+                        } else {
+                            alert('오류가 발생했습니다.');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+
 </body>
 </html>

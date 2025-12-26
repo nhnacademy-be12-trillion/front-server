@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<div layout:fragment="content">
+  <style>
+    /* 테이블 기본 스타일: 깔끔하고 모던하게 */
+    .grade-table thead th {
+      border-top: none;
+      border-bottom: 2px solid #dee2e6;
+      font-weight: 700;
+      color: #495057;
+      padding-bottom: 15px;
+      background-color: transparent; /* 배경색 제거 */
+    }
+    .grade-table tbody td {
+      vertical-align: middle;
+      padding: 25px 15px;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .grade-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 일반(COMMON) 등급 스타일 (회색) */
+    .style-common .grade-badge { background-color: #e9ecef; color: #495057; }
+    .style-common .grade-text  { color: #495057; }
+
+    /* 스페셜 스타일 1 (골드/오렌지) */
+    .style-0 .grade-badge { background-color: #fff4e6; color: #fd7e14; }
+    .style-0 .grade-text  { color: #fd7e14; }
+
+    /* 스페셜 스타일 2 (퍼플/바이올렛) */
+    .style-1 .grade-badge { background-color: #f3d9fa; color: #be4bdb; }
+    .style-1 .grade-text  { color: #be4bdb; }
+
+    /* 스페셜 스타일 3 (블루/인디고) */
+    .style-2 .grade-badge { background-color: #e7f5ff; color: #228be6; }
+    .style-2 .grade-text  { color: #228be6; }
+
+    /* 스페셜 스타일 4 (그린/틸) */
+    .style-3 .grade-badge { background-color: #e6fcf5; color: #0ca678; }
+    .style-3 .grade-text  { color: #0ca678; }
+
+    /* 뱃지 공통 디자인 */
+    .grade-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 50px; /* 둥근 캡슐 모양 */
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* 포인트 숫자 강조 */
+    .point-text {
+      font-size: 1.6rem;
+      font-weight: 900;
+      font-family: 'Arial', sans-serif;
+    }
+  </style>
+
+  <div class="container-fluid">
+    <div class="row px-xl-5">
+      <div class="col-12">
+        <nav class="breadcrumb bg-light mb-30">
+          <a class="breadcrumb-item text-dark" href="/">Home</a>
+          <a class="breadcrumb-item text-dark" href="/members/my-page">마이페이지</a>
+          <span class="breadcrumb-item active">등급 혜택 안내</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row px-xl-5 justify-content-center">
+      <div class="col-lg-10 mb-5">
+
+        <h2 class="section-title position-relative text-uppercase mb-4">
+          <span class="bg-secondary pr-3">회원 등급 및 혜택 안내</span>
+        </h2>
+
+        <div class="bg-light p-4 rounded shadow-sm">
+          <div class="table-responsive">
+            <table class="table grade-table text-center mb-0">
+              <thead>
+              <tr>
+                <th width="30%">등급명</th>
+                <th width="30%">적립 혜택</th>
+                <th width="40%">달성 조건 (순수 주문 금액)</th>
+              </tr>
+              </thead>
+              <tbody>
+
+              <tr th:each="grade, iterStat : ${grades}"
+                  th:classappend="${grade.gradeName == 'COMMON'} ? 'style-common' : 'style-' + ${iterStat.index % 4}">
+
+                <td>
+                                    <span class="grade-badge">
+                                        <i th:unless="${grade.gradeName == 'COMMON'}" class="fas fa-crown mr-1"></i>
+                                        <span th:text="${grade.gradeName}">등급명</span>
+                                    </span>
+                </td>
+
+                <td>
+                  <div class="d-flex align-items-center justify-content-center flex-column">
+                    <div>
+                      <span class="point-text grade-text" th:text="${grade.gradePointRatio}">5</span>
+                      <span class="h5 font-weight-bold grade-text">%</span>
+                    </div>
+                    <small class="text-muted mt-1">결제 금액 적립</small>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="d-flex align-items-center justify-content-center text-dark">
+                                        <span class="h5 font-weight-bold mb-0"
+                                              th:text="${#numbers.formatInteger(grade.gradeCondition, 0, 'COMMA')}">100,000</span>
+                    <span class="h6 mb-0 ml-1 font-weight-normal">원 이상</span>
+                  </div>
+                </td>
+              </tr>
+
+              <tr th:if="${#lists.isEmpty(grades)}">
+                <td colspan="3" class="py-5 text-center text-muted">
+                  등록된 등급 정보가 없습니다.
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-center mt-5">
+            <a href="/members/my-page" class="btn btn-primary py-2 px-4 font-weight-bold shadow-sm" style="border-radius: 5px;">
+              마이페이지로 돌아가기
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</html>

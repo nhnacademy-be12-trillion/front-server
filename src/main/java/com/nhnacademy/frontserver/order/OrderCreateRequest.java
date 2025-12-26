@@ -15,9 +15,11 @@ package com.nhnacademy.frontserver.order;
 import java.time.LocalDateTime;
 import java.util.List;
 
-record OrderCreateRequest(
-    String orderName,
-    String orderContact,
+public record OrderCreateRequest(
+    String ordererName,
+    String ordererContact,
+    String ordererEmail,
+
     LocalDateTime deliveryDate,
 
     String receiverName,

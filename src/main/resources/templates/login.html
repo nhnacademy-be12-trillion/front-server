@@ -4,100 +4,166 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{base}">
 
-<head>
-  <meta charset="utf-8">
-  <title>Trillion-Shop | 로그인</title>
-
-  <!-- base.html 에서 favicon, 기본 CSS, Font Awesome 등은 이미 포함됨 -->
-  <th:block layout:fragment="head">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-    <style>
-      .auth-card {
-        max-width: 720px;
-        width: 100%;
-      }
-
-      .auth-wrapper {
-        min-height: 75vh;
-      }
-    </style>
-  </th:block>
-</head>
-
-<body>
 <div layout:fragment="content">
 
-  <!-- 로그인 폼 -->
-  <div class="container auth-wrapper d-flex align-items-center justify-content-center py-5">
-    <div class="auth-card bg-light p-4 p-md-5 border">
+  <style>
+    .social-btn {
+      width: 100%;
+      margin-bottom: 10px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 50px;
+      position: relative;
+      border-radius: 0;
+      text-decoration: none;
+    }
+    .social-btn img {
+      position: absolute;
+      left: 20px;
+    }
+    .social-btn:hover {
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .google-btn {
+      background-color: #ffffff;
+      color: #757575;
+      border: 1px solid #ddd;
+    }
+    .payco-btn {
+      background-color: #df0c18;
+      color: white;
+      border: none;
+    }
+    .payco-text {
+      font-family: sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      font-weight: 900;
+    }
+  </style>
 
-      <!-- 로고 영역 (원하면 빼도 됨) -->
-      <div class="text-center mb-4">
-        <a th:href="@{/}">
-          <img th:src="@{/img/logo.png}"
-               alt="Trillion-Shop Logo"
-               class="img-fluid mb-3"
-               style="max-height: 80px; background-color: #fff;">
-        </a>
-        <h4 class="mb-0">로그인</h4>
+  <div class="container-fluid">
+    <div class="row px-xl-5">
+      <div class="col-12">
+        <nav class="breadcrumb bg-light mb-30">
+          <a class="breadcrumb-item text-dark" href="/">Home</a>
+          <span class="breadcrumb-item active">로그인</span>
+        </nav>
       </div>
-
-      <!-- 에러 메시지 (옵션) -->
-      <div th:if="${param.error}" class="alert alert-danger py-2 mb-3">
-        이메일 또는 비밀번호가 올바르지 않습니다.
-      </div>
-
-      <form th:action="@{/auth/login}" method="post">
-        <div class="form-group">
-          <label for="email">이메일</label>
-          <input id="email" name="email" type="email"
-                 class="form-control" placeholder="example@email.com" required>
-        </div>
-
-        <div class="form-group">
-          <label for="password">비밀번호</label>
-          <input id="password" name="password" type="password"
-                 class="form-control" placeholder="비밀번호를 입력하세요" required>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="rememberMe" name="rememberMe">
-            <label class="custom-control-label" for="rememberMe">로그인 상태 유지</label>
-          </div>
-          <a th:href="@{/auth/forgot-password}" class="small">비밀번호 찾기</a>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block py-2 mb-3">
-          로그인
-        </button>
-
-        <div class="text-center mb-2">
-          <small class="text-muted">아직 회원이 아니신가요?</small>
-        </div>
-        <a th:href="@{/auth/signup}" class="btn btn-outline-secondary btn-block">
-          회원가입 하러가기
-        </a>
-
-        <hr>
-
-        <div class="text-center">
-          <a th:href="@{/orders/non-members}" class="small">
-            비회원 주문조회 바로가기
-          </a>
-        </div>
-      </form>
     </div>
   </div>
 
+  <div class="container mb-5" style="max-width: 550px;">
+
+    <h2 class="section-title position-relative text-uppercase text-center mb-4">
+      <span class="bg-secondary px-3">로그인</span>
+    </h2>
+
+    <div class="bg-light p-4 p-md-5 rounded shadow-sm">
+      <div class="text-center mb-4">
+        <h3 class="text-primary font-weight-bold" style="letter-spacing: 2px;">Trillion Bookstore</h3>
+        <p class="text-muted">로그인하여 더 많은 혜택을 누리세요</p>
+      </div>
+
+      <div th:if="${message}" class="alert alert-success text-center py-2 mb-4" role="alert" th:text="${message}"></div>
+      <div th:if="${param.error}" class="alert alert-danger text-center py-2 mb-4" role="alert">
+        아이디 또는 비밀번호를 확인해주세요.
+      </div>
+
+      <form action="/login" method="post" id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="memberEmail" class="sr-only">이메일</label>
+          <input type="email" class="form-control" id="memberEmail" name="memberEmail"
+                 placeholder="아이디 (이메일)" required autofocus style="height: 50px;">
+          <div class="invalid-feedback">아이디 형식이 올바르지 않습니다.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="memberPassword" class="sr-only">비밀번호</label>
+          <input type="password" class="form-control" id="memberPassword" name="memberPassword"
+                 placeholder="8자 이상, 영문/숫자/특수문자 포함" required style="height: 50px;">
+          <div class="invalid-feedback" id="passwordError">
+            비밀번호는 8~15자이며, 영문, 숫자, 특수문자를 모두 포함해야 합니다.
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold mb-4" style="height: 50px;">로그인</button>
+      </form>
+
+      <div class="d-flex justify-content-between align-items-center mb-4 text-dark" style="font-size: 0.9rem;">
+        <div>
+          <a href="/members/find/email" class="text-dark mr-2">아이디 찾기</a> |
+          <a href="/members/password/reset" class="text-dark ml-2">비밀번호 재설정</a>
+        </div>
+        <a href="/members/signup" class="text-primary font-weight-bold">회원가입</a>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="text-center mb-3">
+        <span class="text-muted bg-light px-2" style="position: relative; top: -13px;">SNS 계정으로 간편 로그인</span>
+      </div>
+
+      <a href="/api/oauth2/authorization/google" class="btn social-btn google-btn">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" width="20">
+        <span>Google로 로그인</span>
+      </a>
+
+      <a href="/api/oauth2/authorization/payco" class="btn social-btn payco-btn">
+        <span class="payco-text">PAYCO</span>
+        <span class="ml-2">로그인</span>
+      </a>
+    </div>
+  </div>
 </div>
 
-<!-- 이 페이지 전용 JS 필요하면 여기 -->
 <th:block layout:fragment="script">
-  <!-- 예: 로그인 페이지 전용 스크립트 -->
-  <!-- <script th:src="@{/js/login.js}"></script> -->
-</th:block>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      let isValid = true;
+      const emailInput = document.getElementById('memberEmail');
+      const pwInput = document.getElementById('memberPassword');
 
-</body>
+      // 이메일 검증
+      if (!emailInput.value.trim()) {
+        emailInput.classList.add('is-invalid');
+        isValid = false;
+      } else {
+        emailInput.classList.remove('is-invalid');
+      }
+
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,15}$/;
+
+      if (!pwInput.value.trim()) {
+        // 입력값이 없는 경우
+        document.getElementById('passwordError').innerText = "비밀번호를 입력해주세요.";
+        pwInput.classList.add('is-invalid');
+        isValid = false;
+      } else if (!passwordRegex.test(pwInput.value)) {
+        // 정규식 조건 불만족
+        document.getElementById('passwordError').innerText = "비밀번호는 8~15자이며, 영문/숫자/특수문자를 포함해야 합니다.";
+        pwInput.classList.add('is-invalid');
+        isValid = false;
+      } else {
+        // 통과
+        pwInput.classList.remove('is-invalid');
+      }
+
+      if (!isValid) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    });
+
+    // 사용자가 입력 시작하면 빨간 테두리(에러 상태) 제거
+    document.querySelectorAll('.form-control').forEach(input => {
+      input.addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+      });
+    });
+  </script>
+</th:block>
 </html>

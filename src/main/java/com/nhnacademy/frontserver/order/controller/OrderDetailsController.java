@@ -1,6 +1,7 @@
 package com.nhnacademy.frontserver.order.controller;
 
 import com.nhnacademy.frontserver.order.*;
+import com.nhnacademy.frontserver.order.client.OrderClient;
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class OrderDetailsController {
     @PostMapping("/{orderId}/cancel")
     public String cancelOrder(@PathVariable Long orderId) {
         orderClient.cancelOrderByMember(orderId);
-        return "redirect:/api/members/my-page";
+        return "redirect:/my-page/history";
     }
 
     @PostMapping("/{orderId}/items/{itemId}/return")
