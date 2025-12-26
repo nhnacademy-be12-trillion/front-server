@@ -64,8 +64,5 @@ public interface CartClient {
      * POST /api/carts/merge
      */
     @PostMapping("/merge")
-    ResponseEntity<Void> mergeCart(
-            @RequestHeader("Authorization") String token,
-            @RequestHeader("X-Guest-Id") String guestId // 헤더 직접 주입
-    );
+    ResponseEntity<Void> mergeCart();
 }
