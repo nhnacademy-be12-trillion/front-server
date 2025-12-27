@@ -18,11 +18,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class OrderDetailsController {
 
     private final OrderClient orderClient;
-    private final ReviewClient reviewClient;
+    private final com.nhnacademy.frontserver.book.ReviewClient reviewClient;
 
     @GetMapping("/{orderId}")
     public String getOrderDetail(@PathVariable Long orderId, Model model) {
         OrderResponse order = orderClient.getOrderByMember(orderId);
+
+        // 리뷰 존재 여부 확인
         Boolean exists = reviewClient.checkReviewExistence(orderId);
         boolean hasReview = (exists != null && exists);
 

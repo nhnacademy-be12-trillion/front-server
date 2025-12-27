@@ -38,10 +38,10 @@
         </div>
     </div>
 
-    <div class="container-fluid pb-5">
-        <div class="row px-xl-5">
+    <div class="container-fluid pb-5 px-xl-5">
+        <div class="row">
 
-            <div class="col-lg-8">
+            <div class="col-lg-8 col-md-8">
 
                 <div class="card mb-4">
                     <div class="card-header bg-light">
@@ -104,19 +104,17 @@
                                         </div>
 
                                         <div th:if="${item.orderItemStatus.name() == 'CONFIRMED'}">
-
+                                            <!-- 리뷰 작성 여부에 따른 버튼 표시 -->
                                             <a th:if="${!hasReview}"
                                                th:href="@{/reviews/write(bookId=${item.bookId}, orderId=${order.orderId})}"
-                                               class="btn btn-sm btn-success w-100">
+                                               class="btn btn-sm btn-success w-100 mb-1">
                                                 리뷰 작성
                                             </a>
-
                                             <a th:if="${hasReview}"
-                                               th:href="@{/books/{bookId}(bookId=${item.bookId})}"
-                                               class="btn btn-sm btn-secondary w-100">
-                                                도서 보러가기
+                                               th:href="@{/books/{bookId}(bookId=${item.bookId})}"        
+                                               class="btn btn-sm btn-secondary w-100 mb-1">
+                                                내 리뷰 보기
                                             </a>
-
                                         </div>
                                     </td>
 
@@ -181,7 +179,7 @@
             </div>
 
             <!-- ... (우측 주문 요약 정보 및 취소 버튼 영역 유지) ... -->
-            <div class="col-lg-4">
+            <div class="col-lg-4 col-md-4">
 
                 <div class="card mb-4">
                     <div class="card-header bg-light">
