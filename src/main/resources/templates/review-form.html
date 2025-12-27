@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{base}"
       xmlns:layout="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Trillion-Shop | 리뷰 작성</title>
+</head>
 <body>
 <div layout:fragment="content" class="container-fluid pt-5">
   <div class="row px-xl-5 justify-content-center">
@@ -9,25 +12,27 @@
 
       <form th:action="@{/reviews/add}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="bookId" th:value="${book.bookId}">
+        <input type="hidden" name="orderId" th:value="${orderId}" />
 
         <div class="form-group mb-4">
           <label class="font-weight-bold">별점</label>
           <select name="reviewRate" class="form-control" style="width: 150px;">
-            <option value="5">⭐⭐⭐⭐⭐ (5점)</option>
-            <option value="4">⭐⭐⭐⭐ (4점)</option>
-            <option value="3">⭐⭐⭐ (3점)</option>
-            <option value="2">⭐⭐ (2점)</option>
-            <option value="1">⭐ (1점)</option>
+            <option value="5">⭐⭐⭐⭐⭐ </option>
+            <option value="4">⭐⭐⭐⭐ </option>
+            <option value="3">⭐⭐⭐ </option>
+            <option value="2">⭐⭐ </option>
+            <option value="1">⭐ </option>
           </select>
         </div>
 
         <div class="form-group mb-4">
           <label class="font-weight-bold">리뷰 내용</label>
-          <textarea name="reviewContents" class="form-control" rows="8" placeholder="도서에 대한 솔직한 평을 남겨주시면 포인트가 적립됩니다."></textarea>
+          <textarea name="reviewContents" class="form-control" rows="8"
+                    placeholder="도서에 대한 솔직한 평을 남겨주시면 포인트가 적립됩니다." required></textarea>
         </div>
 
         <div class="form-group mb-4">
-          <label class="font-weight-bold">사진 첨 be (최대 5장)</label>
+          <label class="font-weight-bold">사진 첨부 (최대 5장)</label>
           <input type="file" name="images" class="form-control-file" multiple accept="image/*">
         </div>
 

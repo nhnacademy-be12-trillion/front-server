@@ -3,9 +3,14 @@ package com.nhnacademy.frontserver.auth.config;
 import com.nhnacademy.frontserver.auth.util.TokenHolder;
 import feign.RequestInterceptor;
 import feign.Retryer;
+import feign.codec.Encoder;
+import feign.form.spring.SpringFormEncoder;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -15,6 +20,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Slf4j
 @Configuration
 public class FeignClientConfig {
+
+    // 이 빈이 등록되어야 MultipartFile과 DTO를 같이 보낼 때 에러가 안 남
+    @Bean
+    public Encoder feignFormEncoder(ObjectFactory<HttpMessageConverters> converters) {
+        return new SpringFormEncoder(new SpringEncoder(converters));
+    }
 
     @Bean
     public RequestInterceptor requestInterceptor() {

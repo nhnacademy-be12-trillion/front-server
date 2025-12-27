@@ -1,6 +1,5 @@
 package com.nhnacademy.frontserver.order.controller;
 
-import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
@@ -48,8 +47,7 @@ public class CheckoutController {
 
         List<CheckoutItemView> items = new ArrayList<>();
 
-        // ... (Item processing logic remains same) ...
-        // 1) 즉시 결제 흐름: bookId + quantity 가 넘어온 경우
+        // 즉시 결제 흐름: bookId + quantity 가 넘어온 경우
         if (bookId != null && quantity != null) {
             BookDetailResponse book = bookClient.getBookDetail(bookId);
             CheckoutItemView item = new CheckoutItemView(
@@ -62,7 +60,7 @@ public class CheckoutController {
             );
             items.add(item);
         }
-        // 2) 장바구니 결제 흐름: bookId + quantity 가 없는 경우
+        // 장바구니 결제 흐름: bookId + quantity 가 없는 경우
         else {
             List<CartResponseDto> carts = cartClient.getCartItems().getBody();
             if (carts != null) {
@@ -83,9 +81,7 @@ public class CheckoutController {
             }
         }
 
-        // --- 공통 로직 ---
-
-        // 1. 주문 요약 정보 계산
+        // 주문 요약 정보 계산
         int subTotal = items.stream()
                 .mapToInt(CheckoutItemView::totalPrice)
                 .sum();
@@ -104,7 +100,7 @@ public class CheckoutController {
         int totalPrice = subTotal + shippingFee;
         OrderSummary orderSummary = new OrderSummary(subTotal, shippingFee, totalPrice);
 
-        // 2. 회원 정보 확인 (GlobalControllerAdvice에서 주입된 member 활용)
+        // 회원 정보 확인 (GlobalControllerAdvice에서 주입된 member 활용)
         MemberResponse member = (MemberResponse) model.getAttribute("member");
         boolean isMember = (member != null);
         
@@ -158,7 +154,7 @@ public class CheckoutController {
             orderCreateRequest = new OrderCreateRequest(null, null, null, null, null, null, null, null, null, 0, null, null);
         }
 
-        // 4. 포장 정보 조회
+        // 포장 정보 조회
         List<PackagingResponse> packagings = Collections.emptyList();
         try {
             List<PackagingResponse> packagingResponse = orderClient.getAllPackaging(0, 100, "id,asc");
@@ -169,7 +165,7 @@ public class CheckoutController {
             log.error("포장 정보를 가져오는 데 실패했습니다.", e);
         }
 
-        // 5. 모델과 세션에 데이터 추가
+        // 모델과 세션에 데이터 추가
         model.addAttribute("items", items);
         model.addAttribute("orderSummary", orderSummary);
         model.addAttribute("orderCreateRequest", orderCreateRequest);

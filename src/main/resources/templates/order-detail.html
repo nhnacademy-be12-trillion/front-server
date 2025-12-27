@@ -104,7 +104,19 @@
                                         </div>
 
                                         <div th:if="${item.orderItemStatus.name() == 'CONFIRMED'}">
-                                            <button class="btn btn-sm btn-success w-100">리뷰 작성</button>
+
+                                            <a th:if="${!hasReview}"
+                                               th:href="@{/reviews/write(bookId=${item.bookId}, orderId=${order.orderId})}"
+                                               class="btn btn-sm btn-success w-100">
+                                                리뷰 작성
+                                            </a>
+
+                                            <a th:if="${hasReview}"
+                                               th:href="@{/books/{bookId}(bookId=${item.bookId})}"
+                                               class="btn btn-sm btn-secondary w-100">
+                                                도서 보러가기
+                                            </a>
+
                                         </div>
                                     </td>
 

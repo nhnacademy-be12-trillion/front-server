@@ -238,38 +238,38 @@
                         <div class="tab-pane fade" id="tab-pane-3">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div class="bg-light p-4 mb-5 rounded border">
-                                        <h4 class="mb-3">리뷰 작성</h4>
-                                        <form id="reviewForm" th:action="@{/reviews/add}" method="post">
-                                            <input type="hidden" name="bookId" th:value="${book.bookId}">
+<!--                                    <div class="bg-light p-4 mb-5 rounded border">-->
+<!--                                        <h4 class="mb-3">리뷰 작성</h4>-->
+<!--                                        <form id="reviewForm" th:action="@{/reviews/add}" method="post">-->
+<!--                                            <input type="hidden" name="bookId" th:value="${book.bookId}">-->
 
-                                            <div class="d-flex my-3 align-items-center">
-                                                <p class="mb-0 mr-3 font-weight-bold">별점 평가</p>
-                                                <div class="text-primary star-rating">
-                                                    <i class="fas fa-star star-icon" data-value="1"></i>
-                                                    <i class="fas fa-star star-icon" data-value="2"></i>
-                                                    <i class="fas fa-star star-icon" data-value="3"></i>
-                                                    <i class="fas fa-star star-icon" data-value="4"></i>
-                                                    <i class="fas fa-star star-icon" data-value="5"></i>
-                                                    <input type="hidden" name="reviewRate" id="reviewRateInput" value="5">
-                                                </div>
-                                            </div>
+<!--                                            <div class="d-flex my-3 align-items-center">-->
+<!--                                                <p class="mb-0 mr-3 font-weight-bold">별점 평가</p>-->
+<!--                                                <div class="text-primary star-rating">-->
+<!--                                                    <i class="fas fa-star star-icon" data-value="1"></i>-->
+<!--                                                    <i class="fas fa-star star-icon" data-value="2"></i>-->
+<!--                                                    <i class="fas fa-star star-icon" data-value="3"></i>-->
+<!--                                                    <i class="fas fa-star star-icon" data-value="4"></i>-->
+<!--                                                    <i class="fas fa-star star-icon" data-value="5"></i>-->
+<!--                                                    <input type="hidden" name="reviewRate" id="reviewRateInput" value="5">-->
+<!--                                                </div>-->
+<!--                                            </div>-->
 
-                                            <div class="form-group mb-0">
-                                                <textarea id="reviewText" name="reviewContents" cols="30" rows="5"
-                                                          class="form-control mb-3"
-                                                          placeholder="배송 문의나 욕설 및 인신공격성 글은 상품 페이지에서 노출 제외처리됩니다."
-                                                          style="resize: none;"
-                                                          onclick="checkLoginAndFocus()"></textarea>
+<!--                                            <div class="form-group mb-0">-->
+<!--                                                <textarea id="reviewText" name="reviewContents" cols="30" rows="5"-->
+<!--                                                          class="form-control mb-3"-->
+<!--                                                          placeholder="배송 문의나 욕설 및 인신공격성 글은 상품 페이지에서 노출 제외처리됩니다."-->
+<!--                                                          style="resize: none;"-->
+<!--                                                          onclick="checkLoginAndFocus()"></textarea>-->
 
-                                                <div class="text-right">
-                                                    <button type="button" id="submitBtn" class="btn btn-primary px-4 py-2" onclick="submitReview()">
-                                                        등록하기
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
+<!--                                                <div class="text-right">-->
+<!--                                                    <button type="button" id="submitBtn" class="btn btn-primary px-4 py-2" onclick="submitReview()">-->
+<!--                                                        등록하기-->
+<!--                                                    </button>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </form>-->
+<!--                                    </div>-->
 
                                     <h4 class="mb-4 border-bottom pb-2"
                                         th:text="${reviews != null ? reviews.totalElements + '개의 리뷰가 있습니다.' : '리뷰가 없습니다.'}">
@@ -365,61 +365,61 @@
 <th:block layout:fragment="script">
     <script>
         // 리뷰 작성 관련 스크립트
-        // 1. 별점 UI 동작
-        document.querySelectorAll('.star-icon').forEach(star => {
-            star.addEventListener('click', function() {
-                let value = this.getAttribute('data-value');
-                document.getElementById('reviewRateInput').value = value;
-
-                // 별 아이콘 채우기/비우기
-                let stars = this.parentElement.querySelectorAll('.star-icon');
-                stars.forEach(s => {
-                    if (s.getAttribute('data-value') <= value) {
-                        s.classList.remove('far'); // 빈 별 제거 (필요시 class 조정)
-                        s.classList.add('fas');    // 꽉 찬 별 추가
-                        s.classList.remove('text-secondary');
-                        s.classList.add('text-primary');
-                    } else {
-                        s.classList.remove('fas');
-                        s.classList.add('far'); // FontAwesome 버전에 따라 'far' 사용
-                        s.classList.remove('text-primary');
-                        s.classList.add('text-secondary');
-                    }
-                });
-            });
-        });
-
-        // 2. 로그인 체크 및 리다이렉트 함수
-        function checkLoginAndFocus() {
-            const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
-
-            if (!isLoggedIn) {
-                document.getElementById('reviewText').blur(); // 포커스 해제
-
-                const confirmLogin = confirm("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?");
-
-                if (confirmLogin) {
-                    // 현재 페이지 URL을 redirectURL 파라미터로 저장하여 이동
-                    const currentUrl = encodeURIComponent(window.location.href);
-                    window.location.href = '/login?redirectURL=' + currentUrl;
-                }
-                return false;
-            }
-            return true;
-        }
-
-        // 3. 리뷰 등록
-        function submitReview() {
-            if (checkLoginAndFocus()) {
-                const text = document.getElementById('reviewText').value;
-                if(text.trim() === "") {
-                    alert("리뷰 내용을 입력해주세요.");
-                    return;
-                }
-                // 폼 전송
-                document.getElementById('reviewForm').submit();
-            }
-        }
+        // // 1. 별점 UI 동작
+        // document.querySelectorAll('.star-icon').forEach(star => {
+        //     star.addEventListener('click', function() {
+        //         let value = this.getAttribute('data-value');
+        //         document.getElementById('reviewRateInput').value = value;
+        //
+        //         // 별 아이콘 채우기/비우기
+        //         let stars = this.parentElement.querySelectorAll('.star-icon');
+        //         stars.forEach(s => {
+        //             if (s.getAttribute('data-value') <= value) {
+        //                 s.classList.remove('far'); // 빈 별 제거 (필요시 class 조정)
+        //                 s.classList.add('fas');    // 꽉 찬 별 추가
+        //                 s.classList.remove('text-secondary');
+        //                 s.classList.add('text-primary');
+        //             } else {
+        //                 s.classList.remove('fas');
+        //                 s.classList.add('far'); // FontAwesome 버전에 따라 'far' 사용
+        //                 s.classList.remove('text-primary');
+        //                 s.classList.add('text-secondary');
+        //             }
+        //         });
+        //     });
+        // });
+        //
+        // // 2. 로그인 체크 및 리다이렉트 함수
+        // function checkLoginAndFocus() {
+        //     const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
+        //
+        //     if (!isLoggedIn) {
+        //         document.getElementById('reviewText').blur(); // 포커스 해제
+        //
+        //         const confirmLogin = confirm("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?");
+        //
+        //         if (confirmLogin) {
+        //             // 현재 페이지 URL을 redirectURL 파라미터로 저장하여 이동
+        //             const currentUrl = encodeURIComponent(window.location.href);
+        //             window.location.href = '/login?redirectURL=' + currentUrl;
+        //         }
+        //         return false;
+        //     }
+        //     return true;
+        // }
+        //
+        // // 3. 리뷰 등록
+        // function submitReview() {
+        //     if (checkLoginAndFocus()) {
+        //         const text = document.getElementById('reviewText').value;
+        //         if(text.trim() === "") {
+        //             alert("리뷰 내용을 입력해주세요.");
+        //             return;
+        //         }
+        //         // 폼 전송
+        //         document.getElementById('reviewForm').submit();
+        //     }
+        // }
 
         $(document).ready(function () {
             // 수량 조절 버튼 이벤트

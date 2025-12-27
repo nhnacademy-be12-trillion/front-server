@@ -22,8 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
-@FeignClient(name = "gateway-order",
-        url = "${gateway.url}")
+@FeignClient(name = "gateway-book",
+        url = "${gateway.url}",
+        contextId = "bookClient")
 public interface BookClient {
 
     // 도서 목록 조회 (전체)
@@ -60,7 +61,7 @@ public interface BookClient {
     BookDetailResponse getBookDetail(@PathVariable("book_id") Long bookId);
 
     // 리뷰 등록 API
-    @PostMapping(value = "/api/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/api/books/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Long createReview(
             @RequestPart("request") ReviewRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
