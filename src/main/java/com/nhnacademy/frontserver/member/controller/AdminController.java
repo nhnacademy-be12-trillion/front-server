@@ -39,19 +39,27 @@ public class AdminController {
     }
 
     @GetMapping("/admin/orders")
-    public String adminOrders(Model model) {
+    public String adminOrders(@RequestParam(defaultValue = "0") int page, Model model) {
         // ... (기존 주문 조회 로직 유지) ...
         List<OrderResponse> orderList = Collections.emptyList();
+        int totalPages = 0;
+        long totalElements = 0;
+
         try {
-            PageResponse<OrderResponse> response = orderClient.getAllOrderByAdmin(0, 200, "orderDetails.orderDate,desc");
+            PageResponse<OrderResponse> response = orderClient.getAllOrderByAdmin(page, 20, "orderDetails.orderDate,desc");
             if (response != null && response.content() != null) {
                 orderList = response.content();
+                totalPages = response.totalPages();
+                totalElements = response.totalElements();
             }
         } catch (Exception e) {
             log.error("주문 내역 조회 실패", e);
         }
 
         model.addAttribute("orders", orderList);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalElements", totalElements);
         model.addAttribute("activeMenu", "orders");
         model.addAttribute("itemStatuses", OrderItemStatus.values());
 

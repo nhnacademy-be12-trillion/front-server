@@ -160,66 +160,68 @@
 
                 <!-- ===== 우측: 결제 요약 및 진행 ===== -->
                 <div class="col-lg-4 col-md-4">
-                    <h5 class="section-title position-relative text-uppercase mb-3">
-                        <span class="bg-secondary pr-3">결제 요약</span>
-                    </h5>
-                    <div id="summary-box" class="bg-light p-30 mb-5"
-                         th:attr="data-policy-fee=${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyFee : 3000}, data-policy-threshold=${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyThreshold : 50000}">
-                        <div class="border-bottom pb-2">
-                            <div class="d-flex justify-content-between mb-3">
-                                <h6>상품 금액</h6>
-                                <h6 id="summary-subtotal" th:text="${orderSummary != null ? #numbers.formatInteger(orderSummary.subTotal, 0, 'COMMA') + '원' : '0원'}">0원</h6>
+                    <div class="sticky-top" style="top: 2rem; z-index: 10;">
+                        <h5 class="section-title position-relative text-uppercase mb-3">
+                            <span class="bg-secondary pr-3">결제 요약</span>
+                        </h5>
+                        <div id="summary-box" class="bg-light p-30 mb-5"
+                             th:attr="data-policy-fee=${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyFee : 3000}, data-policy-threshold=${deliveryPolicy != null ? deliveryPolicy.deliveryPolicyThreshold : 50000}">
+                            <div class="border-bottom pb-2">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h6>상품 금액</h6>
+                                    <h6 id="summary-subtotal" th:text="${orderSummary != null ? #numbers.formatInteger(orderSummary.subTotal, 0, 'COMMA') + '원' : '0원'}">0원</h6>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h6>포장비</h6>
+                                    <h6 id="summary-packaging">0원</h6>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="font-weight-medium">배송비</h6>
+                                    <h6 id="summary-shipping" class="font-weight-medium" th:text="${orderSummary != null and orderSummary.shippingFee > 0 ? #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">0원</h6>
+                                </div>
+                                <!-- 포인트 사용 표시 추가 -->
+                                <div class="d-flex justify-content-between mt-3" th:if="${isMember}">
+                                    <h6 class="font-weight-medium">포인트 사용</h6>
+                                    <h6 id="summary-point-usage" class="font-weight-medium text-danger">0원</h6>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <h6>포장비</h6>
-                                <h6 id="summary-packaging">0원</h6>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <h6 class="font-weight-medium">배송비</h6>
-                                <h6 id="summary-shipping" class="font-weight-medium" th:text="${orderSummary != null and orderSummary.shippingFee > 0 ? #numbers.formatInteger(orderSummary.shippingFee, 0, 'COMMA') + '원' : '무료'}">0원</h6>
-                            </div>
-                            <!-- 포인트 사용 표시 추가 -->
-                            <div class="d-flex justify-content-between mt-3" th:if="${isMember}">
-                                <h6 class="font-weight-medium">포인트 사용</h6>
-                                <h6 id="summary-point-usage" class="font-weight-medium text-danger">0원</h6>
+                            <div class="pt-2">
+                                <div class="d-flex justify-content-between mt-2">
+                                    <h5>총 결제 금액</h5>
+                                    <h5 id="summary-total" th:text="${orderSummary != null ? #numbers.formatInteger(orderSummary.totalPrice, 0, 'COMMA') + '원' : '0원'}">0원</h5>
+                                </div>
                             </div>
                         </div>
-                        <div class="pt-2">
-                            <div class="d-flex justify-content-between mt-2">
-                                <h5>총 결제 금액</h5>
-                                <h5 id="summary-total" th:text="${orderSummary != null ? #numbers.formatInteger(orderSummary.totalPrice, 0, 'COMMA') + '원' : '0원'}">0원</h5>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="bg-light p-30 mb-5">
-                        <div class="row" th:if="${isMember}">
-                            <div class="col-md-12 form-group">
-                                <label>사용 포인트 <span id="point-display" class="text-muted small" th:if="${member != null}" th:text="| (보유: ${#numbers.formatInteger(member.memberPoint, 0, 'COMMA')}P)|"></span></label>
-                                <span id="available-point" th:if="${member != null}" th:data-point="${member.memberPoint}" style="display:none;"></span>
-                                <div class="input-group">
-                                    <input class="form-control" type="number" th:field="*{pointUsage}" id="pointUsage" min="0" placeholder="0" oninput="checkPointLimit(this)">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-primary" type="button" onclick="useAllPoints()">전액 사용</button>
+                        <div class="bg-light p-30 mb-5">
+                            <div class="row" th:if="${isMember}">
+                                <div class="col-md-12 form-group">
+                                    <label>사용 포인트 <span id="point-display" class="text-muted small" th:if="${member != null}" th:text="| (보유: ${#numbers.formatInteger(member.memberPoint, 0, 'COMMA')}P)|"></span></label>
+                                    <span id="available-point" th:if="${member != null}" th:data-point="${member.memberPoint}" style="display:none;"></span>
+                                    <div class="input-group">
+                                        <input class="form-control" type="number" th:field="*{pointUsage}" id="pointUsage" min="0" placeholder="0" oninput="checkPointLimit(this)">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="button" onclick="useAllPoints()">전액 사용</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-12 form-group">
-                                <label>쿠폰 적용</label>
-                                <div class="d-flex align-items-center mb-2">
-                                    <input type="hidden" th:field="*{couponId}" id="selectedCouponId">
-                                    <button type="button" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#couponModal">
-                                        쿠폰 선택
-                                    </button>
-                                    <span id="selectedCouponDisplay" class="text-success font-weight-bold"></span>
+                                <div class="col-md-12 form-group">
+                                    <label>쿠폰 적용</label>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <input type="hidden" th:field="*{couponId}" id="selectedCouponId">
+                                        <button type="button" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#couponModal">
+                                            쿠폰 선택
+                                        </button>
+                                        <span id="selectedCouponDisplay" class="text-success font-weight-bold"></span>
+                                    </div>
+                                    <small class="form-text text-muted">버튼을 눌러 보유하신 쿠폰을 적용해주세요.</small>
                                 </div>
-                                <small class="form-text text-muted">버튼을 눌러 보유하신 쿠폰을 적용해주세요.</small>
                             </div>
+                            <button type="submit" class="btn btn-block btn-primary font-weight-bold my-3 py-3">
+                                주문하기
+                            </button>
                         </div>
-                        <button type="submit" class="btn btn-block btn-primary font-weight-bold my-3 py-3">
-                            주문하기
-                        </button>
-                    </div>
+                    </div> <!-- sticky-top 닫힘 -->
                 </div>
             </div>
         </form>
