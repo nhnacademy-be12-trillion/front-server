@@ -23,8 +23,6 @@ public class OrderController {
 
     @PostMapping
     public String createOrder(@ModelAttribute OrderCreateRequest request,
-                              @RequestParam("address1") String address1,
-                              @RequestParam("address2") String address2,
                               HttpSession session) {
 
         List<OrderItemCreateRequest> orderItems = request.orderItems();
@@ -34,14 +32,24 @@ public class OrderController {
             return "redirect:/cart";
         }
 
-        String fullAddress = address1 + " " + address2;
+        // 프론트엔드(JS)에서 이미 합쳐진 주소를 사용 (없을 경우에만 null 처리)
+        String fullAddress = request.receiverAddress();
+        if (fullAddress == null || fullAddress.isBlank()) {
+            log.warn("배송지 주소가 누락되었습니다.");
+            // 필요 시 에러 처리 또는 기본값
+        }
+
+        // 포인트 및 쿠폰 null 안전 처리
+        int safePointUsage = request.pointUsage(); // int는 null일 수 없음 (기본값 0)
+        Long safeCouponId = request.couponId();    // null 허용
 
         OrderCreateRequest finalRequest = new OrderCreateRequest(
                 request.ordererName(), request.ordererContact(), request.ordererEmail(), request.deliveryDate(),
                 request.receiverName(), request.receiverContact(),
                 fullAddress,
-                request.receiverPostCode(), request.nonMemberPassword(), request.pointUsage(),
-                request.couponId(), orderItems
+                request.receiverPostCode(), request.nonMemberPassword(), 
+                safePointUsage,
+                safeCouponId, orderItems
         );
 
         OrderResponse response = orderClient.createOrder(finalRequest);

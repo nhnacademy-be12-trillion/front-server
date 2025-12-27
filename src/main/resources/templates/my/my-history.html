@@ -84,7 +84,15 @@
                                                 <small class="text-muted" th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')} + '원 x ' + ${item.quantity} + '개'"></small>
                                             </td>
                                             <td class="align-middle text-center" style="width: 150px;">
-                                                <span class="badge badge-danger px-3 py-2" style="font-size: 0.9em;" th:text="${item.orderItemStatus.title}">취소완료</span>
+                                                <div th:if="${item.orderItemStatus.name() == 'CANCELING'}">
+                                                    <span class="badge badge-warning px-3 py-2" style="font-size: 0.9em;">
+                                                        <i class="fas fa-spinner fa-spin mr-1"></i>취소 처리 중
+                                                    </span>
+                                                    <div class="small text-muted mt-1" style="font-size: 0.75rem; line-height: 1.2;">
+                                                        지연 시 5분마다<br>자동 재시도 중입니다.
+                                                    </div>
+                                                </div>
+                                                <span th:unless="${item.orderItemStatus.name() == 'CANCELING'}" class="badge badge-danger px-3 py-2" style="font-size: 0.9em;" th:text="${item.orderItemStatus.title}">취소완료</span>
                                             </td>
                                             <td class="align-middle text-right" style="width: 150px;">
                                                 <span class="font-weight-bold text-dark" 
@@ -110,9 +118,14 @@
                 </div>
 
                 <!-- 2. 반품/환불 상품 목록 -->
-                <h4 class="section-title position-relative text-uppercase mb-4">
-                    <span class="bg-secondary pr-3">반품/환불 상품</span>
-                </h4>
+                <div class="d-flex justify-content-between align-items-end mb-4">
+                    <h4 class="section-title position-relative text-uppercase mb-0">
+                        <span class="bg-secondary pr-3">반품/환불 상품</span>
+                    </h4>
+                    <span class="text-muted small pb-1">
+                        <i class="fa fa-info-circle mr-1"></i>단순 변심 반품 시 반품 배송비가 차감됩니다.
+                    </span>
+                </div>
                 
                 <div class="bg-light p-30 mb-5">
                     <div th:if="${refundedItems != null and !#lists.isEmpty(refundedItems.content)}">
@@ -142,14 +155,15 @@
                                         </td>
                                         <td class="align-middle" th:text="${item.quantity} + '개'">1개</td>
                                         <td class="align-middle font-weight-bold text-danger">
-                                            <th:block th:with="isChangeOfMind=${item.orderItemStatus.name() == 'RETURN_REQUESTED_CHANGE_OF_MIND'},
-                                                                 deduction=${isChangeOfMind and deliveryPolicy != null ? deliveryPolicy.deliveryPolicyFee : 0},
-                                                                 finalRefund=${item.totalItemSalePrice - deduction}">
-                                                <span th:text="${#numbers.formatInteger(finalRefund > 0 ? finalRefund : 0, 0, 'COMMA')} + '원'">15,000원</span>
-                                                <div th:if="${isChangeOfMind}" class="small text-muted" style="font-size: 0.75rem;">
-                                                    (반품 배송비 <span th:text="${#numbers.formatInteger(deduction, 0, 'COMMA')}">3,000</span>원 차감)
-                                                </div>
-                                            </th:block>
+                                            <!-- 실제 환불된 금액이 있으면 표시, 없으면 예정 금액 표시 -->
+                                            <div th:if="${item.refundPrice != null and item.refundPrice > 0}">
+                                                <span th:text="${#numbers.formatInteger(item.refundPrice, 0, 'COMMA')} + '원'"></span>
+                                                <div class="small text-muted" style="font-size: 0.75rem;">(환불 완료)</div>
+                                            </div>
+                                            <div th:unless="${item.refundPrice != null and item.refundPrice > 0}">
+                                                <span th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA')} + '원'"></span>
+                                                <div class="small text-muted" style="font-size: 0.75rem;">(환불 예정)</div>
+                                            </div>
                                         </td>
                                         <td class="align-middle">
                                             <span class="badge badge-warning px-2 py-1" th:text="${item.orderItemStatus.title}">반품요청</span>

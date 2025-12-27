@@ -102,7 +102,7 @@ public class CheckoutController {
         // 회원 정보 확인 (GlobalControllerAdvice에서 주입된 member 활용)
         MemberResponse member = (MemberResponse) model.getAttribute("member");
         boolean isMember = (member != null);
-        
+
         OrderCreateRequest orderCreateRequest;
         List<AddressResponse> addresses = Collections.emptyList();
         AddressResponse defaultAddress = null;

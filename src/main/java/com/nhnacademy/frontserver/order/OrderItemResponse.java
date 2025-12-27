@@ -25,6 +25,7 @@ public record OrderItemResponse(
         int totalItemOriginalPrice, // 총 원래 상품 가격 ((단가 + 포장비) * 수량)
         int itemDiscountAmount, // 이 상품 라인에 적용된 할인액
         int totalItemSalePrice, // 이 상품 라인의 최종 결제 금액 (totalItemOriginalPrice - 아이템 할인액)
+        int refundPrice,
         int packagingPrice,
         OrderItemStatus orderItemStatus
 ) {
