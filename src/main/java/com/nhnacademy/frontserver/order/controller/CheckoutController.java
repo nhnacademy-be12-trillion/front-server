@@ -32,7 +32,6 @@ public class CheckoutController {
     private final BookClient bookClient;
     private final MemberClient memberClient;
     private final OrderClient orderClient;
-    private final com.nhnacademy.frontserver.coupon.port.out.MemberCouponClient memberCouponClient;
 
     // 결제 요약 정보를 담을 DTO
     public record OrderSummary(int subTotal, int shippingFee, int totalPrice) {}
@@ -103,11 +102,10 @@ public class CheckoutController {
         // 회원 정보 확인 (GlobalControllerAdvice에서 주입된 member 활용)
         MemberResponse member = (MemberResponse) model.getAttribute("member");
         boolean isMember = (member != null);
-        
+
         OrderCreateRequest orderCreateRequest;
         List<AddressResponse> addresses = Collections.emptyList();
         AddressResponse defaultAddress = null;
-        List<com.nhnacademy.frontserver.coupon.port.out.MemberCouponResponse> memberCoupons = Collections.emptyList();
 
         if (isMember) {
             try {
@@ -121,16 +119,6 @@ public class CheckoutController {
                 if (defaultAddress != null) {
                     combinedAddress = defaultAddress.addressBase() + " " + defaultAddress.addressDetail();
                     postCode = defaultAddress.addressPostCode();
-                }
-                
-                // 쿠폰 조회 및 필터링 (사용 안 한 쿠폰만)
-                try {
-                     memberCoupons = memberCouponClient.getMemberCoupons(org.springframework.data.domain.PageRequest.of(0, 100))
-                            .stream()
-                            .filter(c -> !c.use())
-                            .toList();
-                } catch (Exception e) {
-                    log.warn("쿠폰 목록 조회 실패: {}", e.getMessage());
                 }
 
                 orderCreateRequest = new OrderCreateRequest(
@@ -174,7 +162,6 @@ public class CheckoutController {
         if (defaultAddress != null) {
             model.addAttribute("defaultAddress", defaultAddress);
         }
-        model.addAttribute("memberCoupons", memberCoupons);
         model.addAttribute("packagings", packagings);
         model.addAttribute("deliveryPolicy", policy);
         session.setAttribute("checkoutItems", items);
