@@ -1,5 +1,6 @@
 package com.nhnacademy.frontserver.order.controller;
 
+import com.nhnacademy.frontserver.book.ReviewClient;
 import com.nhnacademy.frontserver.order.*;
 import com.nhnacademy.frontserver.order.client.OrderClient;
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
@@ -17,13 +18,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class OrderDetailsController {
 
     private final OrderClient orderClient;
+    private final ReviewClient reviewClient;
 
     @GetMapping("/{orderId}")
     public String getOrderDetail(@PathVariable Long orderId, Model model) {
         OrderResponse order = orderClient.getOrderByMember(orderId);
+        Boolean exists = reviewClient.checkReviewExistence(orderId);
+        boolean hasReview = (exists != null && exists);
 
         model.addAttribute("order", order);
         model.addAttribute("isMember", true);
+        model.addAttribute("hasReview", hasReview);
         return "order-detail";
     }
 
@@ -48,7 +53,6 @@ public class OrderDetailsController {
         } else if ("DAMAGED".equals(reason)) {
             status = OrderItemStatus.RETURN_REQUESTED_DAMAGED;
         } else {
-            // 잘못된 reason -> 일단 리다이렉트
             return "redirect:/orders/" + orderId;
         }
         OrderItemStatusPatchRequest request = new OrderItemStatusPatchRequest(status);
