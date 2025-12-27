@@ -11,106 +11,145 @@
 
 <body>
 <div layout:fragment="content">
-    <div class="container pt-5 pb-5">
-
-        <h2 class="mb-4">주문 상세 내역</h2>
-
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">주문 정보</h5>
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>주문 번호:</strong> <span th:text="${order.orderNumber}"></span>
-                    </div>
-                    <div class="col-md-6 text-right">
-                        <strong>주문 일시:</strong> <span th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></span>
-                    </div>
-                </div>
-                <hr>
-
-                <div th:each="item : ${order.orderItems}" class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="d-flex align-items-center">
-                        <img th:src="${!#strings.isEmpty(item.bookImage) ? '/trillion-bucket/' + item.bookImage : '/img/default-book.png'}"
-                             width="50" height="70"
-                             class="mr-2 rounded border"
-                             alt="책 이미지"
-                             style="object-fit: cover;">
-
-                        <span class="ml-2">
-                            <span th:text="${item.bookName}" class="font-weight-bold">책 제목</span>
-                            <span class="text-muted ml-1" th:text="' x ' + ${item.quantity} + '개'"></span>
-                        </span>
-                    </span>
-                    <span class="font-weight-bold" th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA') + '원'}"></span>
-                </div>
-
-                <hr>
-                <div class="d-flex justify-content-between">
-                    <h5 class="text-danger font-weight-bold">총 결제 금액</h5>
-                    <h5 class="text-danger font-weight-bold" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA') + '원'}"></h5>
-                </div>
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <a class="breadcrumb-item text-dark" th:href="@{/}">홈</a>
+                    <a class="breadcrumb-item text-dark" th:href="@{/orders/non-members-order-form}">비회원 주문 조회</a>
+                    <span class="breadcrumb-item active">주문 상세 정보</span>
+                </nav>
             </div>
         </div>
-
-        <div class="text-center">
-            <a href="/" class="btn btn-outline-dark px-4">홈으로</a>
-
-            <button type="button" class="btn btn-danger px-4 ml-2" data-toggle="modal" data-target="#cancelModal">
-                결제 취소
-            </button>
-        </div>
-
     </div>
 
-    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title" id="cancelModalLabel">결제 취소 요청</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    <div class="container-fluid pb-5">
+        <div class="row px-xl-5">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="m-0">주문 상품 목록</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center mb-0">
+                                <thead class="bg-secondary text-dark">
+                                <tr>
+                                    <th>상품 정보</th>
+                                    <th style="width: 15%;">단가</th>
+                                    <th style="width: 10%;">수량</th>
+                                    <th style="width: 15%;">포장비</th>
+                                    <th style="width: 15%;">합계</th>
+                                    <th style="width: 15%;">상태</th>
+                                </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                <tr th:each="item : ${order.orderItems}"
+                                    th:classappend="${#lists.contains({'CANCELED','RETURNED'}, item.orderItemStatus.name())} ? 'table-secondary' : ''">
+                                    <td class="align-middle text-left">
+                                        <div class="d-flex align-items-center">
+                                            <img th:src="${!#strings.isEmpty(item.bookImage) ? '/trillion-bucket/' + item.bookImage : '/img/default-book.png'}"
+                                                 alt="Book" style="width: 50px; aspect-ratio: 1/1.4; object-fit: cover; margin-right: 15px;">
+                                            <span th:text="${item.bookName}">책 제목</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')} + '원'"></td>
+                                    <td th:text="${item.quantity}"></td>
+                                    <td th:text="${item.packagingPrice > 0 ? #numbers.formatDecimal(item.packagingPrice, 0, 'COMMA', 0, 'POINT') + '원' : '-'}"></td>
+                                    <td th:text="${#numbers.formatDecimal((item.unitPrice * item.quantity) + item.packagingPrice, 0, 'COMMA', 0, 'POINT') + '원'}"></td>
+                                    <td class="align-middle">
+                                        <span th:if="${item.orderItemStatus.name() == 'CANCELING'}" class="badge badge-warning px-2 py-1">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i>취소 중
+                                        </span>
+                                        <span th:unless="${item.orderItemStatus.name() == 'CANCELING'}" 
+                                              class="badge badge-pill px-2 py-1"
+                                              th:classappend="${#lists.contains({'CANCELED','FAILED'}, item.orderItemStatus.name()) ? 'badge-danger' : 'badge-primary'}"
+                                              th:text="${item.orderItemStatus.title}">상태</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
-                <form th:action="@{/payments/cancel}" method="post">
-                    <div class="modal-body">
-
-                        <input type="hidden" name="orderId" th:value="${order.orderId}">
-                        <input type="hidden" name="orderNumber" th:value="${order.orderNumber}">
-                        <input type="hidden" name="cancelAmount" th:value="${order.totalPrice}">
-
-                        <input type="hidden" name="nonMemberPassword" th:value="${nonMemberPassword}">
-
-                        <div class="form-group">
-                            <label for="cancelReason" class="col-form-label font-weight-bold">취소 사유</label>
-                            <select class="custom-select" id="cancelReason" name="cancelReason" required>
-                                <option value="" disabled selected>사유를 선택하세요</option>
-                                <option value="단순 변심">단순 변심</option>
-                                <option value="상품 불량">상품 불량</option>
-                                <option value="주문 실수">주문 실수</option>
-                                <option value="기타">기타</option>
-                            </select>
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="m-0">최종 결제 정보</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="border-bottom pt-3 pb-2">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h6 class="text-dark">상품 금액</h6>
+                                <h6 th:text="${#numbers.formatDecimal(order.originPrice,0,'COMMA',0,'POINT')} + '원'"></h6>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 text-danger" th:if="${order.totalCouponDiscount > 0}">
+                                <h6 class="font-weight-medium">쿠폰 할인</h6>
+                                <h6 class="font-weight-medium" th:text="'-' + ${#numbers.formatDecimal(order.totalCouponDiscount,0,'COMMA',0,'POINT')} + '원'"></h6>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <h6 class="font-weight-medium text-dark">배송비</h6>
+                                <h6 th:text="${#numbers.formatDecimal(order.deliveryFee,0,'COMMA',0,'POINT')} + '원'"></h6>
+                            </div>
                         </div>
-
-                        <div class="form-group">
-                            <label class="col-form-label font-weight-bold">환불 예정 금액</label>
-                            <input type="text" class="form-control"
-                                   th:value="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA') + '원'}" readonly>
-                            <small class="text-muted">전액 취소만 가능합니다.</small>
-                        </div>
-
-                        <div class="alert alert-warning mt-3">
-                            <small><i class="fas fa-exclamation-triangle mr-1"></i> 취소 후에는 되돌릴 수 없습니다.</small>
+                        <div class="pt-2">
+                            <div class="d-flex justify-content-between mt-2">
+                                <h5>총 결제 금액</h5>
+                                <h5 th:text="${#numbers.formatDecimal(order.totalPrice,0,'COMMA',0,'POINT')} + '원'"></h5>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-                        <button type="submit" class="btn btn-danger">취소 확정</button>
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="m-0">주문 요약 정보</h5>
                     </div>
-                </form>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="mb-3">주문 정보</h6>
+                            <table class="table table-bordered table-sm text-dark small">
+                                <tbody>
+                                    <tr><th class="bg-light w-25">주문번호</th><td th:text="${order.orderNumber}"></td></tr>
+                                    <tr><th class="bg-light w-25">주문일시</th><td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></td></tr>
+                                    <tr><th class="bg-light w-25">주문상태</th><td th:text="${order.orderStatus.title}"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr>
+                        <div class="mb-4">
+                            <h6 class="mb-3">주문자 정보</h6>
+                            <table class="table table-bordered table-sm text-dark small">
+                                <tbody>
+                                    <tr><th class="bg-light w-25">이름</th><td th:text="${order.ordererInfo.ordererName}"></td></tr>
+                                    <tr><th class="bg-light w-25">연락처</th><td th:text="${order.ordererInfo.ordererContact}"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr>
+                        <div>
+                            <h6 class="mb-3">배송지 정보</h6>
+                            <table class="table table-bordered table-sm text-dark small">
+                                <tbody>
+                                    <tr><th class="bg-light w-25">이름</th><td th:text="${order.receiverInfo.receiverName}"></td></tr>
+                                    <tr><th class="bg-light w-25">연락처</th><td th:text="${order.receiverInfo.receiverContact}"></td></tr>
+                                    <tr><th class="bg-light w-25">주소</th><td th:text="${order.receiverInfo.receiverAddress}"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${order.orderStatus.name() == 'COMPLETED' and #lists.size(order.orderItems.?[orderItemStatus.name() != 'PREPARING']) == 0}" class="mb-3">
+                    <form th:action="@{/orders/non-members/{orderId}/cancel(orderId=${order.orderId})}" method="post" onsubmit="return confirm('정말 주문 전체를 취소하시겠습니까?');">
+                        <input type="hidden" name="password" th:value="${nonMemberPassword}">
+                        <button type="submit" class="btn btn-danger btn-block py-3 font-weight-bold">주문 전체 취소</button>
+                    </form>
+                </div>
+
+                <a th:href="@{/orders/non-members-order-form}" class="btn btn-primary btn-block py-3 font-weight-bold">목록으로</a>
             </div>
         </div>
     </div>

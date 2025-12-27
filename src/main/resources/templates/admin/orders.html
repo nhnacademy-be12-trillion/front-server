@@ -105,151 +105,221 @@
                                   <tr><th>주소</th> <td th:text="${order.receiverInfo.receiverAddress}"></td></tr>
                                 </table>
             
-                                <h6 class="border-bottom pb-2 mb-2"><i class="fas fa-box-open mr-2"></i>주문 상품 상세</h6>
-                                <table class="table table-bordered table-sm text-center">
-                                  <thead class="thead-light">
-                                  <tr>
-                                    <th style="width: 40px;"><input type="checkbox" onclick="toggleAllItems(this)"></th>
-                                    <th>상품명</th>
-                                    <th style="width:120px;">수량 조절</th>
-                                    <th style="width:160px;">상태 관리</th>
-                                    <th>단가</th>
-                                    <th>합계</th>
-                                  </tr>
-                                  </thead>
-                                  <tbody>
-                                  <tr th:each="item : ${order.orderItems}">
-                                    <td class="align-middle">
-                                      <input type="checkbox" class="item-checkbox" name="selectedItems"
-                                             th:value="${item.orderItemId}"
-                                             onchange="calculateRefund()">
-                                    </td>
-                                    <td class="text-left align-middle" th:text="${item.bookName}"></td>
+                                                                <h6 class="border-bottom pb-2 mb-2"><i class="fas fa-box-open mr-2"></i>주문 상품 상세</h6>
             
-                                    <td class="align-middle">
-                                      <div class="input-group input-group-sm justify-content-center" style="width: 100px; margin: 0 auto;">
-                                        <div class="input-group-prepend">
-                                          <button class="btn btn-outline-secondary btn-qty-minus" type="button"
-                                                  onclick="updateItemQuantity(this, -1)">
-                                            <i class="fas fa-minus"></i>
-                                          </button>
-                                        </div>
-                                        <input type="text" class="form-control text-center bg-white item-quantity"
-                                               th:value="${item.quantity}"
-                                               th:data-original="${item.quantity}"
-                                               th:data-price="${item.unitPrice}"
-                                               readonly style="font-weight: bold; padding: 0;">
-                                        <div class="input-group-append">
-                                          <button class="btn btn-outline-secondary btn-qty-plus" type="button"
-                                                  onclick="updateItemQuantity(this, 1)">
-                                            <i class="fas fa-plus"></i>
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </td>
+                                                                <table class="table table-bordered table-sm text-center">
             
-                                                            <td class="align-middle">
-                                                              <div class="btn-group btn-group-sm">
-                                                                <!-- 1. 상품 준비중 -> 배송 시작 -->
-                                                                <button th:if="${item.orderItemStatus.name() == 'PREPARING'}"
-                                                                        class="btn btn-info" type="button"
-                                                                        th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'SHIPPED', '배송 시작')">
-                                                                  <i class="fas fa-truck"></i> 배송 시작
-                                                                </button>
-                                    
-                                                                <!-- 2. 배송중 -> 배송 완료 -->
-                                                                <button th:if="${item.orderItemStatus.name() == 'SHIPPED'}"
-                                                                        class="btn btn-success" type="button"
-                                                                        th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'DELIVERED', '배송 완료')">
-                                                                  <i class="fas fa-box-open"></i> 배송 완료
-                                                                </button>
-                                    
-                                                                                            <!-- 3. 반품 요청 -> 반품 승인 (반품 완료) -->
-                                                                                            <th:block th:if="${#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')}">
-                                                                                                <span class="badge badge-danger mr-2 p-2" th:text="${statusMap[item.orderItemStatus.name()]}">반품 사유</span>
-                                                                                                <button class="btn btn-warning" type="button"
-                                                                                                        th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'RETURNED', '반품 승인')">
-                                                                                                  <i class="fas fa-undo"></i> 승인
-                                                                                                </button>
-                                                                                            </th:block>                                    
-                                                                <!-- 4. 상태 표시 뱃지들 -->
-                                                                <span th:if="${item.orderItemStatus.name() == 'RETURNED'}" class="badge badge-secondary py-1 px-2">
-                                                                  <i class="fas fa-check-circle"></i> 반품 완료
-                                                                </span>
-                                                                <span th:if="${item.orderItemStatus.name() == 'DELIVERED'}" class="badge badge-primary py-1 px-2">
-                                                                  <i class="fas fa-box"></i> 배송 완료
-                                                                </span>
-                                                                <span th:if="${item.orderItemStatus.name() == 'CONFIRMED'}" class="badge badge-success py-1 px-2">
-                                                                  <i class="fas fa-check-double"></i> 구매 확정
-                                                                </span>
-                                                                <span th:if="${item.orderItemStatus.name() == 'CANCELED'}" class="badge badge-danger py-1 px-2">
-                                                                  <i class="fas fa-times-circle"></i> 취소됨
-                                                                </span>
-                                    
-                                                                <!-- 그 외 상태 (예외 상황) -->
-                                                                <span th:if="${item.orderItemStatus.name() != 'PREPARING' and item.orderItemStatus.name() != 'SHIPPED'
-                                                                            and !#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')
-                                                                            and item.orderItemStatus.name() != 'RETURNED'
-                                                                            and item.orderItemStatus.name() != 'DELIVERED'
-                                                                            and item.orderItemStatus.name() != 'CONFIRMED'
-                                                                            and item.orderItemStatus.name() != 'CANCELED'}"
-                                                                      class="text-muted small">
-                                                                  -
-                                                                </span>
-                                                              </div>
-                                                            </td>                                                                            <td class="align-middle" th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')}"></td>
-                                                                            <td class="align-middle" th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA')}"></td>
-                                                                          </tr>
-                                                                          </tbody>
-                                                                        </table>
-                                                
-                                                                        <div class="bg-light p-3 rounded text-right">
-                                                                          <div>상품 합계: <span th:text="${#numbers.formatInteger(order.originPrice, 0, 'COMMA')}"></span>원</div>
-                                                                          <div>배송비: +<span th:text="${#numbers.formatInteger(order.deliveryFee, 0, 'COMMA')}"></span>원</div>
-                                                                          <div class="text-danger">할인/쿠폰: -<span th:text="${#numbers.formatInteger(order.totalCouponDiscount + order.pointUsage, 0, 'COMMA')}"></span>원</div>
-                                                                          <div class="border-top mt-2 pt-2">
-                                                                            <h6 class="font-weight-bold">최종 결제 금액: <span class="text-primary" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')}"></span>원</h6>
+                                                                  <thead class="thead-light">
+            
+                                                                  <tr>
+            
+                                                                    <th>상품명</th>
+            
+                                                                    <th style="width: 60px;">수량</th>
+            
+                                                                    <th>단가</th>
+            
+                                                                    <th>포장비</th>
+            
+                                                                    <th>할인액</th>
+            
+                                                                    <th>최종 결제액</th>
+            
+                                                                    <th style="width:140px;">상태 관리</th>
+            
+                                                                  </tr>
+            
+                                                                  </thead>
+            
+                                                                  <tbody>
+            
+                                                                  <tr th:each="item : ${order.orderItems}">
+            
+                                                                    <td class="text-left align-middle" th:text="${item.bookName}"></td>
+            
+                                                                    <td class="align-middle font-weight-bold" th:text="${item.quantity}"></td>
+            
+                                                                    <td class="align-middle" th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')}"></td>
+            
+                                                                    <td class="align-middle text-muted small" th:text="${item.packagingPrice > 0 ? '+' + #numbers.formatInteger(item.packagingPrice, 0, 'COMMA') : '-'}"></td>
+            
+                                                                    <td class="align-middle text-danger small" th:text="${item.itemDiscountAmount > 0 ? '-' + #numbers.formatInteger(item.itemDiscountAmount, 0, 'COMMA') : '-'}"></td>
+            
+                                                                    <td class="align-middle font-weight-bold text-primary" th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA')}"></td>
+            
+                                
+            
+                                                                    <td class="align-middle">
+            
+                                                                      <div class="btn-group btn-group-sm">
+            
+                                                                        <!-- 1. 상품 준비중 -> 배송 시작 -->
+            
+                                                                        <button th:if="${item.orderItemStatus.name() == 'PREPARING'}"
+            
+                                                                                class="btn btn-info" type="button"
+            
+                                                                                th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'SHIPPED', '배송 시작')">
+            
+                                                                          <i class="fas fa-truck"></i> 배송 시작
+            
+                                                                        </button>
+            
+                                            
+            
+                                                                        <!-- 2. 배송중 -> 배송 완료 -->
+            
+                                                                        <button th:if="${item.orderItemStatus.name() == 'SHIPPED'}"
+            
+                                                                                class="btn btn-success" type="button"
+            
+                                                                                th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'DELIVERED', '배송 완료')">
+            
+                                                                          <i class="fas fa-box-open"></i> 배송 완료
+            
+                                                                        </button>
+            
+                                            
+            
+                                                                        <!-- 3. 반품 요청 -> 반품 승인 (반품 완료) -->
+            
+                                                                        <th:block th:if="${#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')}">
+            
+                                                                            <span class="badge badge-danger mr-2 p-2" th:text="${statusMap[item.orderItemStatus.name()]}">반품 사유</span>
+            
+                                                                            <button class="btn btn-warning" type="button"
+            
+                                                                                    th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'RETURNED', '반품 승인')">
+            
+                                                                              <i class="fas fa-undo"></i> 승인
+            
+                                                                            </button>
+            
+                                                                        </th:block>                                    
+            
+                                                                        <!-- 4. 상태 표시 뱃지들 -->
+            
+                                                                        <div th:if="${item.orderItemStatus.name() == 'RETURNED'}">
+            
+                                                                          <span class="badge badge-secondary py-1 px-2">
+            
+                                                                            <i class="fas fa-check-circle"></i> 반품 완료
+            
+                                                                          </span>
+            
+                                                                          <div th:if="${item.refundPrice != null and item.refundPrice > 0}" class="small text-danger font-weight-bold mt-1">
+            
+                                                                            (환불: <span th:text="${#numbers.formatInteger(item.refundPrice, 0, 'COMMA')}"></span>원)
+            
                                                                           </div>
-                                                                          <div class="mt-3 pt-2 border-top border-danger">
-                                                                            <h5 class="text-danger font-weight-bold">환불 예정 금액: <span class="refund-total-display">0</span>원</h5>
-                                                                          </div>
+            
                                                                         </div>
+            
+                                                                        <span th:if="${item.orderItemStatus.name() == 'DELIVERED'}" class="badge badge-primary py-1 px-2">
+            
+                                                                          <i class="fas fa-box"></i> 배송 완료
+            
+                                                                        </span>
+            
+                                                                        <span th:if="${item.orderItemStatus.name() == 'CONFIRMED'}" class="badge badge-success py-1 px-2">
+            
+                                                                          <i class="fas fa-check-double"></i> 구매 확정
+            
+                                                                        </span>
+            
+                                                                        <span th:if="${item.orderItemStatus.name() == 'CANCELED'}" class="badge badge-danger py-1 px-2">
+            
+                                                                          <i class="fas fa-times-circle"></i> 취소됨
+            
+                                                                        </span>
+            
+                                            
+            
+                                                                        <!-- 그 외 상태 (예외 상황) -->
+            
+                                                                        <span th:if="${item.orderItemStatus.name() != 'PREPARING' and item.orderItemStatus.name() != 'SHIPPED'
+            
+                                                                                    and !#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')
+            
+                                                                                    and item.orderItemStatus.name() != 'RETURNED'
+            
+                                                                                    and item.orderItemStatus.name() != 'DELIVERED'
+            
+                                                                                    and item.orderItemStatus.name() != 'CONFIRMED'
+            
+                                                                                    and item.orderItemStatus.name() != 'CANCELED'}"
+            
+                                                                              class="text-muted small">
+            
+                                                                          -
+            
+                                                                        </span>
+            
                                                                       </div>
+            
                                                                     </td>
+            
                                                                   </tr>
-                                                
-                                                                  <tr th:if="${#lists.isEmpty(orders)}">
-                                                                    <td colspan="7" class="py-5 text-muted">
-                                                                      <i class="fas fa-box-open fa-3x mb-3"></i><br>
-                                                                      주문 내역이 없거나 불러오지 못했습니다.
-                                                                    </td>
-                                                                  </tr>
+            
                                                                   </tbody>
+            
                                                                 </table>
-                                                              </div>
-                                                            </div>
-                                                          </div>
-                                                        </div>
-                                                      </div>
-                                                
-                                                    <!-- Order Detail Modal -->
-                                                    <div class="modal fade" id="orderDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
-                                                        <div class="modal-dialog modal-lg" role="document">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header bg-primary text-white">
-                                                                    <h5 class="modal-title"><i class="fas fa-file-invoice mr-2"></i>주문 상세 정보</h5>
-                                                                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            
+                                        
+            
+                                                                <div class="bg-light p-3 rounded text-right">
+            
+                                                                  <div>상품 합계: <span th:text="${#numbers.formatInteger(order.originPrice, 0, 'COMMA')}"></span>원</div>
+            
+                                                                  <div>배송비: +<span class="order-delivery-fee" th:data-fee="${order.deliveryFee}" th:text="${#numbers.formatInteger(order.deliveryFee, 0, 'COMMA')}"></span>원</div>
+            
+                                                                  <div class="text-danger">쿠폰 할인: -<span th:text="${#numbers.formatInteger(order.totalCouponDiscount, 0, 'COMMA')}"></span>원</div>
+            
+                                                                  <div class="text-primary">포인트 사용: -<span th:text="${#numbers.formatInteger(order.pointUsage, 0, 'COMMA')}"></span>원</div>
+            
+                                                                  <div class="border-top mt-2 pt-2">
+            
+                                                                    <h6 class="font-weight-bold">최종 결제 금액: <span class="text-primary" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')}"></span>원</h6>
+            
+                                                                  </div>
+            
                                                                 </div>
-                                                                <div class="modal-body" id="orderDetailModalBody"></div>
-                                                                <div class="modal-footer bg-light">
-                                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <th:block layout:fragment="script">
+                                                                                                                                              </div>
+                                                                                                                                            </td>
+                                                                                                                                          </tr>
+                                                                                                                        
+                                                                                                                                          <tr th:if="${#lists.isEmpty(orders)}">
+                                                                                                                                            <td colspan="7" class="py-5 text-muted">
+                                                                                                                                              <i class="fas fa-box-open fa-3x mb-3"></i><br>
+                                                                                                                                              주문 내역이 없거나 불러오지 못했습니다.
+                                                                                                                                            </td>
+                                                                                                                                          </tr>
+                                                                                                                                          </tbody>
+                                                                                                                                        </table>
+                                                                                                                                      </div>
+                                                                                                                                    </div>
+                                                                                                                                  </div>
+                                                                                                                                </div>
+                                                                                                                              </div>
+                                                                                                                        
+                                                                                                                            <!-- Order Detail Modal -->
+                                                                                                                            <div class="modal fade" id="orderDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+                                                                                                                                <div class="modal-dialog modal-lg" role="document">
+                                                                                                                                    <div class="modal-content">
+                                                                                                                                        <div class="modal-header bg-primary text-white">
+                                                                                                                                            <h5 class="modal-title"><i class="fas fa-file-invoice mr-2"></i>주문 상세 정보</h5>
+                                                                                                                                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="modal-body" id="orderDetailModalBody"></div>
+                                                                                                                                        <div class="modal-footer bg-light">
+                                                                                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                                                                                                                                        </div>
+                                                                                                                                    </div>
+                                                                                                                                </div>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                        
+                                                                                                                        <th:block layout:fragment="script">
                                                     <script th:inline="javascript">
                                                 
                                                         document.addEventListener("DOMContentLoaded", function() {
@@ -258,45 +328,7 @@
                                                             window.openOrderDetailModal = function(orderId) {
                                                                 var detailContent = $('#order-detail-' + orderId).html();
                                                                 $('#orderDetailModalBody').html(detailContent);
-                                                                $('#orderDetailModalBody').find('.item-checkbox').prop('checked', false);
-                                                                $('#orderDetailModalBody').find('.refund-total-display').text('0');
                                                                 $('#orderDetailModal').modal('show');
-                                                            };
-                                                
-                                                            // [주문 관리] 전체 선택/해제
-                                                            window.toggleAllItems = function(source) {
-                                                                const isChecked = source.checked;
-                                                                $('#orderDetailModalBody').find('.item-checkbox').prop('checked', isChecked);
-                                                                calculateRefund();
-                                                            };
-                                                
-                                                            // [주문 관리] 환불 금액 계산
-                                                            window.calculateRefund = function() {
-                                                                let totalRefund = 0;
-                                                                const $container = $('#orderDetailModalBody');
-                                                                $container.find('.item-checkbox:checked').each(function() {
-                                                                    const $row = $(this).closest('tr');
-                                                                    const $input = $row.find('.item-quantity');
-                                                                    const quantity = parseInt($input.val());
-                                                                    const price = parseInt($input.data('price'));
-                                                                    totalRefund += (quantity * price);
-                                                                });
-                                                                $container.find('.refund-total-display').text(totalRefund.toLocaleString());
-                                                            };
-                                                
-                                                            // [주문 관리] 수량 조절
-                                                            window.updateItemQuantity = function(btn, change) {
-                                                                const $input = $(btn).closest('.input-group').find('input');
-                                                                const originalQty = parseInt($input.data('original'));
-                                                                let currentQty = parseInt($input.val());
-                                                                let newQty = currentQty + change;
-                                                
-                                                                if (newQty < 1) { alert("최소 1개 이상이어야 합니다."); return; }
-                                                                if (newQty > originalQty) { alert("초기 주문 수량 초과 불가"); return; }
-                                                
-                                                                $input.val(newQty);
-                                                                const $checkbox = $(btn).closest('tr').find('.item-checkbox');
-                                                                if ($checkbox.is(':checked')) { calculateRefund(); }
                                                             };
                                                 
                                                             // [주문 관리] 상품 상태 변경 (버튼식)
@@ -309,7 +341,6 @@
                                                                     .then(response => {
                                                                         if(response.ok) {
                                                                             alert("처리가 완료되었습니다.");
-                                                                            // 화면 갱신 (간단히 새로고침)
                                                                             location.reload();
                                                                         } else {
                                                                             response.text().then(msg => alert("처리 실패: " + msg));
@@ -322,6 +353,5 @@
                                                             };
                                                         });
                                                     </script>
-                                                </th:block>
-</body>
+                                                                                                                        </th:block></body>
 </html>

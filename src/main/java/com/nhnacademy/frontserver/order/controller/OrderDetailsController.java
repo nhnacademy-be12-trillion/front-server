@@ -73,13 +73,18 @@ public class OrderDetailsController {
             return "redirect:/orders/non-members-order-form";
         }
 
-        NonMemberOrderGetRequest request = new NonMemberOrderGetRequest(orderNumber, password);
-        OrderResponse order = orderClient.getOrderByNonMember(request);
+        try {
+            NonMemberOrderGetRequest request = new NonMemberOrderGetRequest(orderNumber, password);
+            OrderResponse order = orderClient.getOrderByNonMember(request);
 
-        model.addAttribute("order", order);
-        model.addAttribute("isMember", false);
-        model.addAttribute("password", password);
-        return "order-detail";
+            model.addAttribute("order", order);
+            model.addAttribute("isMember", false);
+            model.addAttribute("nonMemberPassword", password); // 템플릿에서 사용하는 이름으로 변경
+            return "non-member-order-detail";
+        } catch (Exception e) {
+            log.warn("비회원 주문 조회 실패: orderNumber={}, cause={}", orderNumber, e.getMessage());
+            return "redirect:/orders/non-members-order-form?error=true";
+        }
     }
 
     @GetMapping("/non-members-order-form")
@@ -91,7 +96,7 @@ public class OrderDetailsController {
     public String cancelOrderForNonMember(@PathVariable Long orderId, @RequestParam("password") String password) {
         NonMemberOrderCancelRequest request = new NonMemberOrderCancelRequest(password);
         orderClient.cancelOrderByNonMember(orderId, request);
-        return "redirect:/orders/non-members-form";
+        return "redirect:/orders/non-members-order-form";
     }
 
     @PostMapping("/non-members/{orderId}/items/{itemId}/return")
