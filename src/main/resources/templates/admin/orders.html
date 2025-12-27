@@ -19,6 +19,7 @@
                   .badge-status-waiting { background-color: #ffc107; color: #212529; }
                   .badge-status-completed { background-color: #28a745; color: #fff; }
                   .badge-status-canceled { background-color: #dc3545; color: #fff; }
+                  .badge-status-canceling { background-color: #fd7e14; color: #fff; } /* 주황색 */
                   .badge-status-shipping { background-color: #17a2b8; color: #fff; }
                   .badge-status-returned { background-color: #6c757d; color: #fff; }
                 </style>
@@ -39,7 +40,7 @@
                     <div class="content-box">
                       <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="text-primary mb-0">전체 주문 내역</h4>
-                        <span class="text-muted small">최신순으로 최대 200건까지 표시됩니다.</span>
+                        <span class="text-muted small">총 <span th:text="${totalElements}">0</span>건의 주문이 있습니다.</span>
                       </div>
             
                       <div class="table-responsive">
@@ -76,15 +77,20 @@
                             </td>
                             <td class="align-middle font-weight-bold text-primary"
                                 th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')} + '원'">50,000원</td>
-                                                            <td class="align-middle">
-                                                                  <span class="badge badge-pill px-2 py-1"
-                                                                        th:classappend="${
-                                                                            order.orderStatus.name() == 'PENDING' ? 'badge-status-waiting' :
-                                                                            (order.orderStatus.name() == 'COMPLETED' ? 'badge-status-completed' :
-                                                                            (order.orderStatus.name() == 'CANCELED' or order.orderStatus.name() == 'FAILED' or order.orderStatus.name() == 'CREATION_FAILED' ? 'badge-status-canceled' : 'badge-status-shipping'))
-                                                                        }"
-                                                                        th:text="${statusMap[order.orderStatus.name()]}">결제 대기</span>
-                                                            </td>                            <td class="align-middle">
+                            <td class="align-middle">
+                                  <span th:if="${order.orderStatus.name() == 'CANCELING'}" class="badge badge-pill badge-status-canceling px-2 py-1">
+                                      <i class="fas fa-spinner fa-spin mr-1"></i>취소 중
+                                  </span>
+                                  <span th:unless="${order.orderStatus.name() == 'CANCELING'}"
+                                        class="badge badge-pill px-2 py-1"
+                                        th:classappend="${
+                                            order.orderStatus.name() == 'PENDING' ? 'badge-status-waiting' :
+                                            (order.orderStatus.name() == 'COMPLETED' ? 'badge-status-completed' :
+                                            (order.orderStatus.name() == 'CANCELED' or order.orderStatus.name() == 'FAILED' or order.orderStatus.name() == 'CREATION_FAILED' ? 'badge-status-canceled' : 'badge-status-shipping'))
+                                        }"
+                                        th:text="${order.orderStatus.title}">결제 대기</span>
+                            </td>
+                            <td class="align-middle">
                               <button type="button" class="btn btn-sm btn-outline-dark btn-detail"
                                       th:onclick="openOrderDetailModal([[${order.orderId}]])">
                                 상세보기
@@ -92,12 +98,12 @@
             
                               <!-- Hidden Details for Modal -->
                               <div th:id="'order-detail-' + ${order.orderId}" style="display:none;">
-                                                    <h6 class="border-bottom pb-2 mb-2 mt-2"><i class="fas fa-user mr-2"></i>주문자 정보</h6>
-                                                    <table class="table table-sm table-borderless mb-3 text-left">
-                                                      <tr><th style="width:80px;">주문자</th> <td th:text="${order.ordererInfo.ordererName}"></td></tr>
-                                                      <tr><th>연락처</th> <td th:text="${order.ordererInfo.ordererContact}"></td></tr>
-                                                      <tr><th>이메일</th> <td th:text="${order.ordererInfo.ordererEmail}"></td></tr>
-                                                    </table>            
+                                <h6 class="border-bottom pb-2 mb-2 mt-2"><i class="fas fa-user mr-2"></i>주문자 정보</h6>
+                                <table class="table table-sm table-borderless mb-3 text-left">
+                                  <tr><th style="width:80px;">주문자</th> <td th:text="${order.ordererInfo.ordererName}"></td></tr>
+                                  <tr><th>연락처</th> <td th:text="${order.ordererInfo.ordererContact}"></td></tr>
+                                  <tr><th>이메일</th> <td th:text="${order.ordererInfo.ordererEmail}"></td></tr>
+                                </table>
                                 <h6 class="border-bottom pb-2 mb-2"><i class="fas fa-truck mr-2"></i>배송지 정보 (수령인)</h6>
                                 <table class="table table-sm table-borderless mb-3 text-left">
                                   <tr><th style="width:80px;">수령인</th> <td th:text="${order.receiverInfo.receiverName}"></td></tr>
@@ -105,198 +111,130 @@
                                   <tr><th>주소</th> <td th:text="${order.receiverInfo.receiverAddress}"></td></tr>
                                 </table>
             
-                                                                <h6 class="border-bottom pb-2 mb-2"><i class="fas fa-box-open mr-2"></i>주문 상품 상세</h6>
-            
-                                                                <table class="table table-bordered table-sm text-center">
-            
-                                                                  <thead class="thead-light">
-            
-                                                                  <tr>
-            
-                                                                    <th>상품명</th>
-            
-                                                                    <th style="width: 60px;">수량</th>
-            
-                                                                    <th>단가</th>
-            
-                                                                    <th>포장비</th>
-            
-                                                                    <th>할인액</th>
-            
-                                                                    <th>최종 결제액</th>
-            
-                                                                    <th style="width:140px;">상태 관리</th>
-            
-                                                                  </tr>
-            
-                                                                  </thead>
-            
-                                                                  <tbody>
-            
-                                                                  <tr th:each="item : ${order.orderItems}">
-            
-                                                                    <td class="text-left align-middle" th:text="${item.bookName}"></td>
-            
-                                                                    <td class="align-middle font-weight-bold" th:text="${item.quantity}"></td>
-            
-                                                                    <td class="align-middle" th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')}"></td>
-            
-                                                                    <td class="align-middle text-muted small" th:text="${item.packagingPrice > 0 ? '+' + #numbers.formatInteger(item.packagingPrice, 0, 'COMMA') : '-'}"></td>
-            
-                                                                    <td class="align-middle text-danger small" th:text="${item.itemDiscountAmount > 0 ? '-' + #numbers.formatInteger(item.itemDiscountAmount, 0, 'COMMA') : '-'}"></td>
-            
-                                                                    <td class="align-middle font-weight-bold text-primary" th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA')}"></td>
-            
-                                
-            
-                                                                    <td class="align-middle">
-            
-                                                                      <div class="btn-group btn-group-sm">
-            
-                                                                        <!-- 1. 상품 준비중 -> 배송 시작 -->
-            
-                                                                        <button th:if="${item.orderItemStatus.name() == 'PREPARING'}"
-            
-                                                                                class="btn btn-info" type="button"
-            
-                                                                                th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'SHIPPED', '배송 시작')">
-            
-                                                                          <i class="fas fa-truck"></i> 배송 시작
-            
-                                                                        </button>
-            
-                                            
-            
-                                                                        <!-- 2. 배송중 -> 배송 완료 -->
-            
-                                                                        <button th:if="${item.orderItemStatus.name() == 'SHIPPED'}"
-            
-                                                                                class="btn btn-success" type="button"
-            
-                                                                                th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'DELIVERED', '배송 완료')">
-            
-                                                                          <i class="fas fa-box-open"></i> 배송 완료
-            
-                                                                        </button>
-            
-                                            
-            
-                                                                        <!-- 3. 반품 요청 -> 반품 승인 (반품 완료) -->
-            
-                                                                        <th:block th:if="${#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')}">
-            
-                                                                            <span class="badge badge-danger mr-2 p-2" th:text="${statusMap[item.orderItemStatus.name()]}">반품 사유</span>
-            
-                                                                            <button class="btn btn-warning" type="button"
-            
-                                                                                    th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'RETURNED', '반품 승인')">
-            
-                                                                              <i class="fas fa-undo"></i> 승인
-            
-                                                                            </button>
-            
-                                                                        </th:block>                                    
-            
-                                                                        <!-- 4. 상태 표시 뱃지들 -->
-            
-                                                                        <div th:if="${item.orderItemStatus.name() == 'RETURNED'}">
-            
-                                                                          <span class="badge badge-secondary py-1 px-2">
-            
-                                                                            <i class="fas fa-check-circle"></i> 반품 완료
-            
-                                                                          </span>
-            
-                                                                          <div th:if="${item.refundPrice != null and item.refundPrice > 0}" class="small text-danger font-weight-bold mt-1">
-            
-                                                                            (환불: <span th:text="${#numbers.formatInteger(item.refundPrice, 0, 'COMMA')}"></span>원)
-            
-                                                                          </div>
-            
-                                                                        </div>
-            
-                                                                        <span th:if="${item.orderItemStatus.name() == 'DELIVERED'}" class="badge badge-primary py-1 px-2">
-            
-                                                                          <i class="fas fa-box"></i> 배송 완료
-            
-                                                                        </span>
-            
-                                                                        <span th:if="${item.orderItemStatus.name() == 'CONFIRMED'}" class="badge badge-success py-1 px-2">
-            
-                                                                          <i class="fas fa-check-double"></i> 구매 확정
-            
-                                                                        </span>
-            
-                                                                        <span th:if="${item.orderItemStatus.name() == 'CANCELED'}" class="badge badge-danger py-1 px-2">
-            
-                                                                          <i class="fas fa-times-circle"></i> 취소됨
-            
-                                                                        </span>
-            
-                                            
-            
-                                                                        <!-- 그 외 상태 (예외 상황) -->
-            
-                                                                        <span th:if="${item.orderItemStatus.name() != 'PREPARING' and item.orderItemStatus.name() != 'SHIPPED'
-            
-                                                                                    and !#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')
-            
-                                                                                    and item.orderItemStatus.name() != 'RETURNED'
-            
-                                                                                    and item.orderItemStatus.name() != 'DELIVERED'
-            
-                                                                                    and item.orderItemStatus.name() != 'CONFIRMED'
-            
-                                                                                    and item.orderItemStatus.name() != 'CANCELED'}"
-            
-                                                                              class="text-muted small">
-            
-                                                                          -
-            
-                                                                        </span>
-            
-                                                                      </div>
-            
-                                                                    </td>
-            
-                                                                  </tr>
-            
-                                                                  </tbody>
-            
-                                                                </table>
-            
-                                        
-            
-                                                                <div class="bg-light p-3 rounded text-right">
-            
-                                                                  <div>상품 합계: <span th:text="${#numbers.formatInteger(order.originPrice, 0, 'COMMA')}"></span>원</div>
-            
-                                                                  <div>배송비: +<span class="order-delivery-fee" th:data-fee="${order.deliveryFee}" th:text="${#numbers.formatInteger(order.deliveryFee, 0, 'COMMA')}"></span>원</div>
-            
-                                                                  <div class="text-danger">쿠폰 할인: -<span th:text="${#numbers.formatInteger(order.totalCouponDiscount, 0, 'COMMA')}"></span>원</div>
-            
-                                                                  <div class="text-primary">포인트 사용: -<span th:text="${#numbers.formatInteger(order.pointUsage, 0, 'COMMA')}"></span>원</div>
-            
-                                                                  <div class="border-top mt-2 pt-2">
-            
-                                                                    <h6 class="font-weight-bold">최종 결제 금액: <span class="text-primary" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')}"></span>원</h6>
-            
-                                                                  </div>
-            
-                                                                </div>
-                                                                                                                                              </div>
-                                                                                                                                            </td>
-                                                                                                                                          </tr>
-                                                                                                                        
-                                                                                                                                          <tr th:if="${#lists.isEmpty(orders)}">
-                                                                                                                                            <td colspan="7" class="py-5 text-muted">
-                                                                                                                                              <i class="fas fa-box-open fa-3x mb-3"></i><br>
-                                                                                                                                              주문 내역이 없거나 불러오지 못했습니다.
-                                                                                                                                            </td>
-                                                                                                                                          </tr>
-                                                                                                                                          </tbody>
-                                                                                                                                        </table>
-                                                                                                                                      </div>
+                                <h6 class="border-bottom pb-2 mb-2"><i class="fas fa-box-open mr-2"></i>주문 상품 상세</h6>
+                                <table class="table table-bordered table-sm text-center">
+                                  <thead class="thead-light">
+                                  <tr>
+                                    <th>상품명</th>
+                                    <th style="width: 60px;">수량</th>
+                                    <th>단가</th>
+                                    <th>포장비</th>
+                                    <th>할인액</th>
+                                    <th>최종 결제액</th>
+                                    <th style="width:140px;">상태 관리</th>
+                                  </tr>
+                                  </thead>
+                                  <tbody>
+                                  <tr th:each="item : ${order.orderItems}">
+                                    <td class="text-left align-middle" th:text="${item.bookName}"></td>
+                                    <td class="align-middle font-weight-bold" th:text="${item.quantity}"></td>
+                                    <td class="align-middle" th:text="${#numbers.formatInteger(item.unitPrice, 0, 'COMMA')}"></td>
+                                    <td class="align-middle text-muted small" th:text="${item.packagingPrice > 0 ? '+' + #numbers.formatInteger(item.packagingPrice, 0, 'COMMA') : '-'}"></td>
+                                    <td class="align-middle text-danger small" th:text="${item.itemDiscountAmount > 0 ? '-' + #numbers.formatInteger(item.itemDiscountAmount, 0, 'COMMA') : '-'}"></td>
+                                    <td class="align-middle font-weight-bold text-primary" th:text="${#numbers.formatInteger(item.totalItemSalePrice, 0, 'COMMA')}"></td>
+                                    <td class="align-middle">
+                                      <div class="btn-group btn-group-sm">
+                                        <!-- 1. 상품 준비중 -> 배송 시작 -->
+                                        <button th:if="${item.orderItemStatus.name() == 'PREPARING'}"
+                                                class="btn btn-info" type="button"
+                                                th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'SHIPPED', '배송 시작')">
+                                          <i class="fas fa-truck"></i> 배송 시작
+                                        </button>
+                                        <!-- 2. 배송중 -> 배송 완료 -->
+                                        <button th:if="${item.orderItemStatus.name() == 'SHIPPED'}"
+                                                class="btn btn-success" type="button"
+                                                th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'DELIVERED', '배송 완료')">
+                                          <i class="fas fa-box-open"></i> 배송 완료
+                                        </button>
+                                        <!-- 3. 반품 요청 -> 반품 승인 (반품 완료) -->
+                                        <th:block th:if="${#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')}">
+                                            <span class="badge badge-danger mr-2 p-2" th:text="${statusMap[item.orderItemStatus.name()]}">반품 사유</span>
+                                            <button class="btn btn-warning" type="button"
+                                                    th:onclick="updateStatus([[${item.orderId}]], [[${item.orderItemId}]], 'RETURNED', '반품 승인')">
+                                              <i class="fas fa-undo"></i> 승인
+                                            </button>
+                                        </th:block>
+                                        <!-- 4. 상태 표시 뱃지들 -->
+                                        <div th:if="${item.orderItemStatus.name() == 'RETURNED'}">
+                                          <span class="badge badge-secondary py-1 px-2">
+                                            <i class="fas fa-check-circle"></i> 반품 완료
+                                          </span>
+                                          <div th:if="${item.refundPrice != null and item.refundPrice > 0}" class="small text-danger font-weight-bold mt-1">
+                                            (환불: <span th:text="${#numbers.formatInteger(item.refundPrice, 0, 'COMMA')}"></span>원)
+                                          </div>
+                                        </div>
+                                        <span th:if="${item.orderItemStatus.name() == 'DELIVERED'}" class="badge badge-primary py-1 px-2">
+                                          <i class="fas fa-box"></i> 배송 완료
+                                        </span>
+                                        <span th:if="${item.orderItemStatus.name() == 'CONFIRMED'}" class="badge badge-success py-1 px-2">
+                                          <i class="fas fa-check-double"></i> 구매 확정
+                                        </span>
+                                        <span th:if="${item.orderItemStatus.name() == 'CANCELED'}" class="badge badge-danger py-1 px-2">
+                                          <i class="fas fa-times-circle"></i> 취소됨
+                                        </span>
+                                        <!-- 그 외 상태 (예외 상황) -->
+                                        <span th:if="${item.orderItemStatus.name() != 'PREPARING' and item.orderItemStatus.name() != 'SHIPPED'
+                                                    and !#strings.startsWith(item.orderItemStatus.name(), 'RETURN_REQUESTED')
+                                                    and item.orderItemStatus.name() != 'RETURNED'
+                                                    and item.orderItemStatus.name() != 'DELIVERED'
+                                                    and item.orderItemStatus.name() != 'CONFIRMED'
+                                                    and item.orderItemStatus.name() != 'CANCELED'}"
+                                              class="text-muted small">
+                                          -
+                                        </span>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  </tbody>
+                                </table>
+                                <div class="bg-light p-3 rounded text-right">
+                                  <div>상품 합계: <span th:text="${#numbers.formatInteger(order.originPrice, 0, 'COMMA')}"></span>원</div>
+                                  <div>배송비: +<span class="order-delivery-fee" th:data-fee="${order.deliveryFee}" th:text="${#numbers.formatInteger(order.deliveryFee, 0, 'COMMA')}"></span>원</div>
+                                  <div class="text-danger">쿠폰 할인: -<span th:text="${#numbers.formatInteger(order.totalCouponDiscount, 0, 'COMMA')}"></span>원</div>
+                                  <div class="text-primary">포인트 사용: -<span th:text="${#numbers.formatInteger(order.pointUsage, 0, 'COMMA')}"></span>원</div>
+                                  <div class="border-top mt-2 pt-2">
+                                    <h6 class="font-weight-bold">최종 결제 금액: <span class="text-primary" th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')}"></span>원</h6>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr th:if="${#lists.isEmpty(orders)}">
+                            <td colspan="7" class="py-5 text-muted">
+                              <i class="fas fa-box-open fa-3x mb-3"></i><br>
+                              주문 내역이 없거나 불러오지 못했습니다.
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <!-- Pagination -->
+                      <div class="d-flex justify-content-center mt-4" th:if="${totalPages > 1}">
+                          <nav aria-label="Page navigation">
+                              <ul class="pagination">
+                                  <!-- Previous -->
+                                  <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                      <a class="page-link" th:href="@{/admin/orders(page=${currentPage - 1})}" aria-label="Previous">
+                                          <span aria-hidden="true">&laquo;</span>
+                                      </a>
+                                  </li>
+
+                                  <!-- Page Numbers -->
+                                  <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                      th:classappend="${i == currentPage} ? 'active'">
+                                      <a class="page-link" th:href="@{/admin/orders(page=${i})}" th:text="${i + 1}">1</a>
+                                  </li>
+
+                                  <!-- Next -->
+                                  <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                      <a class="page-link" th:href="@{/admin/orders(page=${currentPage + 1})}" aria-label="Next">
+                                          <span aria-hidden="true">&raquo;</span>
+                                      </a>
+                                  </li>
+                              </ul>
+                          </nav>
+                      </div>
                                                                                                                                     </div>
                                                                                                                                   </div>
                                                                                                                                 </div>
