@@ -9,6 +9,10 @@
     <title>Trillion-Shop | 도서 목록</title>
 
     <th:block layout:fragment="head">
+        <!-- (선택) 환경설정에서 minio.public-base 를 쓰는 경우를 대비 -->
+        <meta name="minio-public-base"
+              th:content="${@environment.getProperty('minio.public-base')}" />
+
         <style>
             .book-thumb {
                 display: block;
@@ -114,9 +118,28 @@
                                 <div th:if="${book.bookState != null and book.bookState.toString() == 'SOLD_OUT'}"
                                      class="sold-out-overlay">재고 소진</div>
 
+                                <!-- ✅ [수정] 어떤 형태의 bookImage 가 와도 정상 URL로 정규화 -->
                                 <img class="img-fluid w-100 book-thumb"
-                                     th:src="${#strings.isEmpty(book.bookImage) ? 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image' :
-                                              (#strings.startsWith(book.bookImage, 'http') or #strings.startsWith(book.bookImage, '/trillion-bucket/') ? book.bookImage : '/trillion-bucket/' + book.bookImage)}"
+                                     th:with="
+                                        fallback='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image',
+                                        raw=${book.bookImage},
+
+                                        envBase=${@environment.getProperty('minio.public-base')},
+                                        base0=${#strings.isEmpty(envBase) ? '/trillion-bucket/' : envBase},
+                                        base1=${#strings.endsWith(base0, '/') ? base0 : base0 + '/'},
+
+                                        normalized=${#strings.isEmpty(raw) ? '' :
+                                            (#strings.startsWith(raw, 'http') ? raw :
+                                             (#strings.startsWith(raw, '/') ? raw :
+                                              (#strings.startsWith(raw, 'trillion-bucket/') ? '/' + raw :
+                                               (#strings.startsWith(raw, 'trillion-bucket') ? '/' + raw :
+                                                base1 + raw
+                                               )
+                                              )
+                                             )
+                                            )
+                                     "
+                                     th:src="${#strings.isEmpty(normalized) ? fallback : normalized}"
                                      onerror="this.onerror=null; this.src='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image';"
                                      loading="lazy" alt="책 표지">
 
