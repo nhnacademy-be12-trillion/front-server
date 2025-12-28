@@ -32,7 +32,7 @@
             color: #3D464D;
         }
 
-        /* [추가] 품절(SOLD_OUT) 상태일 때 회색 톤 오버레이 스타일 */
+        /* [수정] 품절(SOLD_OUT) 상태일 때 회색 톤 오버레이 스타일 */
         .sold-out-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -45,7 +45,7 @@
             color: #ffffff; /* 흰색 글씨 */
             font-size: 1.2rem;
         }
-        /* 품절된 상품 흐리게 처리 (선택사항) */
+        /* 품절된 상품 흐리게 처리 */
         .sold-out-item .book-thumb {
             opacity: 0.5;
         }
@@ -153,11 +153,9 @@
 
                                 <div class="mt-2" style="text-align: center;">
                                     <div th:if="${book.bookSalePrice > 0}">
-
                                         <h6 class="text-muted mb-1" th:if="${book.bookSalePrice < book.bookRegularPrice}">
                                             <del th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</del>
                                         </h6>
-
                                         <div class="d-flex align-items-center justify-content-center">
                                             <h5 class="text-primary mb-0" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
                                             <span class="badge badge-danger ml-2" th:if="${book.bookSalePrice < book.bookRegularPrice}" th:text="${book.discountRate} + '%'">10%</span>
