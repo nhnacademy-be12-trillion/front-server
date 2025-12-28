@@ -7,6 +7,9 @@
 <head>
     <meta charset="utf-8">
     <title>Trillion-Shop | 관리자 - 도서 등록</title>
+
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+
     <th:block layout:fragment="head">
         <style>
             body { background-color: #f5f5f5; }
@@ -32,14 +35,13 @@
         <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
 
         <div class="row px-xl-5">
-            <!-- Sidebar Fragment -->
             <th:block th:replace="~{admin/fragments/sidebar :: sidebar('books')}"></th:block>
 
             <div class="col-lg-9 col-md-8">
                 <div class="content-box">
                     <h4 class="mb-4 text-primary">신규 도서 등록 (AI 지원)</h4>
                     <div class="policy-group">
-                        <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data">
+                        <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data" id="bookRegisterForm">
 
                             <input type="hidden" name="bookState" value="ON_SALE">
                             <input type="hidden" name="isPackaging" value="true">
@@ -100,10 +102,15 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">도서 설명 (AI)</label>
-                                <div class="col-sm-9"><textarea class="form-control" name="bookDescription" rows="8"></textarea></div>
+                                <div class="col-sm-9">
+                                    <div id="editor"></div>
+                                    <input type="hidden" name="bookDescription" id="bookDescriptionHidden">
+                                </div>
                             </div>
+
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">목차 (AI)</label>
                                 <div class="col-sm-9"><textarea class="form-control" name="bookIndex" rows="5"></textarea></div>
@@ -133,7 +140,6 @@
         </div>
     </div>
 
-    <!-- Category Search Modal -->
     <div class="modal fade" id="categorySearchModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -158,30 +164,40 @@
 </div>
 
 <th:block layout:fragment="script">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
     <script th:inline="javascript">
 
         document.addEventListener("DOMContentLoaded", function() {
 
-            // [중요 수정] AI 검색 중복 요청 방지 로직 적용
+            // Toast UI Editor 초기화
+            const editor = new toastui.Editor({
+                el: document.querySelector('#editor'),
+                height: '400px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical'
+            });
+
+            // AI 검색 중복 요청 방지
             let isSearching = false;
 
             $('#btn-ai-search').off('click').on('click', function () {
-                if (isSearching) return; // 이미 검색 중이면 무시
+                if (isSearching) return;
 
                 const isbn = $('#isbnInput').val().trim();
                 if (!isbn) { alert("ISBN 입력"); return; }
 
-                isSearching = true; // 검색 시작 플래그 ON
+                isSearching = true;
                 const $btn = $(this);
                 const orgText = $btn.html();
                 $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 검색 중...');
 
                 fetch([[@{/admin/books/isbn/}]] + isbn)
-                    .then(async res => {
-                        if (res.ok) return res.json();
-                        if (res.status === 429) throw new Error("AI 요청 한도 초과: 잠시 후(약 1분 뒤) 다시 시도해주세요.");
-                        throw new Error("검색 결과가 없거나 서버 응답이 없습니다.");
-                    })
+            .then(async res => {
+                    if (res.ok) return res.json();
+                    if (res.status === 429) throw new Error("AI 요청 한도 초과: 잠시 후(약 1분 뒤) 다시 시도해주세요.");
+                    throw new Error("검색 결과가 없거나 서버 응답이 없습니다.");
+                })
                     .then(data => {
                         $('input[name="bookName"]').val(data.bookName);
                         $('input[name="bookAuthor"]').val(data.bookAuthor);
@@ -189,7 +205,10 @@
                         $('input[name="bookDate"]').val(data.bookPublicationDate);
                         $('input[name="bookRegularPrice"]').val(data.bookRegularPrice);
                         $('input[name="bookSalePrice"]').val(data.bookSalePrice);
-                        $('textarea[name="bookDescription"]').val(data.bookDescription);
+
+                        // AI가 가져온 설명을 에디터에 세팅
+                        editor.setMarkdown(data.bookDescription || '');
+
                         $('textarea[name="bookIndex"]').val(data.bookIndex);
                         $('input[name="tags"]').val(data.tags);
 
@@ -215,12 +234,19 @@
                         alert("오류 발생: " + err.message);
                     })
                     .finally(() => {
-                        isSearching = false; // 검색 종료 플래그 OFF
+                        isSearching = false;
                         $btn.prop('disabled', false).html(orgText);
                     });
             });
 
-            // [도서 등록] 카테고리 검색
+            // 폼 제출 시 에디터 내용을 hidden input에 동기화
+            $('#bookRegisterForm').on('submit', function() {
+                const description = editor.getMarkdown();
+                $('#bookDescriptionHidden').val(description);
+                return true;
+            });
+
+            // 카테고리 검색
             $('#btn-search-category').off('click').on('click', function() {
                 const keyword = $('#categoryKeyword').val().trim();
                 if (!keyword) { alert("검색어 입력"); return; }
@@ -228,7 +254,7 @@
                 $list.html('검색중...');
 
                 fetch([[@{/admin/categories/search}]] + '?keyword=' + encodeURIComponent(keyword))
-                    .then(res => res.json())
+            .then(res => res.json())
                     .then(data => {
                         $list.empty();
                         if (!data || data.length === 0) {
