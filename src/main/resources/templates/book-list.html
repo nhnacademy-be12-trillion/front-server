@@ -9,10 +9,6 @@
     <title>Trillion-Shop | 도서 목록</title>
 
     <th:block layout:fragment="head">
-        <!-- (선택) 환경설정에서 minio.public-base 를 쓰는 경우를 대비 -->
-        <meta name="minio-public-base"
-              th:content="${@environment.getProperty('minio.public-base')}" />
-
         <style>
             .book-thumb {
                 display: block;
@@ -24,7 +20,6 @@
             .product-img .book-thumb {
                 height: 240px;
             }
-            /* 페이지네이션 스타일 */
             .page-item.active .page-link {
                 z-index: 1;
                 color: #fff;
@@ -34,8 +29,6 @@
             .page-link {
                 color: #3D464D;
             }
-
-            /* 품절 오버레이 스타일 */
             .sold-out-overlay {
                 position: absolute;
                 top: 0; left: 0; width: 100%; height: 100%;
@@ -118,28 +111,29 @@
                                 <div th:if="${book.bookState != null and book.bookState.toString() == 'SOLD_OUT'}"
                                      class="sold-out-overlay">재고 소진</div>
 
-                                <!-- ✅ [수정] 어떤 형태의 bookImage 가 와도 정상 URL로 정규화 -->
+                                <!-- ✅ [핵심 수정] bookImage 형태(키만 / trillion-bucket 포함 / 슬래시 유무 / 절대URL) 모두 안전 처리 -->
                                 <img class="img-fluid w-100 book-thumb"
-                                     th:with="
-                                        fallback='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image',
-                                        raw=${book.bookImage},
-
-                                        envBase=${@environment.getProperty('minio.public-base')},
-                                        base0=${#strings.isEmpty(envBase) ? '/trillion-bucket/' : envBase},
-                                        base1=${#strings.endsWith(base0, '/') ? base0 : base0 + '/'},
-
-                                        normalized=${#strings.isEmpty(raw) ? '' :
-                                            (#strings.startsWith(raw, 'http') ? raw :
-                                             (#strings.startsWith(raw, '/') ? raw :
-                                              (#strings.startsWith(raw, 'trillion-bucket/') ? '/' + raw :
-                                               (#strings.startsWith(raw, 'trillion-bucket') ? '/' + raw :
-                                                base1 + raw
-                                               )
-                                              )
-                                             )
-                                            )
-                                     "
-                                     th:src="${#strings.isEmpty(normalized) ? fallback : normalized}"
+                                     th:src="${
+                                       #strings.isEmpty(book.bookImage)
+                                         ? 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image'
+                                         : (
+                                             #strings.startsWith(book.bookImage, 'http')
+                                               ? book.bookImage
+                                               : (
+                                                   #strings.startsWith(book.bookImage, '/trillion-bucket/')
+                                                     ? book.bookImage
+                                                     : (
+                                                         #strings.startsWith(book.bookImage, 'trillion-bucket/')
+                                                           ? '/' + book.bookImage
+                                                           : (
+                                                               #strings.startsWith(book.bookImage, '/')
+                                                                 ? book.bookImage
+                                                                 : '/trillion-bucket/' + book.bookImage
+                                                             )
+                                                       )
+                                                 )
+                                           )
+                                     }"
                                      onerror="this.onerror=null; this.src='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image';"
                                      loading="lazy" alt="책 표지">
 
@@ -257,7 +251,6 @@
 
 <th:block layout:fragment="script">
     <script th:inline="javascript">
-        // [원본 유지] 장바구니 추가 기능
         function addToCart(bookId) {
             const data = { bookId: bookId, cartQuantity: 1 };
             fetch('/carts/add', {
@@ -277,7 +270,6 @@
                 .catch(error => { console.error('Error:', error); alert('오류가 발생했습니다.'); });
         }
 
-        // [원본 유지] 찜하기 기능
         function toggleWishlist(bookId) {
             fetch('/wishlists/toggle?bookId=' + bookId, { method: 'GET' })
                 .then(response => {
