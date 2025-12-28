@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<div layout:fragment="content">
+    <style>
+        /* 포인트 증감 색상 스타일 */
+        .point-plus { color: #28a745; font-weight: 800; } /* 초록색 */
+        .point-minus { color: #dc3545; font-weight: 800; } /* 빨간색 */
+
+        /* 사이드바 활성화 스타일 */
+        .mypage-menu .nav-link.active {
+            background-color: #FFD333;
+            color: #3D464D;
+            font-weight: 700;
+        }
+        .mypage-menu .nav-link {
+            border-radius: 5px;
+            padding: 12px 20px;
+        }
+    </style>
+
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <a class="breadcrumb-item text-dark" href="/">Home</a>
+                    <a class="breadcrumb-item text-dark" href="/members/my-page">마이페이지</a>
+                    <span class="breadcrumb-item active">포인트 내역</span>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+
+            <div class="col-lg-3 col-md-4 mb-5">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">MY 메뉴</span>
+                </h5>
+                <div class="bg-light p-30 rounded shadow-sm border">
+                    <div class="nav flex-column nav-pills mypage-menu">
+                        <a class="nav-link text-dark mb-2" th:href="@{/members/my-page}">
+                            <i class="fa fa-user-circle mr-2"></i>내 정보 / 배송지
+                        </a>
+                        <a class="nav-link active mb-2" th:href="@{/my-page/points}">
+                            <i class="fas fa-coins mr-2"></i>포인트 내역
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/orders}">
+                            <i class="fa fa-shopping-bag mr-2"></i>주문/배송 조회
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/history}">
+                            <i class="fa fa-undo mr-2"></i>취소/반품 내역
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/wishlists}">
+                            <i class="fa fa-heart mr-2"></i>찜한 상품
+                        </a>
+                        <a class="nav-link text-dark" th:href="@{/members/reviews}">
+                            <i class="fa fa-edit mr-2"></i>내 리뷰
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8">
+                <h2 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">포인트 내역</span>
+                </h2>
+
+                <div class="bg-light p-4 mb-4 rounded shadow-sm border d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="font-weight-bold mb-1 text-dark">현재 사용 가능 포인트</h5>
+                        <small class="text-muted">적립된 포인트는 결제 시 현금처럼 사용할 수 있습니다.</small>
+                    </div>
+                    <div class="text-right">
+                        <h2 class="text-primary font-weight-bold mb-0">
+                            <i class="fas fa-coins mr-2"></i>
+                            <span th:text="${#numbers.formatInteger(currentPoint, 0, 'COMMA')}">0</span> P
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="bg-light p-30 rounded shadow-sm border">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-center mb-0">
+                            <thead class="thead-light">
+                            <tr>
+                                <th style="width: 20%;">날짜</th>
+                                <th style="width: 45%;" class="text-left pl-4">내용</th>
+                                <th style="width: 15%;">적립/사용</th>
+                                <th style="width: 20%;">잔여 포인트</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="history : ${pointHistories}">
+                                <td class="align-middle text-muted"
+                                    th:text="${#temporals.format(history.transactionAt, 'yyyy-MM-dd HH:mm')}">
+                                    2024-01-01 12:00
+                                </td>
+
+                                <td class="align-middle text-left pl-4 font-weight-bold"
+                                    th:text="${history.reason}">
+                                    회원가입 축하 적립
+                                </td>
+
+                                <td class="align-middle">
+                                    <span th:if="${history.amount > 0}" class="point-plus">
+                                        +<span th:text="${#numbers.formatInteger(history.amount, 0, 'COMMA')}">500</span>
+                                    </span>
+                                    <span th:if="${history.amount < 0}" class="point-minus"
+                                          th:text="${#numbers.formatInteger(history.amount, 0, 'COMMA')}">
+                                        -500
+                                    </span>
+                                    <span th:if="${history.amount == 0}" class="text-muted">0</span>
+                                </td>
+
+                                <td class="align-middle text-muted"
+                                    th:text="${#numbers.formatInteger(history.currentBalance, 0, 'COMMA')} + ' P'">
+                                    1,500 P
+                                </td>
+                            </tr>
+
+                            <tr th:if="${#lists.isEmpty(pointHistories)}">
+                                <td colspan="4" class="py-5 text-center text-muted">
+                                    <i class="fas fa-exclamation-circle fa-2x mb-3 d-block text-secondary"></i>
+                                    <p class="mb-0">포인트 적립/사용 내역이 없습니다.</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</html>
