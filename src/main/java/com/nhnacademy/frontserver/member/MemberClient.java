@@ -6,7 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "gateway-member",
-        url = "${gateway.url}")
+        url = "${gateway.url}",
+        contextId = "memberClient")
 public interface MemberClient {
     // 회원
     @PostMapping("/api/members/signup")
@@ -17,6 +18,10 @@ public interface MemberClient {
 
     @GetMapping("/api/members/social/{oauthId}")
     MemberResponse getMemberByOauthId(@PathVariable("oauthId") String oauthId);
+
+    // 마이페이지 정보 수정
+    @PutMapping("/api/members")
+    void updateMember(@RequestBody MemberUpdateRequest request);
 
     // 휴면 해제 인증번호 요청
     @PostMapping("/api/members/dormant/request")

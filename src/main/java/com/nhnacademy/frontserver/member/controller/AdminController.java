@@ -1,6 +1,5 @@
 package com.nhnacademy.frontserver.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.CategorySearchResponse;
@@ -8,6 +7,9 @@ import com.nhnacademy.frontserver.order.OrderItemStatusPatchRequest;
 import com.nhnacademy.frontserver.order.OrderResponse;
 import com.nhnacademy.frontserver.order.client.OrderClient;
 import com.nhnacademy.frontserver.order.util.OrderItemStatus;
+import com.nhnacademy.frontserver.point.PointPolicyResponse;
+import com.nhnacademy.frontserver.point.PointPolicyUpdateRequest;
+import com.nhnacademy.frontserver.point.client.PointClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,25 +29,23 @@ public class AdminController {
 
     private final BookClient bookClient;
     private final OrderClient orderClient;
-    private final ObjectMapper objectMapper;
+    private final PointClient pointClient;
 
-    // =================================================================================
-    // 1. 관리자 페이지 화면 (주문, 정책, 회원)
-    // =================================================================================
-
+    // 관리자 메인 리다이렉트
     @GetMapping("/admin")
     public String adminRoot() {
         return "redirect:/admin/orders";
     }
 
+    // 주문 관리 페이지
     @GetMapping("/admin/orders")
     public String adminOrders(@RequestParam(defaultValue = "0") int page, Model model) {
-        // ... (기존 주문 조회 로직 유지) ...
         List<OrderResponse> orderList = Collections.emptyList();
         int totalPages = 0;
         long totalElements = 0;
 
         try {
+            // 주문 목록은 PageResponse로 반환되므로 기존 로직 유지
             PageResponse<OrderResponse> response = orderClient.getAllOrderByAdmin(page, 20, "orderDetails.orderDate,desc");
             if (response != null && response.content() != null) {
                 orderList = response.content();
@@ -65,39 +65,61 @@ public class AdminController {
 
         Map<String, String> statusMap = new HashMap<>();
         for (OrderItemStatus status : OrderItemStatus.values()) statusMap.put(status.name(), status.getTitle());
-        // OrderStatus 등 나머지 매핑 로직 유지
-
         model.addAttribute("statusMap", statusMap);
+
         return "admin/orders";
     }
 
+    // 정책 관리 페이지 (배송 + 포장 + 포인트 통합)
     @GetMapping("/admin/policies")
     public String adminPolicies(Model model) {
         model.addAttribute("activeMenu", "policies");
+
         try {
+            // 배송비 정책
             model.addAttribute("deliveryPolicy", orderClient.getDeliveryPolicy());
+
+            // 포장 정책
             model.addAttribute("packagingList", orderClient.getAllPackaging(0, 100, "packagingId,asc"));
+
+            // 포인트 정책
+            List<PointPolicyResponse> pointPolicies = pointClient.getPolicies();
+            model.addAttribute("pointPolicies", pointPolicies);
+
         } catch (Exception e) {
             log.error("정책 조회 실패", e);
+            // 에러 발생 시 빈 리스트라도 넣어 뷰 렌더링 오류 방지
+            if (!model.containsAttribute("packagingList")) {
+                model.addAttribute("packagingList", Collections.emptyList());
+            }
+            if (!model.containsAttribute("pointPolicies")) {
+                model.addAttribute("pointPolicies", Collections.emptyList());
+            }
         }
         return "admin/policies";
     }
 
+    // 회원 관리 페이지
     @GetMapping("/admin/members")
     public String adminMembers(Model model) {
         model.addAttribute("activeMenu", "members");
         return "admin/members";
     }
 
-    // [제거됨] adminBookRegister (도서 등록 페이지) -> AdminBookController로 이동
-    // [제거됨] createBook (도서 등록 처리) -> AdminBookController로 이동
-    // [제거됨] getBookInfoByIsbn (ISBN 조회) -> AdminBookController로 이동
+    // 포인트 정책 수정 처리
+    @PostMapping("/admin/policies/points/{policyId}")
+    public String updatePointPolicy(@PathVariable Long policyId,
+                                    @ModelAttribute PointPolicyUpdateRequest request) {
+        try {
+            pointClient.updatePointPolicy(policyId, request);
+        } catch (Exception e) {
+            log.error("포인트 정책 수정 실패", e);
+            return "redirect:/admin/policies?error=Update failed";
+        }
+        return "redirect:/admin/policies?success=Updated";
+    }
 
-    // =================================================================================
-    // 2. 기타 공통 API
-    // =================================================================================
-
-    // 주문 상태 변경 API
+    // 주문 상세 상태 변경 (AJAX)
     @PatchMapping("/admin/orders/{orderId}/items/{orderItemId}/status")
     @ResponseBody
     public ResponseEntity<String> updateOrderItemStatus(
@@ -108,13 +130,13 @@ public class AdminController {
         try {
             OrderItemStatusPatchRequest request = new OrderItemStatusPatchRequest(status);
             orderClient.patchOrderItemStatusByMember(orderId, orderItemId, request);
-            return ResponseEntity.ok("상태 변경 성공");
+            return ResponseEntity.ok("성공");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("상태 변경 실패: " + e.getMessage());
+            return ResponseEntity.status(500).body("실패: " + e.getMessage());
         }
     }
 
-    // 카테고리 검색 API (HTML에서 사용하는 URL 유지를 위해 여기에 남겨둠)
+    // 카테고리 검색 (AJAX)
     @GetMapping("/admin/categories/search")
     @ResponseBody
     public ResponseEntity<List<CategorySearchResponse>> searchCategories(@RequestParam("keyword") String keyword) {
