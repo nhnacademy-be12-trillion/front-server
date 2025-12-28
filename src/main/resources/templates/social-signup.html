@@ -17,9 +17,10 @@
     </div>
   </div>
 
-  <div class="container mb-5" style="max-width: 600px;"> <h2 class="section-title position-relative text-uppercase text-center mb-4">
-    <span class="bg-secondary px-3">회원가입 마무리</span>
-  </h2>
+  <div class="container mb-5" style="max-width: 600px;">
+    <h2 class="section-title position-relative text-uppercase text-center mb-4">
+      <span class="bg-secondary px-3">회원가입 마무리</span>
+    </h2>
 
     <div class="bg-light p-4 p-md-5 rounded shadow-sm">
       <div class="text-center mb-4">
@@ -29,14 +30,23 @@
       <form action="/members/social-signup" method="post" onsubmit="return validateForm()">
 
         <div class="form-group">
+          <label>이름 <span class="text-danger">*</span></label>
+          <input type="text" name="memberName" class="form-control"
+                 placeholder="이름을 입력해주세요" required
+                 th:value="${memberName}"
+                 style="height: 50px;">
+        </div>
+
+        <div class="form-group">
           <label>생년월일 <span class="text-danger">*</span></label>
           <input type="date" id="memberBirth" name="memberBirth" class="form-control" required style="height: 50px;">
           <small class="text-muted">생일 쿠폰 발급 기준이 되며, 가입 후 변경이 불가능할 수 있습니다.</small>
         </div>
 
         <div class="form-group">
-          <label>연락처</label>
-          <input type="text" name="memberContact" class="form-control" placeholder="010-0000-0000" style="height: 50px;">
+          <label>연락처 <span class="text-danger">*</span></label>
+          <input type="text" id="memberContact" name="memberContact" class="form-control"
+                 placeholder="010-0000-0000" maxlength="13" required oninput="autoHyphen(this)" style="height: 50px;">
         </div>
 
         <hr class="my-4">
@@ -65,6 +75,9 @@
 
         <input type="hidden" name="memberAddress.addressAlias" value="우리집">
 
+        <input type="hidden" name="memberOauthId" th:value="${memberOauthId}">
+        <input type="hidden" name="memberEmail" th:value="${memberEmail}">
+
         <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold mt-4" style="height: 50px;">가입 완료</button>
       </form>
 
@@ -75,10 +88,28 @@
 <th:block layout:fragment="script">
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
+    // 전화번호 자동 하이픈
+    function autoHyphen(target) {
+      target.value = target.value
+              .replace(/[^0-9]/g, '')
+              .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3")
+              .replace(/(\-{1,2})$/g, "");
+    }
+
     function validateForm() {
+      // 이름 검증 (required가 있지만 스페이스바 방지용)
+      const nameInput = document.getElementsByName('memberName')[0].value;
+      if (!nameInput.trim()) {
+        alert("이름을 입력해주세요.");
+        return false;
+      }
+
       // 생년월일 검증
       const birthInput = document.getElementById('memberBirth').value;
-      if (!birthInput) return false;
+      if (!birthInput) {
+        alert("생년월일을 입력해주세요.");
+        return false;
+      }
 
       const memberBirth = new Date(birthInput);
       const today = new Date();
@@ -87,6 +118,15 @@
 
       if (memberBirth > oneYearAgo) {
         alert("생년월일을 정확히 입력해주세요. (최근 1년 이내 날짜 선택 불가)");
+        return false;
+      }
+
+      // 전화번호 형식 검증
+      const phone = document.getElementById('memberContact').value;
+      const phoneRegex = /^01(?:0|1|[6-9])-(?:\d{3}|\d{4})-\d{4}$/;
+      if (!phoneRegex.test(phone)) {
+        alert("올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)");
+        document.getElementById('memberContact').focus();
         return false;
       }
 

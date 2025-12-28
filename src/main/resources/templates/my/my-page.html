@@ -59,7 +59,7 @@
             font-size: 0.9rem;
         }
 
-        /* 사이드바 메뉴 활성화 스타일 (추가됨) */
+        /* 사이드바 메뉴 활성화 스타일 */
         .mypage-menu .nav-link.active {
             background-color: #FFD333; /* 테마 메인 컬러 */
             color: #3D464D;
@@ -97,6 +97,9 @@
                         <a class="nav-link active mb-2" th:href="@{/members/my-page}">
                             <i class="fa fa-user-circle mr-2"></i>내 정보 / 배송지
                         </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/points}">
+                            <i class="fas fa-coins mr-2"></i>포인트 내역
+                        </a>
                         <a class="nav-link text-dark mb-2" th:href="@{/my-page/orders}">
                             <i class="fa fa-shopping-bag mr-2"></i>주문/배송 조회
                         </a>
@@ -115,25 +118,31 @@
 
             <div class="col-lg-9 col-md-8">
 
-                <h2 class="section-title position-relative text-uppercase mb-4">
-                    <span class="bg-secondary pr-3">내 정보</span>
-                </h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="section-title position-relative text-uppercase mb-0">
+                        <span class="bg-secondary pr-3">내 정보</span>
+                    </h2>
+                    <button class="btn btn-sm btn-outline-dark font-weight-bold" data-toggle="modal" data-target="#memberEditModal">
+                        <i class="fa fa-cog mr-1"></i>정보 수정
+                    </button>
+                </div>
+
                 <div class="custom-card mb-5">
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <div class="row">
-                                <div class="col-sm-6 mb-3">
+                                <div class="col-sm-6 mb-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="mr-3 text-secondary"><i class="fas fa-user fa-2x"></i></div>
+                                        <div class="mr-3 text-secondary" style="width: 40px; text-align: center;"><i class="fas fa-user fa-2x"></i></div>
                                         <div>
                                             <div class="info-label">이름</div>
                                             <div class="info-value" th:text="${member.memberName}">홍길동</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-sm-6 mb-3">
+                                <div class="col-sm-6 mb-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="mr-3 text-secondary"><i class="fas fa-crown fa-2x"></i></div>
+                                        <div class="mr-3 text-secondary" style="width: 40px; text-align: center;"><i class="fas fa-crown fa-2x"></i></div>
                                         <div>
                                             <div class="info-label">등급</div>
                                             <div class="grade-badge-pill">
@@ -142,9 +151,27 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                <div class="col-sm-6 mb-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="mr-3 text-secondary"><i class="fas fa-envelope fa-2x"></i></div>
+                                        <div class="mr-3 text-secondary" style="width: 40px; text-align: center;"><i class="fas fa-phone-alt fa-2x"></i></div>
+                                        <div>
+                                            <div class="info-label">연락처</div>
+                                            <div class="info-value" th:text="${member.memberContact}">010-1234-5678</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3 text-secondary" style="width: 40px; text-align: center;"><i class="fas fa-birthday-cake fa-2x"></i></div>
+                                        <div>
+                                            <div class="info-label">생년월일</div>
+                                            <div class="info-value" th:text="${member.memberBirth}">2000-01-01</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4 mb-sm-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3 text-secondary" style="width: 40px; text-align: center;"><i class="fas fa-envelope fa-2x"></i></div>
                                         <div>
                                             <div class="info-label">이메일</div>
                                             <div class="info-value" th:text="${member.memberEmail}">email@example.com</div>
@@ -153,7 +180,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="mr-3 text-secondary"><i class="fas fa-coins fa-2x"></i></div>
+                                        <div class="mr-3 text-secondary" style="width: 40px; text-align: center;"><i class="fas fa-coins fa-2x"></i></div>
                                         <div>
                                             <div class="info-label">보유 포인트</div>
                                             <div class="point-value" th:text="${member.memberPoint} + ' P'">1,000 P</div>
@@ -227,11 +254,30 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="font-weight-bold">우편번호</label>
-                                                            <input type="text" name="addressPostCode" class="form-control bg-light" th:value="${addr.addressPostCode}" readonly required style="height: 45px;">
+                                                            <div class="input-group">
+                                                                <input type="text"
+                                                                       th:id="'zipcode-' + ${addr.addressId}"
+                                                                       name="addressPostCode"
+                                                                       class="form-control bg-light"
+                                                                       th:value="${addr.addressPostCode}"
+                                                                       readonly required
+                                                                       th:onclick="'execDaumPostcodeTarget(\'zipcode-' + ${addr.addressId} + '\', \'base-' + ${addr.addressId} + '\')'"
+                                                                       style="height: 45px;">
+                                                                <div class="input-group-append">
+                                                                    <button type="button" class="btn btn-dark"
+                                                                            th:onclick="'execDaumPostcodeTarget(\'zipcode-' + ${addr.addressId} + '\', \'base-' + ${addr.addressId} + '\')'">찾기</button>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="font-weight-bold">기본 주소</label>
-                                                            <input type="text" name="addressBase" class="form-control bg-light" th:value="${addr.addressBase}" readonly required style="height: 45px;">
+                                                            <input type="text"
+                                                                   th:id="'base-' + ${addr.addressId}"
+                                                                   name="addressBase"
+                                                                   class="form-control bg-light"
+                                                                   th:value="${addr.addressBase}"
+                                                                   readonly required
+                                                                   style="height: 45px;">
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="font-weight-bold">상세 주소</label>
@@ -295,7 +341,48 @@
                     </form>
                 </div>
 
-            </div> </div> </div> </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="memberEditModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title font-weight-bold">내 정보 수정</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="/members/update" method="post" onsubmit="return validateUpdateForm()">
+                    <div class="modal-body text-left p-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">이름</label>
+                            <input type="text" name="memberName" class="form-control" th:value="${member.memberName}" required style="height: 45px;">
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">연락처</label>
+                            <input type="text" id="updateMemberContact" name="memberContact" class="form-control"
+                                   th:value="${member.memberContact}"
+                                   maxlength="13"
+                                   oninput="autoHyphen(this)"
+                                   required style="height: 45px;">
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">생년월일</label>
+                            <input type="date" id="updateMemberBirth" name="memberBirth" class="form-control" th:value="${member.memberBirth}" required style="height: 45px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary font-weight-bold px-4">정보 수정 완료</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 <th:block layout:fragment="script">
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -312,33 +399,85 @@
     </script>
 
     <script>
+        // 전화번호 자동 하이픈
+        function autoHyphen(target) {
+            target.value = target.value
+                .replace(/[^0-9]/g, '')
+                .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3")
+                .replace(/(\-{1,2})$/g, "");
+        }
+
+        function validateUpdateForm() {
+            const phoneInput = document.getElementById('updateMemberContact');
+            const birthInput = document.getElementById('updateMemberBirth');
+
+            // 전화번호 형식 검증
+            const phoneRegex = /^01(?:0|1|[6-9])-(?:\d{3}|\d{4})-\d{4}$/;
+            if (!phoneRegex.test(phoneInput.value)) {
+                alert("올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)");
+                phoneInput.focus();
+                return false;
+            }
+
+            // 생년월일 검증 (최근 1년 이내 선택 불가)
+            if (!birthInput.value) {
+                alert("생년월일을 입력해주세요.");
+                return false;
+            }
+
+            const memberBirth = new Date(birthInput.value);
+            const today = new Date();
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+            // 미래 날짜이거나 1년 이내인 경우
+            if (memberBirth > today) {
+                alert("미래의 날짜는 선택할 수 없습니다.");
+                birthInput.focus();
+                return false;
+            }
+
+            if (memberBirth > oneYearAgo) {
+                alert("생년월일을 정확히 입력해주세요. (최근 1년 이내 날짜 선택 불가)");
+                birthInput.focus();
+                return false;
+            }
+
+            return true; // 검증 통과 시 서버로 전송
+        }
+
+        // 주소 추가 (Daum API)
         function execDaumPostcode() {
             new daum.Postcode({
                 oncomplete: function(data) {
-                    var addr = '';
-                    var extraAddr = '';
-
-                    if (data.userSelectedType === 'R') {
-                        addr = data.roadAddress;
-                    } else {
-                        addr = data.jibunAddress;
-                    }
-
+                    var addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
                     if(data.userSelectedType === 'R'){
-                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-                            extraAddr += data.bname;
-                        }
-                        if(data.buildingName !== '' && data.apartment === 'Y'){
-                            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-                        }
-                        if(extraAddr !== ''){
-                            addr += ' (' + extraAddr + ')';
-                        }
+                        var extraAddr = '';
+                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)) extraAddr += data.bname;
+                        if(data.buildingName !== '' && data.apartment === 'Y') extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        if(extraAddr !== '') addr += ' (' + extraAddr + ')';
                     }
-
                     document.getElementById('newZipcode').value = data.zonecode;
                     document.getElementById('newAddressBase').value = addr;
                     document.getElementById('newAddressDetail').focus();
+                }
+            }).open();
+        }
+
+        // 주소 수정 (Daum API)
+        function execDaumPostcodeTarget(zipcodeId, baseId) {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                    if(data.userSelectedType === 'R'){
+                        var extraAddr = '';
+                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)) extraAddr += data.bname;
+                        if(data.buildingName !== '' && data.apartment === 'Y') extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        if(extraAddr !== '') addr += ' (' + extraAddr + ')';
+                    }
+                    // 전달받은 ID를 사용하여 값 설정
+                    document.getElementById(zipcodeId).value = data.zonecode;
+                    document.getElementById(baseId).value = addr;
                 }
             }).open();
         }

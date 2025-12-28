@@ -1,11 +1,9 @@
 package com.nhnacademy.frontserver.member.controller;
 
-import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
 import com.nhnacademy.frontserver.member.*;
-import com.nhnacademy.frontserver.order.OrderResponse;
-import com.nhnacademy.frontserver.order.client.OrderClient;
+import com.nhnacademy.frontserver.member.MemberClient;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,7 +27,6 @@ public class MemberController {
 
     private final MemberClient memberClient;
     private final AuthClient authClient;
-    private final OrderClient orderClient;
 
     // 회원가입 페이지
     @GetMapping("/signup")
@@ -97,6 +94,28 @@ public class MemberController {
             forceLogout(response);
             return "redirect:/login?error=access_denied";
         }
+    }
+
+    @PostMapping("/update")
+    public String updateMemberInfo(@ModelAttribute MemberUpdateRequest request,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            memberClient.updateMember(request);
+            redirectAttributes.addFlashAttribute("message", "회원 정보가 성공적으로 수정되었습니다.");
+        } catch (FeignException e) {
+            // 409 Conflict: 중복된 전화번호
+            if (e.status() == 409) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 사용 중인 전화번호입니다. 다른 번호를 입력해주세요.");
+            }
+            // 400 Bad Request: 유효성 검사 실패 (Validation)
+            else if (e.status() == 400) {
+                redirectAttributes.addFlashAttribute("errorMessage", "입력 값이 올바르지 않습니다. 다시 확인해주세요.");
+            }
+            else {
+                redirectAttributes.addFlashAttribute("errorMessage", "정보 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            }
+        }
+        return "redirect:/members/my-page";
     }
 
     // 이메일 찾기 페이지
