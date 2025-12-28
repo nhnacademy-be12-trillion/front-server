@@ -31,6 +31,24 @@
         .page-link {
             color: #3D464D;
         }
+
+        /* [추가] 품절(SOLD_OUT) 상태일 때 회색 톤 오버레이 스타일 */
+        .sold-out-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(50, 50, 50, 0.7); /* 진한 회색 반투명 배경 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            font-weight: bold;
+            color: #ffffff; /* 흰색 글씨 */
+            font-size: 1.2rem;
+        }
+        /* 품절된 상품 흐리게 처리 (선택사항) */
+        .sold-out-item .book-thumb {
+            opacity: 0.5;
+        }
     </style>
 </head>
 
@@ -90,29 +108,34 @@
 
                 <div class="row">
                     <div class="col-lg-3 col-md-4 col-sm-6 pb-1"
-                         th:each="book : ${books}">
+                         th:each="book : ${books}"
+                         th:unless="${book.bookState.name() == 'SALE_END'}">
 
-                        <div class="product-item bg-light mb-4">
+                        <div class="product-item bg-light mb-4" th:classappend="${book.bookState.name() == 'SOLD_OUT'} ? 'sold-out-item' : ''">
                             <div class="product-img position-relative overflow-hidden">
 
+                                <div th:if="${book.bookState.name() == 'SOLD_OUT'}" class="sold-out-overlay">재고 소진</div>
+
                                 <img class="img-fluid w-100 book-thumb"
-                                     th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : '/img/default-book.png'}"
+                                     th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image'}"
+                                     onerror="this.onerror=null; this.src='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image';"
                                      loading="lazy"
                                      alt="도서 이미지">
 
                                 <div class="product-action">
                                     <a class="btn btn-outline-dark btn-square"
                                        href="javascript:void(0);"
-                                       th:onclick="'addToCart(' + ${book.bookId} + ')'">
+                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\');' : 'addToCart(' + ${book.bookId} + ')'">
                                         <i class="fa fa-shopping-cart"></i>
                                     </a>
                                     <a class="btn btn-outline-dark btn-square"
                                        href="javascript:void(0);"
-                                       th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
+                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\');' : 'toggleWishlist(' + ${book.bookId} + ')'">
                                         <i class="far fa-heart"></i>
                                     </a>
                                     <a class="btn btn-outline-dark btn-square"
-                                       th:href="@{/books/{id}(id=${book.bookId})}">
+                                       th:href="${book.bookState.name() == 'SOLD_OUT'} ? 'javascript:void(0)' : @{/books/{id}(id=${book.bookId})}"
+                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\'); return false;' : ''">
                                         <i class="fa fa-search"></i>
                                     </a>
                                 </div>
@@ -120,7 +143,8 @@
 
                             <div class="text-center py-4 px-2">
                                 <a class="h6 text-decoration-none text-truncate d-block mb-1"
-                                   th:href="@{/books/{id}(id=${book.bookId})}"
+                                   th:href="${book.bookState.name() == 'SOLD_OUT'} ? 'javascript:void(0)' : @{/books/{id}(id=${book.bookId})}"
+                                   th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\'); return false;' : ''"
                                    th:text="${book.bookName}">책 제목</a>
 
                                 <div class="small text-muted mb-2">
