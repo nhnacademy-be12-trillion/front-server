@@ -115,7 +115,8 @@
                                      class="sold-out-overlay">재고 소진</div>
 
                                 <img class="img-fluid w-100 book-thumb"
-                                     th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image'}"
+                                     th:src="${#strings.isEmpty(book.bookImage) ? 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image' :
+                                              (#strings.startsWith(book.bookImage, 'http') or #strings.startsWith(book.bookImage, '/trillion-bucket/') ? book.bookImage : '/trillion-bucket/' + book.bookImage)}"
                                      onerror="this.onerror=null; this.src='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image';"
                                      loading="lazy" alt="책 표지">
 
