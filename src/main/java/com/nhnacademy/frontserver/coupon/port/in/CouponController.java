@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class CouponController {
     private final MemberCouponClient memberCouponClient;
-    @GetMapping("/coupons")
+    @GetMapping("/my-coupons")
     public String getIndexPage(Model model, Page page) {
         model.addAttribute("contents",memberCouponClient.getMemberCoupons(page.pageNumber(), page.pageSize()));
         return "my/my-coupons";
