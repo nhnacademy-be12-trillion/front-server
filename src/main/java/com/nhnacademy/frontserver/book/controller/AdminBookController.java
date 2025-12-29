@@ -5,6 +5,7 @@ import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookCreateRequest;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.book.BookState;
+import com.nhnacademy.frontserver.search.SearchClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class AdminBookController {
 
     private final BookClient bookClient;
     private final ObjectMapper objectMapper; // JSON 변환용
+    private final SearchClient searchClient; // 검색 서버 호출
 
     // =========================================================================
     // 1. 화면(View) 반환 - 경로 수정됨 (admin/ 접두어 추가)
@@ -66,9 +68,27 @@ public class AdminBookController {
             log.info(">>>> [Admin] 도서 등록 요청: {}", request.getBookName());
 
             String jsonRequest = objectMapper.writeValueAsString(request);
-            MultipartFile jsonPart = new DtoMultipartFile("book", "book.json", "application/json", jsonRequest.getBytes(StandardCharsets.UTF_8));
+            MultipartFile jsonPart = new DtoMultipartFile(
+                    "book", "book.json", "application/json",
+                    jsonRequest.getBytes(StandardCharsets.UTF_8)
+            );
 
+            // 1) Book 서비스(DB) 등록
             bookClient.createBook(jsonPart, file);
+
+            // 2) Search 서비스(ES) 신규 인덱싱 트리거: ISBN 기반
+            try {
+                String isbn = (request.getIsbn() == null) ? null : request.getIsbn().trim();
+                if (isbn != null && !isbn.isBlank()) {
+                    log.info(">>>> [Admin] Search 인덱싱 요청(신규): isbn={}", isbn);
+                    searchClient.upsertByIsbn(isbn);
+                } else {
+                    log.warn(">>>> [Admin] Search 인덱싱 스킵: isbn 비어있음");
+                }
+            } catch (Exception e) {
+                // DB 등록 성공했는데 ES 인덱싱 실패 -> 운영상 흔함(지연/네트워크) -> 로그만
+                log.error(">>>> [Admin] Search 인덱싱 실패(신규): isbn={}", request.getIsbn(), e);
+            }
 
             // 성공 시 다시 등록 페이지로 리다이렉트 (혹은 목록으로)
             return "redirect:/admin/books/register?success=true";
@@ -114,7 +134,18 @@ public class AdminBookController {
     ) {
         try {
             log.info(">>>> [Admin] 도서 수정 요청: ID={}", bookId);
+
+            // 1) Book 서비스(DB) 수정
             bookClient.updateBook(bookId, request);
+
+            // 2) Search 서비스(ES) 갱신 트리거: bookId 기반
+            try {
+                log.info(">>>> [Admin] Search 인덱싱 요청(갱신): bookId={}", bookId);
+                searchClient.upsertByBookId(bookId);
+            } catch (Exception e) {
+                log.error(">>>> [Admin] Search 인덱싱 실패(갱신): bookId={}", bookId, e);
+            }
+
             return ResponseEntity.ok("도서가 성공적으로 수정되었습니다.");
         } catch (Exception e) {
             log.error("도서 수정 실패", e);
@@ -128,7 +159,18 @@ public class AdminBookController {
     public ResponseEntity<String> deleteBook(@PathVariable("bookId") Long bookId) {
         try {
             log.info(">>>> [Admin] 도서 삭제 요청: ID={}", bookId);
+
+            // 1) Book 서비스(DB) 삭제
             bookClient.deleteBook(bookId);
+
+            // 2) Search 서비스(ES) 삭제 트리거: bookId 기반
+            try {
+                log.info(">>>> [Admin] Search 인덱스 삭제 요청: bookId={}", bookId);
+                searchClient.deleteByBookId(bookId);
+            } catch (Exception e) {
+                log.error(">>>> [Admin] Search 인덱스 삭제 실패: bookId={}", bookId, e);
+            }
+
             return ResponseEntity.ok("도서가 삭제되었습니다.");
         } catch (Exception e) {
             log.error("도서 삭제 실패", e);
