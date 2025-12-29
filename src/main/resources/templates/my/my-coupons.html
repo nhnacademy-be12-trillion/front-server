@@ -5,7 +5,22 @@
       layout:decorate="~{base}">
 
 <div layout:fragment="content">
-    <!-- 브레드크럼 -->
+    <style>
+        /* 사이드바 활성화 스타일 [통일됨] */
+        .mypage-menu .nav-link.active {
+            background-color: #87CEEB; /* 하늘색 */
+            color: #ffffff;            /* 텍스트 흰색 */
+            font-weight: 700;
+        }
+        .mypage-menu .nav-link {
+            border-radius: 5px;
+            padding: 12px 20px;
+        }
+        .mypage-menu .nav-link:hover {
+            background-color: #f1f3f5;
+        }
+    </style>
+
     <div class="container-fluid">
         <div class="row px-xl-5">
             <div class="col-12">
@@ -20,27 +35,26 @@
 
     <div class="container-fluid">
         <div class="row px-xl-5">
-            <!-- 좌측 사이드바 -->
             <div class="col-lg-3 col-md-4 mb-5">
                 <h5 class="section-title position-relative text-uppercase mb-3">
                     <span class="bg-secondary pr-3">MY 메뉴</span>
                 </h5>
-                <div class="bg-light p-30">
+                <div class="bg-light p-30 rounded shadow-sm border">
                     <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
                         <a class="nav-link text-dark mb-2" th:href="@{/members/my-page}">
                             <i class="fa fa-user-circle mr-2"></i>내 정보 / 배송지
                         </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/points}">
+                            <i class="fas fa-coins mr-2"></i>포인트 내역
+                        </a>
                         <a class="nav-link text-dark mb-2" th:href="@{/my-page/orders}">
                             <i class="fa fa-shopping-bag mr-2"></i>주문/배송 조회
                         </a>
-                        <a class="nav-link mb-2" th:href="@{/my-page/history}">
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/history}">
                             <i class="fa fa-undo mr-2"></i>취소/반품 내역
                         </a>
                         <a class="nav-link text-dark mb-2" th:href="@{/wishlists}">
                             <i class="fa fa-heart mr-2"></i>찜한 상품
-                        </a>
-                        <a class="nav-link text-dark" th:href="@{/members/reviews}">
-                            <i class="fa fa-edit mr-2"></i>내 리뷰
                         </a>
                         <a class="nav-link active mb-2" th:href="@{/my-coupons}">
                             <i class="fa fa-ticket mr-2"></i>쿠폰 조회

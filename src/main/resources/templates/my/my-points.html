@@ -10,15 +10,18 @@
         .point-plus { color: #28a745; font-weight: 800; } /* 초록색 */
         .point-minus { color: #dc3545; font-weight: 800; } /* 빨간색 */
 
-        /* 사이드바 활성화 스타일 */
+        /* 사이드바 활성화 스타일 [수정됨] */
         .mypage-menu .nav-link.active {
-            background-color: #FFD333;
-            color: #3D464D;
+            background-color: #87CEEB; /* 하늘색으로 변경 (#FFD333 -> #87CEEB) */
+            color: #ffffff;            /* 텍스트 흰색 */
             font-weight: 700;
         }
         .mypage-menu .nav-link {
             border-radius: 5px;
             padding: 12px 20px;
+        }
+        .mypage-menu .nav-link:hover {
+            background-color: #f1f3f5;
         }
     </style>
 
@@ -57,9 +60,6 @@
                         </a>
                         <a class="nav-link text-dark mb-2" th:href="@{/wishlists}">
                             <i class="fa fa-heart mr-2"></i>찜한 상품
-                        </a>
-                        <a class="nav-link text-dark" th:href="@{/members/reviews}">
-                            <i class="fa fa-edit mr-2"></i>내 리뷰
                         </a>
                         <a class="nav-link text-dark  mb-2" th:href="@{/my-coupons}">
                             <i class="fa fa-ticket mr-2"></i>쿠폰 조회

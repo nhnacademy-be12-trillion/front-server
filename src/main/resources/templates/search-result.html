@@ -203,7 +203,6 @@
 <body>
 <div layout:fragment="content" class="search-page">
 
-    <!-- 검색 헤더 / 요약 영역 -->
     <div class="container-fluid pt-5">
         <div class="row px-xl-5">
             <div class="col-12 mb-2 d-flex justify-content-between align-items-end flex-wrap">
@@ -244,7 +243,6 @@
                 </form>
             </div>
 
-            <!-- 요약 문구 -->
             <div class="col-12 mb-3">
                 <p class="search-summary mb-1">
                     "<b th:text="${query}">-</b>" 검색 결과
@@ -268,7 +266,6 @@
         </div>
     </div>
 
-    <!-- 결과 없음 -->
     <div class="container-fluid" th:if="${result == null or #lists.isEmpty(result)}">
         <div class="row px-xl-5">
             <div class="col-12 text-center py-5">
@@ -278,14 +275,12 @@
         </div>
     </div>
 
-    <!-- 검색 결과 리스트 -->
     <div class="container-fluid" th:if="${result != null and !#lists.isEmpty(result)}">
         <div class="row px-xl-5">
             <div class="col-12">
                 <div class="search-result-list">
                     <div class="search-result-item" th:each="b : ${result}">
 
-                        <!-- 썸네일 -->
                         <div class="search-result-thumb">
                             <a th:href="@{/books/{id}(id=${b.id})}">
                                 <img th:src="${#strings.isEmpty(b.imageUrl) ? '/img/default-book.png' : '/trillion-bucket/' + b.imageUrl}"
@@ -293,10 +288,8 @@
                             </a>
                         </div>
 
-                        <!-- 본문 -->
                         <div class="search-result-body">
                             <div class="d-flex justify-content-between flex-wrap">
-                                <!-- 왼쪽: 정보 + 가격 + 평점 -->
                                 <div class="flex-grow-1 mr-2">
                                     <a class="search-result-title"
                                        th:href="@{/books/{id}(id=${b.id})}"
@@ -310,10 +303,8 @@
                                         <span th:text="${b.publisher != null ? b.publisher : '출판사 정보 없음'}">출판사</span>
                                     </div>
 
-                                    <!-- 가격 + 할인률 + 평점/리뷰 -->
                                     <div class="search-result-price-row">
 
-                                        <!-- 할인가 있는 경우 -->
                                         <th:block th:if="${b.salePrice != null}">
                                             <span class="price-now"
                                                   th:text="${#numbers.formatInteger(b.salePrice, 0, 'COMMA')} + '원'">
@@ -325,7 +316,6 @@
                                                 </del>
                                             </span>
 
-                                            <!-- 할인률 -->
                                             <span class="discount-badge-inline"
                                                   th:if="${b.price != null and b.salePrice < b.price}"
                                                   th:text="${T(java.lang.Math).round((1.0 - (b.salePrice * 1.0 / b.price)) * 100)} + '% 할인'">
@@ -333,7 +323,6 @@
                                             </span>
                                         </th:block>
 
-                                        <!-- 할인가 없고 정가만 있는 경우 -->
                                         <th:block th:if="${b.salePrice == null}">
                                             <span class="price-now"
                                                   th:text="${#numbers.formatInteger(b.price, 0, 'COMMA')} + '원'">
@@ -341,7 +330,6 @@
                                             </span>
                                         </th:block>
 
-                                        <!-- 평점 / 리뷰 수 -->
                                         <span class="search-result-rating" th:if="${b.ratingAvg != null}">
                                             <span class="text-warning">
                                                 <i class="fa fa-star"></i>
@@ -358,7 +346,6 @@
                                         </span>
                                     </div>
 
-                                    <!-- 태그 -->
                                     <div class="search-result-tags"
                                          th:if="${b.tags != null and !#lists.isEmpty(b.tags)}">
                                         <span class="badge"
@@ -368,7 +355,6 @@
                                         </span>
                                     </div>
 
-                                    <!-- AI 추천 정보 -->
                                     <div class="mt-2" th:if="${mode == 'ai'}">
                                         <span class="badge badge-info mr-2"
                                               th:if="${b.recommended}">
@@ -382,7 +368,6 @@
                                     </div>
                                 </div>
 
-                                <!-- 오른쪽: 수량 + 버튼들 -->
                                 <div class="action-block mt-2 mt-md-0">
                                     <div class="input-group input-group-sm">
                                         <div class="input-group-prepend">
@@ -421,13 +406,11 @@
                             </div>
                         </div>
 
-                    </div> <!-- each item -->
-                </div>
+                    </div> </div>
             </div>
         </div>
     </div>
 
-    <!-- 페이징 -->
     <div class="container-fluid"
          th:if="${totalPages != null and totalPages > 1 and page != null}">
         <div class="row px-xl-5">
@@ -508,6 +491,16 @@
                         cartQuantity: quantity
                     }),
                     success: function () {
+                        // [수정] 1. 낙관적 업데이트: 즉시 화면의 숫자 증가
+                        if (typeof incrementCartBadge === 'function') {
+                            incrementCartBadge();
+                        }
+
+                        // [수정] 2. 서버 데이터 동기화
+                        if (typeof updateCartBadge === 'function') {
+                            updateCartBadge();
+                        }
+
                         if (confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
                             location.href = '/carts';
                         }
@@ -537,12 +530,34 @@
             // 찜하기
             $('.search-result-list').on('click', '.js-btn-like', function () {
                 const bookId = $(this).data('book-id');
+                const $btn = $(this);
 
                 $.ajax({
                     url: '/wishlists/toggle?bookId=' + bookId,
                     method: 'GET',
-                    success: function () {
-                        alert('찜 목록에 반영되었습니다.');
+                    success: function (res) {
+                        // [수정] 찜 목록 변경 성공 시 헤더 배지 업데이트
+                        if (typeof updateWishlistBadge === 'function') {
+                            updateWishlistBadge();
+                        }
+
+                        // 하트 아이콘 토글 (시각적 피드백)
+                        const $icon = $btn.find('i');
+                        if($icon.length > 0) {
+                            // far <-> fas 토글
+                            if($icon.hasClass('far')) {
+                                $icon.removeClass('far').addClass('fas');
+                            } else {
+                                $icon.removeClass('fas').addClass('far');
+                            }
+                        }
+
+                        // res 객체에 message가 있다면 사용, 없다면 기본 메시지
+                        let msg = '찜 목록에 반영되었습니다.';
+                        if (res && res.message) {
+                            msg = res.message;
+                        }
+                        alert(msg);
                     },
                     error: function (xhr) {
                         if (xhr.status === 401) {
