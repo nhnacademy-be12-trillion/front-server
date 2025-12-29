@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(
         name = "gateway-coupon",
         url = "${gateway.url}",
-        path = "/member-coupons",
+        path = "/api/member-coupons",
         contextId = "memberCoupon"
 )
 public interface MemberCouponClient {
