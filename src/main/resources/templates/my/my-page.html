@@ -59,12 +59,14 @@
             font-size: 0.9rem;
         }
 
-        /* 사이드바 메뉴 활성화 스타일 */
+        /* 사이드바 메뉴 활성화 스타일 [수정됨] */
         .mypage-menu .nav-link.active {
-            background-color: #FFD333; /* 테마 메인 컬러 */
-            color: #3D464D;
+            background-color: #87CEEB; /* 노란색(#FFD333) -> 하늘색(#87CEEB) 변경 */
+            color: #ffffff; /* 텍스트 색상도 가독성을 위해 흰색으로 조정 (원하면 #3D464D 유지 가능) */
             font-weight: 700;
         }
+        /* 텍스트 색상을 기존 진한 회색(#3D464D)으로 유지하려면 위 color를 #3D464D로 되돌리세요. */
+
         .mypage-menu .nav-link {
             border-radius: 5px;
             padding: 12px 20px;
@@ -108,9 +110,6 @@
                         </a>
                         <a class="nav-link text-dark mb-2" th:href="@{/wishlists}">
                             <i class="fa fa-heart mr-2"></i>찜한 상품
-                        </a>
-                        <a class="nav-link text-dark" th:href="@{/members/reviews}">
-                            <i class="fa fa-edit mr-2"></i>내 리뷰
                         </a>
                         <a class="nav-link text-dark  mb-2" th:href="@{/my-coupons}">
                             <i class="fa fa-ticket mr-2"></i>쿠폰 조회
@@ -472,8 +471,7 @@
             new daum.Postcode({
                 oncomplete: function(data) {
                     var addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-                    if(data.userSelectedType === 'R'){
-                        var extraAddr = '';
+                    if(data.userSelectedType === 'R'){\n                        var extraAddr = '';
                         if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)) extraAddr += data.bname;
                         if(data.buildingName !== '' && data.apartment === 'Y') extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
                         if(extraAddr !== '') addr += ' (' + extraAddr + ')';

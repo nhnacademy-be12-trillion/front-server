@@ -36,23 +36,28 @@
             .slider-btn:hover .custom-thin-arrow { border-color: #00C4FF; transform: scale(1.1) rotate(45deg); }
             .prev-btn:hover .custom-thin-arrow { transform: scale(1.1) rotate(-135deg); }
 
-            /* [수정] 품절(SOLD_OUT) 상태일 때 회색 톤 오버레이 스타일 */
+            /* [수정] 품절(SOLD_OUT) 상태 배지 스타일 (작게 표시) */
             .sold-out-overlay {
                 position: absolute;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(50, 50, 50, 0.7); /* 진한 회색 반투명 배경 */
+                top: 10px;
+                right: 10px;
+                width: auto;
+                height: auto;
+                background: rgba(50, 50, 50, 0.85);
+                padding: 4px 10px;
+                border-radius: 4px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 5;
                 font-weight: bold;
-                color: #ffffff; /* 흰색 글씨 */
-                font-size: 1.2rem;
-                /* 테두리 제거 */
+                color: #ffffff;
+                font-size: 0.85rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             }
-            /* 품절된 상품의 이미지나 컨텐츠 흐리게 처리 (선택사항) */
+            /* 품절된 상품의 이미지 약간 흐리게 (선택사항) */
             .sold-out-item .book-thumb {
-                opacity: 0.5;
+                opacity: 0.7;
             }
         </style>
     </th:block>
@@ -85,12 +90,6 @@
                                  onerror="this.onerror=null; this.src='https://dummyimage.com/600x400/ced4da/6c757d.jpg&text=No+Image';"
                                  style="object-fit: cover;">
 
-                            <div th:if="${book.bookState.name() == 'SOLD_OUT'}"
-                                 class="position-absolute d-flex align-items-center justify-content-center w-100 h-100"
-                                 style="background: rgba(0,0,0,0.6); z-index: 10;">
-                                <h2 class="text-white font-weight-bold">재고 소진</h2>
-                            </div>
-
                             <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                                 <div class="p-3" style="max-width: 700px;">
                                     <p class="mx-md-5 px-5 animate__animated animate__bounceIn"
@@ -98,8 +97,7 @@
                                        style="font-size: 1.5rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">책 제목</p>
 
                                     <a class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp"
-                                       th:href="${book.bookState.name() == 'SOLD_OUT'} ? 'javascript:void(0)' : @{/books/{id}(id=${book.bookId})}"
-                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\'); return false;' : ''">
+                                       th:href="@{/books/{id}(id=${book.bookId})}">
                                         지금 보러가기
                                     </a>
                                 </div>
@@ -146,7 +144,7 @@
                          th:unless="${book.bookState.name() == 'SALE_END'}">
                         <div class="product-item bg-light mb-4" th:classappend="${book.bookState.name() == 'SOLD_OUT'} ? 'sold-out-item' : ''">
                             <div class="product-img position-relative overflow-hidden">
-                                <div th:if="${book.bookState.name() == 'SOLD_OUT'}" class="sold-out-overlay">재고 소진</div>
+                                <div th:if="${book.bookState.name() == 'SOLD_OUT'}" class="sold-out-overlay">품절</div>
 
                                 <img class="img-fluid w-100 book-thumb"
                                      th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image'}"
@@ -155,24 +153,22 @@
 
                                 <div class="product-action">
                                     <a class="btn btn-outline-dark btn-square" href="javascript:void(0);"
-                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\');' : 'addToCart(' + ${book.bookId} + ')'">
+                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'품절된 도서는 장바구니에 담을 수 없습니다.\');' : 'addToCart(' + ${book.bookId} + ')'">
                                         <i class="fa fa-shopping-cart"></i>
                                     </a>
                                     <a class="btn btn-outline-dark btn-square" href="javascript:void(0);"
-                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\');' : 'toggleWishlist(' + ${book.bookId} + ')'">
+                                       th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
                                         <i class="far fa-heart"></i>
                                     </a>
                                     <a class="btn btn-outline-dark btn-square"
-                                       th:href="${book.bookState.name() == 'SOLD_OUT'} ? 'javascript:void(0)' : @{/books/{book_id}(book_id=${book.bookId})}"
-                                       th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\'); return false;' : ''">
+                                       th:href="@{/books/{book_id}(book_id=${book.bookId})}">
                                         <i class="fa fa-search"></i>
                                     </a>
                                 </div>
                             </div>
                             <div class="text-center py-4 px-2">
                                 <a class="h6 text-decoration-none text-truncate d-block mb-1"
-                                   th:href="${book.bookState.name() == 'SOLD_OUT'} ? 'javascript:void(0)' : @{/books/{book_id}(book_id=${book.bookId})}"
-                                   th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\'); return false;' : ''"
+                                   th:href="@{/books/{book_id}(book_id=${book.bookId})}"
                                    th:text="${book.bookName}">책 제목</a>
 
                                 <div class="small text-muted mb-2">
@@ -242,7 +238,7 @@
                  th:unless="${book.bookState.name() == 'SALE_END'}">
                 <div class="product-item bg-light mb-4" th:classappend="${book.bookState.name() == 'SOLD_OUT'} ? 'sold-out-item' : ''">
                     <div class="product-img position-relative overflow-hidden">
-                        <div th:if="${book.bookState.name() == 'SOLD_OUT'}" class="sold-out-overlay">재고 소진</div>
+                        <div th:if="${book.bookState.name() == 'SOLD_OUT'}" class="sold-out-overlay">품절</div>
 
                         <img class="img-fluid w-100 book-thumb"
                              th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image'}"
@@ -250,24 +246,22 @@
                              loading="lazy" alt="책 표지">
                         <div class="product-action">
                             <a class="btn btn-outline-dark btn-square" href="javascript:void(0);"
-                               th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\');' : 'addToCart(' + ${book.bookId} + ')'">
+                               th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'품절된 도서는 장바구니에 담을 수 없습니다.\');' : 'addToCart(' + ${book.bookId} + ')'">
                                 <i class="fa fa-shopping-cart"></i>
                             </a>
                             <a class="btn btn-outline-dark btn-square" href="javascript:void(0);"
-                               th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\');' : 'toggleWishlist(' + ${book.bookId} + ')'">
+                               th:onclick="'toggleWishlist(' + ${book.bookId} + ')'">
                                 <i class="far fa-heart"></i>
                             </a>
                             <a class="btn btn-outline-dark btn-square"
-                               th:href="${book.bookState.name() == 'SOLD_OUT'} ? 'javascript:void(0)' : @{/books/{book_id}(book_id=${book.bookId})}"
-                               th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\'); return false;' : ''">
+                               th:href="@{/books/{book_id}(book_id=${book.bookId})}">
                                 <i class="fa fa-search"></i>
                             </a>
                         </div>
                     </div>
                     <div class="text-center py-4 px-2">
                         <a class="h6 text-decoration-none text-truncate d-block mb-1"
-                           th:href="${book.bookState.name() == 'SOLD_OUT'} ? 'javascript:void(0)' : @{/books/{book_id}(book_id=${book.bookId})}"
-                           th:onclick="${book.bookState.name() == 'SOLD_OUT'} ? 'alert(\'재고가 소진된 도서입니다.\'); return false;' : ''"
+                           th:href="@{/books/{book_id}(book_id=${book.bookId})}"
                            th:text="${book.bookName}">책 제목</a>
                         <div class="small text-muted mb-2">
                             <span th:text="${book.bookAuthor == null ? '저자 미상' : (#strings.length(book.bookAuthor) > 10 ? #strings.substring(book.bookAuthor, 0, 10) + '...' : book.bookAuthor)}">저자명</span>
@@ -304,14 +298,12 @@
 
         // 카테고리 AJAX 로드
         function loadCategoryBooks(categoryId, categoryName, element) {
-            // 탭 활성화 처리
             document.querySelectorAll('.category-pill').forEach(el => el.classList.remove('active'));
             if(element) element.classList.add('active');
 
             const prefix = document.getElementById('category-title-prefix');
             const suffix = document.getElementById('category-title-suffix');
 
-            // 문구 변경
             if (categoryId == 0 || categoryName === '전체') {
                 prefix.innerText = '전체';
                 suffix.innerText = ' 신간 도서';
@@ -320,7 +312,6 @@
                 suffix.innerText = ' 분야의 신간 도서';
             }
 
-            // ID가 0이거나 '전체'일 때는 무조건 전체 신간 API 호출
             let url;
             if (categoryId == 0 || categoryName === '전체') {
                 url = '/books/new-books';
@@ -337,7 +328,6 @@
                     const container = document.getElementById('category-book-list-container');
                     container.innerHTML = '';
 
-                    // SALE_END 상태 필터링
                     const filteredBooks = books.filter(b => b.bookState !== 'SALE_END');
 
                     if (!filteredBooks || filteredBooks.length === 0) {
@@ -351,20 +341,19 @@
                         let author = book.bookAuthor ? book.bookAuthor : '저자 미상';
                         if (author.length > 10) author = author.substring(0, 10) + '...';
 
-                        // [수정] 품절(SOLD_OUT) 체크 및 HTML 생성 (JS)
+                        // [수정] 동적 로딩 시 품절 처리 로직 변경
                         let soldOutOverlay = '';
-                        let clickAction = '';
                         let linkHref = `/books/${book.bookId}`;
-                        let cartAction = `addToCart(${book.bookId})`;
                         let wishAction = `toggleWishlist(${book.bookId})`;
+
+                        // 기본적으로 장바구니 가능
+                        let cartAction = `addToCart(${book.bookId})`;
                         let itemClass = '';
 
                         if (book.bookState === 'SOLD_OUT') {
-                            soldOutOverlay = `<div class="sold-out-overlay">재고 소진</div>`;
-                            clickAction = `alert('재고가 소진된 도서입니다.'); return false;`;
-                            linkHref = `javascript:void(0)`;
-                            cartAction = `alert('재고가 소진된 도서입니다.');`;
-                            wishAction = `alert('재고가 소진된 도서입니다.');`;
+                            // 품절 시: 배지 표시, 장바구니만 차단
+                            soldOutOverlay = `<div class="sold-out-overlay">품절</div>`;
+                            cartAction = `alert('품절된 도서는 장바구니에 담을 수 없습니다.');`;
                             itemClass = 'sold-out-item';
                         }
 
@@ -402,11 +391,11 @@
                                     <div class="product-action">
                                         <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" onclick="${cartAction}"><i class="fa fa-shopping-cart"></i></a>
                                         <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" onclick="${wishAction}"><i class="far fa-heart"></i></a>
-                                        <a class="btn btn-outline-dark btn-square" href="${linkHref}" onclick="${clickAction}"><i class="fa fa-search"></i></a>
+                                        <a class="btn btn-outline-dark btn-square" href="${linkHref}"><i class="fa fa-search"></i></a>
                                     </div>
                                 </div>
                                 <div class="text-center py-4 px-2">
-                                    <a class="h6 text-decoration-none text-truncate d-block mb-1" href="${linkHref}" onclick="${clickAction}">${book.bookName}</a>
+                                    <a class="h6 text-decoration-none text-truncate d-block mb-1" href="${linkHref}">${book.bookName}</a>
                                     <div class="small text-muted mb-2"><span>${author}</span></div>
                                     ${priceHtml}
                                 </div>
@@ -429,6 +418,15 @@
             })
                 .then(response => {
                     if (response.ok) {
+                        // 1. 낙관적 업데이트
+                        if (typeof incrementCartBadge === 'function') {
+                            incrementCartBadge();
+                        }
+                        // 2. 서버 동기화
+                        if (typeof updateCartBadge === 'function') {
+                            updateCartBadge();
+                        }
+
                         if (confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) { location.href = '/carts'; }
                     } else if (response.status === 401) {
                         if(confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) { location.href = '/login'; }
@@ -452,6 +450,10 @@
                 .then(data => {
                     if (data) {
                         const msg = data.message || (data.isAdded ? '찜 목록에 추가되었습니다.' : '찜 목록에서 삭제되었습니다.');
+
+                        if (typeof updateWishlistBadge === 'function') {
+                            updateWishlistBadge();
+                        }
                         alert(msg);
                     }
                 })
