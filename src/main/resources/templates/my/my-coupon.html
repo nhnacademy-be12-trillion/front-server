@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<div layout:fragment="content">
+    <!-- 브레드크럼 -->
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <a class="breadcrumb-item text-dark" href="/">Home</a>
+                    <a class="breadcrumb-item text-dark" href="/members/my-page">마이페이지</a>
+                    <span class="breadcrumb-item active">쿠폰 조회</span>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <!-- 좌측 사이드바 -->
+            <div class="col-lg-3 col-md-4 mb-5">
+                <h5 class="section-title position-relative text-uppercase mb-3">
+                    <span class="bg-secondary pr-3">MY 메뉴</span>
+                </h5>
+                <div class="bg-light p-30">
+                    <div class="nav flex-column nav-pills mypage-menu" aria-orientation="vertical">
+                        <a class="nav-link text-dark mb-2" th:href="@{/members/my-page}">
+                            <i class="fa fa-user-circle mr-2"></i>내 정보 / 배송지
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/my-page/orders}">
+                            <i class="fa fa-shopping-bag mr-2"></i>주문/배송 조회
+                        </a>
+                        <a class="nav-link active mb-2" th:href="@{/my-page/history}">
+                            <i class="fa fa-undo mr-2"></i>취소/반품 내역
+                        </a>
+                        <a class="nav-link text-dark mb-2" th:href="@{/wishlists}">
+                            <i class="fa fa-heart mr-2"></i>찜한 상품
+                        </a>
+                        <a class="nav-link text-dark" th:href="@{/members/reviews}">
+                            <i class="fa fa-edit mr-2"></i>내 리뷰
+                        </a>
+                        <a class="nav-link text-dark  mb-2" th:href="@{/members/coupons}">
+                            <i class="fa fa-edit mr-2"></i>쿠폰 조회
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-8">
+                <h2 class="section-title position-relative text-uppercase mb-4">
+                    <span class="bg-secondary pr-3">쿠폰 발급내역</span>
+                </h2>
+                <div class="bg-light p-30 rounded shadow-sm border">
+                    <div class="table-responsive">
+                        <table class="table table-hover text-center mb-0">
+                            <thead class="thead-light">
+                            <tr>
+                                <th>쿠폰이름</th>
+                                <th>쿠폰수량</th>
+                                <th>쿠폰시작일</th>
+                                <th>쿠폰마감일</th>
+                                <th>최소주문금액</th>
+                                <th>최대할인금액</th>
+                                <th>할인금액</th>
+                                <th>쿠폰타입</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="content : ${contents}">
+                                <td th:text="${content.name}">쿠폰이름</td>
+                                <td th:text="${content.quantity()}">수량</td>
+                                <td th:text="${content.issueStartDate()}">100200</td>
+                                <td th:text="${content.issueEndDate()}">100200</td>
+
+                                <td th:text="${content.minOrderPrice==null?'없음':#numbers.formatInteger(content.minOrderPrice,0,'COMMA')+ '원'}">user1</td>
+                                <td th:text="${content.maxDiscountPrice==null?'없음':#numbers.formatInteger(content.maxDiscountPrice,0,'COMMA') + '원'}">15,000원</td>
+                                <td th:text="${content.couponDiscountType== 'FIXED_AMOUNT' ? #numbers.formatInteger(content.discountValue,0,'COMMA') +'원':content.discountValue+'%'}">15,000원</td>
+                                <td th:text="${content.couponDiscountType== 'FIXED_AMOUNT' ? '금액 할인 (정액)' : '퍼센트 할인 (정률)'}">2025-12-01</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>
