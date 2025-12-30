@@ -173,7 +173,7 @@
 
                         <span class="badge badge-dark ml-2"
                               style="font-size: 0.9rem; background-color: #000000; color: #ffffff; cursor: pointer; padding: 0.4em 0.6em;"
-                              th:onclick="issueCoupon(${book.bookId})">
+                              th:onclick="'issueCoupon(\'' + ${book.bookId} + '\')'">
                             쿠폰발급
                         </span>
                     </h5>
@@ -573,6 +573,7 @@
             // ===== /리뷰 요약 타이핑 효과 =====
         });
         function issueCoupon(bookId) {
+            console.log("발급 시도하는 도서 ID:", bookId);
             fetch("/book-coupons", {
                 method: "POST",
                 headers: {
