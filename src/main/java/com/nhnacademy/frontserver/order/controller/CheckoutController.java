@@ -4,6 +4,7 @@ import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.CartResponseDto;
+import com.nhnacademy.frontserver.coupon.port.out.MemberCouponResponse;
 import com.nhnacademy.frontserver.member.AddressResponse;
 import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.member.MemberResponse;
@@ -32,6 +33,8 @@ public class CheckoutController {
     private final BookClient bookClient;
     private final MemberClient memberClient;
     private final OrderClient orderClient;
+    private final com.nhnacademy.frontserver.coupon.port.out.MemberCouponClient memberCouponClient;
+    private final com.nhnacademy.frontserver.coupon.port.out.CouponClient couponClient;
 
     // 결제 요약 정보를 담을 DTO
     public record OrderSummary(int subTotal, int shippingFee, int totalPrice) {}
@@ -153,6 +156,17 @@ public class CheckoutController {
             log.error("포장 정보를 가져오는 데 실패했습니다.", e);
         }
 
+        // 쿠폰 정보 조회
+        List<MemberCouponResponse> memberCoupons = Collections.emptyList();
+        if (isMember) {
+            try {
+                // 한 번에 최대 100개까지 조회 (페이지네이션 고려 필요 시 수정)
+                memberCoupons = memberCouponClient.getMemberCoupons(false, 0, 100);
+            } catch (Exception e) {
+                log.error("회원 쿠폰 정보를 가져오는 데 실패했습니다.", e);
+            }
+        }
+
         // 모델과 세션에 데이터 추가
         model.addAttribute("items", items);
         model.addAttribute("orderSummary", orderSummary);
@@ -164,8 +178,19 @@ public class CheckoutController {
         }
         model.addAttribute("packagings", packagings);
         model.addAttribute("deliveryPolicy", policy);
+        model.addAttribute("memberCoupons", memberCoupons);
         session.setAttribute("checkoutItems", items);
 
         return "checkout";
+    }
+
+    @org.springframework.web.bind.annotation.GetMapping("/checkout/api/discount")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public com.nhnacademy.frontserver.coupon.port.out.DiscountPriceResponse calculateDiscount(
+            @RequestParam("couponId") Long couponId,
+            @RequestParam("bookIds") List<Long> bookIds,
+            @RequestParam("quantities") List<Long> quantities
+    ) {
+        return couponClient.getDiscountPrice(couponId, bookIds, quantities);
     }
 }
