@@ -92,7 +92,7 @@ public class BookDetailsController {
         // 3. 리뷰 요약 통계 조회
         ReviewSummaryResponse reviewSummary = null;
         try {
-            reviewSummary = reviewSummaryClient.getReviewSummary(bookId.toString());
+            reviewSummary = reviewSummaryClient.getReviewSummary(bookDetail.isbn());
         } catch (Exception e) {
             log.warn("리뷰 요약 정보를 가져올 수 없습니다.", e);
         }
