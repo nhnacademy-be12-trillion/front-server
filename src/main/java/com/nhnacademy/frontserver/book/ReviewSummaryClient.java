@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "gateway-book", url = "${gateway.url}")
 public interface ReviewSummaryClient {
-    @GetMapping("/api/books/{isbn}/review-summary")
+    @GetMapping("/api/review-summary/{isbn}")
     ReviewSummaryResponse getReviewSummary(@PathVariable("isbn") String isbn);
 }
