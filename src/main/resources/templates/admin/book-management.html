@@ -305,37 +305,31 @@
         updateBookRequest(bookId, requestData, "수정되었습니다.");
       };
 
-      // 판매 종료(삭제) 기능
-      window.deleteBook = function() {
-        const bookData = $('#manageBookResult').data('book');
-        if(!bookData) return;
+        // 판매 종료(삭제) 기능 - DELETE로 변경
+        window.deleteBook = function() {
+            const bookData = $('#manageBookResult').data('book');
+            if (!bookData) return;
 
-        if(!confirm("정말 이 도서를 판매 종료(SALE_END) 처리하시겠습니까? (목록에서 숨겨질 수 있습니다)")) return;
+            if (!confirm("정말 이 도서를 판매 종료(SALE_END) 처리하시겠습니까?")) return;
 
-        let calculatedDiscount = 0;
-        if(bookData.bookRegularPrice > 0 && bookData.bookSalePrice < bookData.bookRegularPrice) {
-          calculatedDiscount = ((bookData.bookRegularPrice - bookData.bookSalePrice) / bookData.bookRegularPrice) * 100;
-        }
-
-        let currentImage = bookData.bookImage;
-        if (!currentImage && bookData.bookImageList && bookData.bookImageList.length > 0) {
-          currentImage = bookData.bookImageList[0].fileUrl;
-        }
-
-        const requestData = {
-          bookName: bookData.bookName,
-          bookDescription: bookData.bookDescription,
-          bookIndex: bookData.bookIndex,
-          bookStock: bookData.bookStock,
-          discountRate: calculatedDiscount,
-          bookState: 'SALE_END',
-          bookPackaging: bookData.bookPackaging,
-          bookImage: currentImage
+            fetch('/admin/books/' + bookData.bookId, {
+                method: 'DELETE'
+            })
+                .then(async (res) => {
+                    if (!res.ok) {
+                        const msg = await res.text();
+                        throw new Error(msg || '삭제 실패');
+                    }
+                })
+                .then(() => {
+                    alert("판매 종료(SALE_END) 처리되었습니다. (검색에서 제거됩니다)");
+                    $('#btn-find-book').click(); // 상태 다시 조회
+                })
+                .catch(err => alert("오류 발생: " + err.message));
         };
-        updateBookRequest(bookData.bookId, requestData, "판매 종료(SALE_END) 처리되었습니다.");
-      };
 
-      function updateBookRequest(bookId, requestData, successMsg) {
+
+        function updateBookRequest(bookId, requestData, successMsg) {
         fetch('/admin/books/' + bookId, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
