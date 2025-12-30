@@ -67,6 +67,21 @@
                 <h2 class="section-title position-relative text-uppercase mb-4">
                     <span class="bg-secondary pr-3">쿠폰 발급내역</span>
                 </h2>
+                <div class="btn-group coupon-filter" role="group">
+                    <a th:href="@{/my-coupons(status='unused')}"
+                       class="btn btn-outline-primary"
+                       th:classappend="${param.status == null || param.status[0] == 'unused'} ? 'active' : ''">
+                        미사용 쿠폰
+                    </a>
+                    <a th:href="@{/my-coupons(status='used')}"
+                       class="btn btn-outline-primary"
+                       th:classappend="${param.status != null && param.status[0] == 'used'} ? 'active' : ''">
+                        사용한 쿠폰
+                    </a>
+                </div>
+            </div>
+            </div>
+
                 <div class="bg-light p-30 rounded shadow-sm border">
                     <div class="table-responsive">
                         <table class="table table-hover text-center mb-0">

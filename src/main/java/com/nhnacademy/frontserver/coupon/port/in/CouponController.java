@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
@@ -13,8 +14,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class CouponController {
     private final MemberCouponClient memberCouponClient;
     @GetMapping("/my-coupons")
-    public String getIndexPage(Model model, Page page) {
-        model.addAttribute("contents",memberCouponClient.getMemberCoupons(page.pageNumber(), page.pageSize()));
+    public String getIndexPage(@RequestParam(value = "status", required = false, defaultValue = "unused") String status, Model model, Page page) {
+
+        model.addAttribute("contents",memberCouponClient.getMemberCoupons(isUse(status),page.pageNumber(), page.pageSize()));
         return "my/my-coupons";
+    }
+    private boolean isUse(String status) {
+        return "used".equals(status);
     }
 }

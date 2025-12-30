@@ -2,7 +2,6 @@ package com.nhnacademy.frontserver.coupon.port.out;
 
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -14,5 +13,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 )
 public interface MemberCouponClient {
     @GetMapping("")
-    List<MemberCouponResponse> getMemberCoupons(@RequestParam Integer page, @RequestParam Integer size);
+    List<MemberCouponResponse> getMemberCoupons(@RequestParam boolean isUse,@RequestParam Integer page, @RequestParam Integer size);
 }
