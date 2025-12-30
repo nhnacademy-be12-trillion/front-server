@@ -2,9 +2,6 @@ package com.nhnacademy.frontserver.layout.interceptor;
 
 import com.nhnacademy.frontserver.layout.cartbadge.service.CartBadgeService;
 import com.nhnacademy.frontserver.layout.category.service.CategoryService;
-import com.nhnacademy.frontserver.layout.logininfo.LoginInfo;
-import com.nhnacademy.frontserver.layout.logininfo.service.LoginInfoService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +18,11 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
 
     private final CartBadgeService cartBadgeService;
     private final CategoryService categoryService;
-    private final LoginInfoService loginInfoService;
 
     public LayoutDataInterceptor(@Lazy CartBadgeService cartBadgeService,
-                                 @Lazy CategoryService categoryService,
-                                 @Lazy LoginInfoService loginInfoService) {
+                                 @Lazy CategoryService categoryService) {
         this.cartBadgeService = cartBadgeService;
         this.categoryService = categoryService;
-        this.loginInfoService = loginInfoService;
     }
 
     @Override
@@ -39,7 +33,6 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
         // 2. 각 영역별 데이터 주입
         addCategoryMenu(mv);
         addCartBadge(mv);
-        //addMemberInfo(request, mv);
     }
 
     // --- 1. 카테고리 메뉴용 모델 주입  ---
@@ -50,11 +43,6 @@ public class LayoutDataInterceptor implements HandlerInterceptor {
     private void addCartBadge(ModelAndView mv){
         int count = cartBadgeService.getCartCount();
         mv.addObject("badgeCount", count);
-    }
-    // --- 3. 회원 정보용 모델 주입 ---
-    private void addMemberInfo(HttpServletRequest request, ModelAndView mv) {
-        LoginInfo member = loginInfoService.getLoginInfo();
-        mv.addObject("member", member);
     }
 
     // --- Helper Utils ---
