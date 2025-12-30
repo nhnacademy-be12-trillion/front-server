@@ -155,6 +155,12 @@
 
                         <span class="badge badge-dark ml-2" style="font-size: 0.9rem;"
                               th:if="${book.bookState.name() == 'SOLD_OUT'}">품절</span>
+
+                        <span class="badge badge-dark ml-2"
+                              style="font-size: 0.9rem; background-color: #000000; color: #ffffff; cursor: pointer; padding: 0.4em 0.6em;"
+                              onclick="issueCoupon(book.bookId)">
+                            쿠폰발급
+                        </span>
                     </h5>
 
                     <hr class="my-4">
@@ -478,6 +484,32 @@
                 });
             });
         });
+        function issueCoupon(bookId) {
+            fetch("/book-coupons", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                    // 필요시 CSRF 토큰 등을 추가해야 할 수 있습니다.
+                },
+                body:JSON.stringify({ bookId: bookId })
+            })
+                .then(response => {
+                    if (response.status === 200) {
+                        alert("쿠폰이 발급되었습니다.");
+                    } else if (response.status === 400) {
+                        console.error("Error:", error);
+                        alert("이미 발급받았거나 발급할 수 없는 쿠폰입니다. ");
+                    } else {
+                        console.error("Error:", error);
+                        alert("문제가 발생했습니다. 다시 시도해주세요.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("서버와 통신 중 에러가 발생했습니다.");
+                });
+        }
+
     </script>
 </th:block>
 
