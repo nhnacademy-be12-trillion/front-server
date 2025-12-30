@@ -9,6 +9,8 @@
     <title th:text="${book.bookName} + ' | Trillion-Shop'">도서 상세</title>
 
     <th:block layout:fragment="head">
+        <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor-viewer.min.css" />
+
         <style>
             .detail-img { width: 100%; max-height: 500px; object-fit: contain; background: #f8f9fa; }
 
@@ -79,6 +81,12 @@
             .home-icon {
                 font-size: 16px;
                 color: #555;
+            }
+
+            /* TUI Viewer 내부 폰트 조정 */
+            .toastui-editor-contents {
+                font-size: 16px;
+                font-family: inherit;
             }
         </style>
     </th:block>
@@ -232,7 +240,10 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="tab-pane-1">
                             <h4 class="mb-3 border-bottom pb-2">도서 소개</h4>
-                            <p th:text="${book.bookDescription}" style="line-height: 1.8;">상세 내용</p>
+
+                            <div id="viewer"></div>
+
+                            <textarea id="bookDescriptionContent" style="display:none;" th:text="${book.bookDescription}"></textarea>
                         </div>
 
                         <div class="tab-pane fade" id="tab-pane-2">
@@ -339,9 +350,27 @@
 <input type="hidden" id="isLoggedIn" th:value="${#authorization.expression('isAuthenticated()')}" />
 
 <th:block layout:fragment="script">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-viewer.min.js"></script>
+
     <script>
         $(document).ready(function () {
-            // 수량 조절 버튼 이벤트
+            // [수정] TUI Viewer 초기화
+            // 'toastui-editor-viewer.min.js' 사용 시 toastui.Editor 자체가 Viewer 클래스입니다.
+            // factory 메서드 대신 new 생성자를 사용하여 초기화합니다.
+            const $contentArea = $('#bookDescriptionContent');
+            if ($contentArea.length > 0) {
+                const content = $contentArea.val();
+                try {
+                    const viewer = new toastui.Editor({
+                        el: document.querySelector('#viewer'),
+                        initialValue: content || ''
+                    });
+                } catch (e) {
+                    console.error("Toast UI Viewer Init Error:", e);
+                }
+            }
+
+            // 기존 기능: 수량 조절 버튼 이벤트
             $('.quantity button').off('click').on('click', function () {
                 var button = $(this);
                 var $input = button.parent().parent().find('input#cartQuantity');
@@ -362,7 +391,7 @@
                 $('#buyNowQuantity').val(newVal);
             });
 
-            // 장바구니 담기 AJAX
+            // 기존 기능: 장바구니 담기 AJAX
             $('#btn-add-cart').off('click').on('click', function () {
                 const bookId = $(this).data('book-id');
                 const quantity = $('#cartQuantity').val();
@@ -376,7 +405,6 @@
                         cartQuantity: parseInt(quantity)
                     }),
                     success: function (res) {
-                        // 1. 낙관적 업데이트
                         if (typeof incrementCartBadge === 'function') {
                             incrementCartBadge();
                         } else {
@@ -387,7 +415,6 @@
                             }
                         }
 
-                        // 2. 서버 동기화
                         if (typeof updateCartBadge === 'function') {
                             updateCartBadge();
                         }
@@ -407,7 +434,7 @@
                 });
             });
 
-            // 찜하기 AJAX
+            // 기존 기능: 찜하기 AJAX
             $('#btn-add-like').off('click').on('click', function () {
                 const $btn = $(this);
                 const bookId = $btn.data('book-id');

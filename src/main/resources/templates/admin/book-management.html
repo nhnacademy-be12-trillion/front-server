@@ -8,27 +8,25 @@
   <meta charset="utf-8">
   <title>Trillion-Shop | 관리자 - 도서 관리</title>
   <th:block layout:fragment="head">
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+
     <style>
       body { background-color: #f5f5f5; }
       .admin-container { padding-top: 50px; padding-bottom: 50px; }
 
-      /* [수정] 네비게이션 필 스타일 (하늘색 테마 적용) */
       .nav-pills .nav-link { border-radius: 0.25rem; margin-bottom: 5px; background-color: #e9ecef; color: #3D464D; transition: 0.3s; }
       .nav-pills .nav-link.active, .nav-pills .nav-link:hover {
-        background-color: #87CEEB; /* 하늘색으로 변경 */
-        color: #ffffff;            /* 텍스트 흰색 */
+        background-color: #87CEEB;
+        color: #ffffff;
         font-weight: bold;
       }
 
       .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
       .table thead th { border-top: none; background-color: #f8f9fa; color: #333; font-weight: 600; }
       .table td { vertical-align: middle; }
-      .badge-status-waiting { background-color: #ffc107; color: #212529; }
-      .badge-status-completed { background-color: #28a745; color: #fff; }
-      .badge-status-canceled { background-color: #dc3545; color: #fff; }
-      .badge-status-canceling { background-color: #fd7e14; color: #fff; } /* 주황색 */
-      .badge-status-shipping { background-color: #17a2b8; color: #fff; }
-      .badge-status-returned { background-color: #6c757d; color: #fff; }
+
+      /* 모달 내 에디터 간격 조정 */
+      .tui-editor-defaultUI { margin-bottom: 10px; }
     </style>
   </th:block>
 </head>
@@ -106,69 +104,69 @@
   </div>
 
   <div class="modal fade" id="bookUpdateModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header bg-warning text-white">
-          <h5 class="modal-title"><i class="fas fa-edit mr-2"></i>도서 정보 수정</h5>
-          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <form id="bookUpdateForm">
-            <input type="hidden" id="editBookId">
-            <input type="hidden" id="editBookImage">
-
-            <div class="form-group row">
-              <label class="col-sm-3 col-form-label">도서명</label>
-              <div class="col-sm-9"><input type="text" class="form-control" id="editBookName" required></div>
-            </div>
-
-            <div class="form-group row">
-              <label class="col-sm-3 col-form-label">설명</label>
-              <div class="col-sm-9">
-                <div id="editBookDescriptionEditor"></div>
-              </div>
-            </div>
-
-            <div class="form-group row">
-              <label class="col-sm-3 col-form-label">목차</label>
-              <div class="col-sm-9"><textarea class="form-control" id="editBookIndex" rows="3"></textarea></div>
-            </div>
-            <div class="form-group row">
-              <label class="col-sm-3 col-form-label">재고 수량</label>
-              <div class="col-sm-9"><input type="number" class="form-control" id="editBookStock" required></div>
-            </div>
-            <div class="form-group row">
-              <label class="col-sm-3 col-form-label">할인율 (%)</label>
-              <div class="col-sm-9">
-                <input type="number" class="form-control" id="editDiscountRate" placeholder="예: 10">
-                <small class="text-muted">입력한 할인율에 따라 판매가가 자동 계산됩니다.</small>
-              </div>
-            </div>
-            <div class="form-group row">
-              <label class="col-sm-3 col-form-label">판매 상태</label>
-              <div class="col-sm-9">
-                <select class="form-control" id="editBookState">
-                  <option value="ON_SALE">판매중 (ON_SALE)</option>
-                  <option value="SOLD_OUT">품절 (SOLD_OUT)</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group row">
-              <label class="col-sm-3 col-form-label">포장 가능 여부</label>
-              <div class="col-sm-9">
-                <select class="form-control" id="editBookPackaging">
-                  <option value="true">가능</option>
-                  <option value="false">불가능</option>
-                </select>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-          <button type="button" class="btn btn-warning" onclick="submitBookUpdate()">수정 완료</button>
-        </div>
+    <div class="modal-dialog modal-xl" role="document"> <div class="modal-content">
+      <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title"><i class="fas fa-edit mr-2"></i>도서 정보 수정</h5>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
       </div>
+      <div class="modal-body">
+        <form id="bookUpdateForm">
+          <input type="hidden" id="editBookId">
+          <input type="hidden" id="editBookImage">
+
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">도서명</label>
+            <div class="col-sm-10"><input type="text" class="form-control" id="editBookName" required></div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">설명</label>
+            <div class="col-sm-10">
+              <div id="editBookDescriptionEditor"></div>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">목차</label>
+            <div class="col-sm-10">
+              <div id="editBookIndexEditor"></div>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">재고 수량</label>
+            <div class="col-sm-4"><input type="number" class="form-control" id="editBookStock" required></div>
+
+            <label class="col-sm-2 col-form-label">할인율 (%)</label>
+            <div class="col-sm-4">
+              <input type="number" class="form-control" id="editDiscountRate" placeholder="예: 10">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">판매 상태</label>
+            <div class="col-sm-4">
+              <select class="form-control" id="editBookState">
+                <option value="ON_SALE">판매중 (ON_SALE)</option>
+                <option value="SOLD_OUT">품절 (SOLD_OUT)</option>
+              </select>
+            </div>
+
+            <label class="col-sm-2 col-form-label">포장 여부</label>
+            <div class="col-sm-4">
+              <select class="form-control" id="editBookPackaging">
+                <option value="true">가능</option>
+                <option value="false">불가능</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-warning" onclick="submitBookUpdate()">수정 완료</button>
+      </div>
+    </div>
     </div>
   </div>
 </div>
@@ -179,25 +177,35 @@
   <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
 
-      // 에디터 초기화
-      let updateEditor;
+      // 에디터 변수 선언
+      let descriptionEditor;
+      let indexEditor;
 
-      // DOM 로드 후 에디터 생성
-      updateEditor = new toastui.Editor({
+      // 1. 도서 설명(Description) 에디터 초기화
+      descriptionEditor = new toastui.Editor({
         el: document.querySelector('#editBookDescriptionEditor'),
+        height: '400px',
+        initialEditType: 'wysiwyg',
+        previewStyle: 'vertical'
+      });
+
+      // 2. [추가] 도서 목차(Index) 에디터 초기화
+      indexEditor = new toastui.Editor({
+        el: document.querySelector('#editBookIndexEditor'),
         height: '300px',
         initialEditType: 'wysiwyg',
         previewStyle: 'vertical'
       });
 
-      // 모달이 열린 직후 에디터 크기 갱신
+      // 모달이 열린 직후 에디터 레이아웃 갱신 (중요: 깨짐 방지)
       $('#bookUpdateModal').on('shown.bs.modal', function() {
-        updateEditor.refresh();
+        descriptionEditor.refresh();
+        indexEditor.refresh();
       });
 
       const bucketBaseUrl = [[@{/trillion-bucket/}]];
 
-      // 도서 조회 (Book ID로)
+      // 도서 조회
       $('#btn-find-book').on('click', function() {
         const bookId = $('#manageBookIdInput').val().trim();
         if(!bookId) { alert("Book ID를 입력해주세요."); return; }
@@ -251,10 +259,10 @@
         $('#editBookId').val(bookData.bookId);
         $('#editBookName').val(bookData.bookName);
 
-        // 에디터에 기존 설명 세팅
-        updateEditor.setMarkdown(bookData.bookDescription || '');
+        // [수정] 에디터에 값 세팅 (설명 & 목차)
+        descriptionEditor.setMarkdown(bookData.bookDescription || '');
+        indexEditor.setMarkdown(bookData.bookIndex || '');
 
-        $('#editBookIndex').val(bookData.bookIndex);
         $('#editBookStock').val(bookData.bookStock);
 
         let calculatedDiscount = 0;
@@ -280,13 +288,14 @@
       window.submitBookUpdate = function() {
         const bookId = $('#editBookId').val();
 
-        // 에디터에서 작성된 내용(Markdown) 가져오기
-        const descriptionContent = updateEditor.getMarkdown();
+        // [수정] 두 에디터에서 Markdown 값 가져오기
+        const descriptionContent = descriptionEditor.getMarkdown();
+        const indexContent = indexEditor.getMarkdown();
 
         const requestData = {
           bookName: $('#editBookName').val(),
-          bookDescription: descriptionContent, // 수정된 내용 반영
-          bookIndex: $('#editBookIndex').val(),
+          bookDescription: descriptionContent, // TUI Editor 값
+          bookIndex: indexContent,             // TUI Editor 값
           bookStock: parseInt($('#editBookStock').val()),
           discountRate: parseFloat($('#editDiscountRate').val() || 0),
           bookState: $('#editBookState').val(),
@@ -296,6 +305,7 @@
         updateBookRequest(bookId, requestData, "수정되었습니다.");
       };
 
+      // 판매 종료(삭제) 기능
       window.deleteBook = function() {
         const bookData = $('#manageBookResult').data('book');
         if(!bookData) return;
