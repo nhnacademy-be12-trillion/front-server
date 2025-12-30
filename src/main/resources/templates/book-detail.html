@@ -573,7 +573,6 @@
             // ===== /리뷰 요약 타이핑 효과 =====
         });
         function issueCoupon(bookId) {
-            console.log("발급 시도하는 도서 ID:", bookId);
             fetch("/book-coupons", {
                 method: "POST",
                 headers: {
@@ -588,7 +587,10 @@
                     } else if (response.status === 400) {
                         console.error("Error:", error);
                         alert("이미 발급받았거나 발급할 수 없는 쿠폰입니다. ");
-                    } else {
+                    }else if (response.status === 401) {
+                        alert("로그인이 필요한 서비스입니다.");
+                    }
+                    else {
                         console.error("Error:", error);
                         alert("문제가 발생했습니다. 다시 시도해주세요.");
                     }
