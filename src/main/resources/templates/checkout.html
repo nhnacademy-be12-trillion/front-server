@@ -184,6 +184,10 @@
                                     <h6 class="font-weight-medium">포인트 사용</h6>
                                     <h6 id="summary-point-usage" class="font-weight-medium text-danger">0원</h6>
                                 </div>
+                                <div class="d-flex justify-content-between mt-3">
+                                    <h6 class="font-weight-medium">쿠폰 할인</h6>
+                                    <h6 id="summary-coupon-discount" class="font-weight-medium text-danger">0원</h6>
+                                </div>
                             </div>
                             <div class="pt-2">
                                 <div class="d-flex justify-content-between mt-2">
@@ -209,7 +213,7 @@
                                     <label>쿠폰 적용</label>
                                     <div class="d-flex align-items-center mb-2">
                                         <input type="hidden" th:field="*{couponId}" id="selectedCouponId">
-                                        <button type="button" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#couponModal">
+                                        <button type="button" class="btn btn-outline-primary mr-2" onclick="openCouponModal()">
                                             쿠폰 선택
                                         </button>
                                         <span id="selectedCouponDisplay" class="text-success font-weight-bold"></span>
@@ -244,13 +248,48 @@
                     <ul class="list-group" th:unless="${#lists.isEmpty(memberCoupons)}">
                         <li class="list-group-item" th:each="coupon : ${memberCoupons}">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-0" th:text="'쿠폰 번호 #' + ${coupon.couponId}">Coupon Name</h6>
-                                    <small class="text-muted" th:text="'발급번호: ' + ${coupon.id}">ID</small>
+                                <div style="flex: 1;">
+                                    <!-- 쿠폰 이름 -->
+                                    <h6 class="mb-1 font-weight-bold" th:text="${coupon.name != null ? coupon.name : '쿠폰 #' + coupon.couponId}">Coupon Name</h6>
+
+                                    <!-- 할인 정보 -->
+                                    <div class="text-primary mb-1 font-weight-bold">
+                                        <!-- 정액 할인 -->
+                                        <span th:if="${coupon.couponDiscountType == 'FIXED_AMOUNT'}"
+                                              th:text="${#numbers.formatInteger(coupon.discountValue, 0, 'COMMA')} + '원 할인'"></span>
+                                        
+                                        <!-- 정률 할인 -->
+                                        <span th:if="${coupon.couponDiscountType == 'RATE'}">
+                                            <span th:text="${#numbers.formatInteger(coupon.discountValue, 0, 'COMMA')} + '% 할인'"></span>
+                                            <span th:if="${coupon.maxDiscountPrice != null and coupon.maxDiscountPrice > 0}"
+                                                  class="text-muted small"
+                                                  th:text="' (최대 ' + ${#numbers.formatInteger(coupon.maxDiscountPrice, 0, 'COMMA')} + '원)'"></span>
+                                        </span>
+                                    </div>
+
+                                    <!-- 최소 주문 금액 -->
+                                    <div class="text-muted small mb-1" th:if="${coupon.minOrderPrice != null and coupon.minOrderPrice > 0}">
+                                        <i class="fa fa-shopping-cart mr-1"></i>
+                                        <span th:text="'최소 ' + ${#numbers.formatInteger(coupon.minOrderPrice, 0, 'COMMA')} + '원 이상 구매 시'"></span>
+                                    </div>
+
+                                    <!-- 유효 기간 -->
+                                    <div class="text-muted small" th:if="${coupon.issueEndDate != null}">
+                                        <i class="far fa-clock mr-1"></i>
+                                        <span th:text="${#temporals.format(coupon.issueEndDate, 'yyyy-MM-dd HH:mm')} + ' 까지'"></span>
+                                    </div>
+                                    <div class="text-muted small" th:if="${coupon.issueEndDate == null}">
+                                        <span class="badge badge-success">기한 무제한</span>
+                                    </div>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-primary"
-                                        th:onclick="'selectCoupon(' + ${coupon.id} + ', ' + ${coupon.couponId} + ')'">
-                                    선택
+                                <button type="button" class="btn btn-sm btn-outline-primary ml-3"
+                                        th:data-id="${coupon.id}"
+                                        th:data-display-id="${coupon.couponId}"
+                                        th:data-name="${coupon.name ?: '쿠폰'}"
+                                        th:data-type="${coupon.couponDiscountType}"
+                                        th:data-value="${coupon.discountValue}"
+                                        onclick="selectCoupon(this)">
+                                    적용
                                 </button>
                             </div>
                         </li>
@@ -267,17 +306,162 @@
 
 <th:block layout:fragment="script">
     <script>
-        // [자체 추가] 쿠폰 선택 로직
-        function selectCoupon(memberCouponId, couponDisplayId) {
-            document.getElementById('selectedCouponId').value = memberCouponId;
-            document.getElementById('selectedCouponDisplay').innerText = '쿠폰이 선택되었습니다. (번호: #' + couponDisplayId + ')';
+        // [자체 추가] 쿠폰 처리 상태 플래그
+        let isCouponProcessing = false;
+
+        // [자체 추가] 주문 버튼 잠금/해제
+        function toggleSubmitButton(disabled) {
+            const submitBtn = document.querySelector('form[name="orderForm"] button[type="submit"]');
+            if (!submitBtn) return;
+
+            submitBtn.disabled = disabled;
+            if (disabled) {
+                submitBtn.dataset.originalText = submitBtn.innerText;
+                submitBtn.innerText = '쿠폰 적용 중...';
+            } else {
+                if (submitBtn.dataset.originalText) {
+                    submitBtn.innerText = submitBtn.dataset.originalText;
+                }
+            }
+        }
+
+        // [자체 추가] 쿠폰 모달 열기
+        function openCouponModal() {
+            if (typeof $ === 'undefined' || typeof $.fn.modal === 'undefined') {
+                alert('필수 라이브러리(jQuery/Bootstrap)가 로드되지 않았습니다. 인터넷 연결을 확인해주세요.');
+                return;
+            }
+            $('#couponModal').modal('show');
+        }
+
+        // [자체 추가] 쿠폰 선택 로직 (data 속성 활용으로 변경)
+        function selectCoupon(btn) {
+            const dataset = btn.dataset;
+            const memberCouponId = dataset.id;
+            const couponDisplayId = dataset.displayId;
+            const couponName = dataset.name;
+            const discountType = dataset.type;
+            const discountValue = dataset.value;
+
+            if (!couponDisplayId) {
+                alert('유효하지 않은 쿠폰 ID입니다.');
+                return;
+            }
+            
+            // 처리 시작: 버튼 잠금
+            isCouponProcessing = true;
+            toggleSubmitButton(true);
+
+            // 1. 선택된 쿠폰 ID 저장 (정책 ID 전송)
+            document.getElementById('selectedCouponId').value = couponDisplayId;
+            
+            // [개선] 사용자 친화적인 메시지 표시
+            let discountInfo = '';
+            if (discountType === 'FIXED_AMOUNT') {
+                discountInfo = formatNumber(discountValue) + '원 할인';
+            } else { // RATE
+                discountInfo = discountValue + '% 할인';
+            }
+            
+            const displayText = (couponName || '쿠폰') + ' (' + discountInfo + ')이 적용되었습니다.';
+            document.getElementById('selectedCouponDisplay').innerText = displayText;
+            
+            // 2. 서버에 할인 금액 계산 요청
+            calculateDiscount(couponDisplayId);
+
             $('#couponModal').modal('hide');
+        }
+
+        // 쿠폰 할인 계산 및 적용
+        function calculateDiscount(couponId) {
+            const itemRows = document.querySelectorAll('tbody tr');
+            const bookIds = [];
+            const quantities = [];
+
+            itemRows.forEach(row => {
+                // bookId 가져오기 (input hidden name="orderItems[i].bookId")
+                const bookIdInput = row.querySelector('input[type="hidden"][name$=".bookId"]');
+                const quantityInput = row.querySelector('.quantity-input');
+                
+                if (bookIdInput && quantityInput) {
+                    bookIds.push(bookIdInput.value);
+                    quantities.push(quantityInput.value);
+                }
+            });
+
+            if (bookIds.length === 0) {
+                isCouponProcessing = false;
+                toggleSubmitButton(false);
+                return;
+            }
+
+            // AJAX 요청
+            const url = '/checkout/api/discount?couponId=' + couponId + '&bookIds=' + bookIds.join(',') + '&quantities=' + quantities.join(',');
+            
+            fetch(url)
+                .then(async response => {
+                    if (!response.ok) {
+                        // 서버에서 보낸 에러 메시지 추출 시도
+                        const errorData = await response.json().catch(() => ({}));
+                        const errorMsg = errorData.message || '쿠폰 적용 중 오류가 발생했습니다.';
+                        throw new Error(errorMsg);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // data.totalDiscountPrice 사용
+                    const discountAmount = data.totalDiscountPrice || 0;
+                    applyDiscountToTotal(discountAmount);
+                    lockOrderInputs(true); // 수량/포장 변경 잠금
+                })
+                .catch(err => {
+                    console.error(err);
+                    // 서버가 전달한 구체적인 에러 메시지를 alert으로 표시
+                    alert('쿠폰 적용 실패: ' + err.message);
+                    resetCoupon(); // 실패 시 초기화
+                })
+                .finally(() => {
+                    // 처리 종료: 버튼 해제
+                    isCouponProcessing = false;
+                    toggleSubmitButton(false);
+                });
+        }
+
+        function applyDiscountToTotal(discountAmount) {
+            // 현재 화면에 표시된 "총 결제 금액"에서 할인을 차감하는 방식이 아니라,
+            // updateTotals()가 계산한 baseTotal에서 차감해야 정확함.
+            // 따라서 updateTotals 로직에 discountAmount를 주입하거나,
+            // 전역 변수로 저장해야 함. 여기서는 전역 변수 활용.
+            window.currentCouponDiscount = discountAmount;
+            updateTotals(); // 재계산 트리거
+        }
+
+        function lockOrderInputs(lock) {
+            const inputs = document.querySelectorAll('.quantity-input, .packaging-select');
+            inputs.forEach(input => {
+                input.disabled = lock;
+            });
+            
+            // 잠금 상태면 시각적 피드백 (옵션)
+            if (lock) {
+                // alert('쿠폰이 적용되어 수량 및 포장을 변경할 수 없습니다.\n변경하려면 쿠폰 적용을 취소해주세요.');
+                // 너무 잦은 alert은 방해되므로 주석 처리하거나 토스트로 변경 권장
+            }
         }
 
         // [자체 추가] 쿠폰 선택 취소 로직
         function resetCoupon() {
              document.getElementById('selectedCouponId').value = '';
              document.getElementById('selectedCouponDisplay').innerText = '';
+             
+             window.currentCouponDiscount = 0;
+             updateTotals();
+             lockOrderInputs(false); // 잠금 해제
+
+             // 강제 종료 시에도 상태 복구
+             isCouponProcessing = false;
+             toggleSubmitButton(false);
+
              $('#couponModal').modal('hide');
         }
 
@@ -326,7 +510,12 @@
             const shippingFee = (baseForShipping >= policyThreshold || baseForShipping === 0) ? 0 : policyFee;
             
             // 포인트 차감 전 순수 결제 금액
-            const totalBeforePoint = subTotal + totalPackagingFee + shippingFee;
+            let totalBeforePoint = subTotal + totalPackagingFee + shippingFee;
+
+            // [변경] 쿠폰 할인 적용
+            const couponDiscount = window.currentCouponDiscount || 0;
+            totalBeforePoint -= couponDiscount;
+            if (totalBeforePoint < 0) totalBeforePoint = 0;
 
             // 포인트 사용액 계산 및 보정
             const pointInput = document.getElementById('pointUsage');
@@ -369,9 +558,15 @@
                 summaryPoint.textContent = '-' + formatNumber(pointUsage) + '원';
             }
 
+            const summaryCoupon = document.getElementById('summary-coupon-discount');
+            if (summaryCoupon) {
+                summaryCoupon.textContent = '-' + formatNumber(couponDiscount) + '원';
+            }
+
             const totalElem = document.getElementById('summary-total');
             if (totalElem) totalElem.textContent = formatNumber(total) + '원';
         }
+
 
         // [통합] 페이지 로드 시 및 동적 업데이트 로직
         document.addEventListener('DOMContentLoaded', function () {
@@ -478,11 +673,16 @@
         
         // [커밋 80312e22] 폼 제출 전 데이터 준비 함수
         function prepareFormData() {
+            // [자체 추가] 전송 전 disabled 해제하여 값이 넘어가도록 함
+            lockOrderInputs(false);
+
             var road = document.getElementById("roadAddress").value;
             var detail = document.getElementById("detailAddress").value;
+            var isCouponSelected = document.getElementById('selectedCouponId').value !== '';
 
             if(!road || !detail) {
                 alert("주소를 모두 입력해주세요.");
+                if (isCouponSelected) lockOrderInputs(true); // 쿠폰 적용 중이었다면 다시 잠금
                 return false;
             }
             document.getElementById("hiddenReceiverAddress").value = (road + " " + detail).trim();
@@ -490,6 +690,7 @@
             var dateInput = document.getElementById("visibleDateInput").value;
             if (!dateInput) {
                 alert("배송 희망일을 선택해주세요.");
+                if (isCouponSelected) lockOrderInputs(true); // 쿠폰 적용 중이었다면 다시 잠금
                 return false;
             }
             document.getElementById("hiddenDeliveryDate").value = dateInput + "T00:00:00";
