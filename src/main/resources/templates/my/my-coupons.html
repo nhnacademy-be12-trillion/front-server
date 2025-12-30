@@ -73,7 +73,6 @@
                             <thead class="thead-light">
                             <tr>
                                 <th>쿠폰이름</th>
-                                <th>쿠폰수량</th>
                                 <th>쿠폰시작일</th>
                                 <th>쿠폰마감일</th>
                                 <th>최소주문금액</th>
@@ -85,10 +84,8 @@
                             <tbody>
                             <tr th:each="content : ${contents}">
                                 <td th:text="${content.name}">쿠폰이름</td>
-                                <td th:text="${content.quantity}">수량</td>
                                 <td th:text="${content.issueStartDate}">100200</td>
                                 <td th:text="${content.issueEndDate}">100200</td>
-
                                 <td th:text="${content.minOrderPrice==null?'없음':#numbers.formatInteger(content.minOrderPrice,0,'COMMA')+ '원'}">user1</td>
                                 <td th:text="${content.maxDiscountPrice==null?'없음':#numbers.formatInteger(content.maxDiscountPrice,0,'COMMA') + '원'}">15,000원</td>
                                 <td th:text="${content.couponDiscountType== 'FIXED_AMOUNT' ? #numbers.formatInteger(content.discountValue,0,'COMMA') +'원':content.discountValue+'%'}">15,000원</td>
