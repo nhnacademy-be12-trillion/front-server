@@ -716,9 +716,37 @@
             // [자체 추가] 전송 전 disabled 해제하여 값이 넘어가도록 함
             lockOrderInputs(false);
 
+            // 1. 필수 입력 필드 검증 (HTML5 required 속성 보완)
+            var requiredFields = [
+                { id: 'ordererName', name: '주문자 이름' },
+                { id: 'ordererContact', name: '주문자 연락처' },
+                { id: 'receiverName', name: '수령인 이름' },
+                { id: 'receiverContact', name: '수령인 연락처' }
+            ];
+
+            for (var i = 0; i < requiredFields.length; i++) {
+                var field = document.getElementById(requiredFields[i].id);
+                if (field && !field.value.trim()) {
+                    alert(requiredFields[i].name + "을(를) 입력해주세요.");
+                    field.focus();
+                    return false;
+                }
+            }
+
+            // 2. 비회원 비밀번호 검증 (비회원인 경우 필드가 존재함)
+            var pwField = document.getElementById('nonMemberPassword');
+            if (pwField && !pwField.value.trim()) {
+                alert("주문 조회를 위한 비회원 비밀번호를 입력해주세요.");
+                pwField.focus();
+                return false;
+            }
+
+            // 3. 주소 정보 조합
             var road = document.getElementById("roadAddress").value;
             var detail = document.getElementById("detailAddress").value;
-            var isCouponSelected = document.getElementById('selectedCouponId').value !== '';
+            
+            var couponElem = document.getElementById('selectedCouponId');
+            var isCouponSelected = couponElem && couponElem.value !== '';
 
             if(!road || !detail) {
                 alert("주소를 모두 입력해주세요.");
@@ -727,6 +755,7 @@
             }
             document.getElementById("hiddenReceiverAddress").value = (road + " " + detail).trim();
 
+            // 4. 배송 희망일 설정
             var dateInput = document.getElementById("visibleDateInput").value;
             if (!dateInput) {
                 alert("배송 희망일을 선택해주세요.");
