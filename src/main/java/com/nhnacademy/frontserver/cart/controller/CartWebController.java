@@ -62,7 +62,6 @@ public class CartWebController {
         long totalQuantity = 0;  // 전체 수량
 
         // 각 장바구니 아이템별 책 상세 정보 조회 및 가격 계산
-        // TODO. N+1 문제 발생중.
         if (cartItems != null) {
             for (CartResponseDto item : cartItems) {
                 totalQuantity += item.getCartQuantity();
@@ -116,8 +115,8 @@ public class CartWebController {
     /**
      * [동작] 삭제
      */
-    @PostMapping("/delete/{bookId}")
-    public String deleteItem(@PathVariable Long bookId) {
+    @PostMapping("/delete/{book-id}")
+    public String deleteItem(@PathVariable(name="book-id") Long bookId) {
         cartClient.removeCartItem(bookId);
         return "redirect:/carts";
     }
