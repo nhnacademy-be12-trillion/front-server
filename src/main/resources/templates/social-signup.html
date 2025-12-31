@@ -27,25 +27,24 @@
         <p class="text-muted">배송과 쿠폰 발급을 위해<br>나머지 정보를 입력해주세요.</p>
       </div>
 
-      <form action="/members/social-signup" method="post" onsubmit="return validateForm()">
+      <form action="/members/social-signup" method="post" th:object="${socialSignupRequest}" onsubmit="return validateForm()">
 
         <div class="form-group">
           <label>이름 <span class="text-danger">*</span></label>
-          <input type="text" name="memberName" class="form-control"
+          <input type="text" th:field="*{memberName}" class="form-control"
                  placeholder="이름을 입력해주세요" required
-                 th:value="${memberName}"
                  style="height: 50px;">
         </div>
 
         <div class="form-group">
           <label>생년월일 <span class="text-danger">*</span></label>
-          <input type="date" id="memberBirth" name="memberBirth" class="form-control" required style="height: 50px;">
+          <input type="date" th:field="*{memberBirth}" class="form-control" required style="height: 50px;">
           <small class="text-muted">생일 쿠폰 발급 기준이 되며, 가입 후 변경이 불가능할 수 있습니다.</small>
         </div>
 
         <div class="form-group">
           <label>연락처 <span class="text-danger">*</span></label>
-          <input type="text" id="memberContact" name="memberContact" class="form-control"
+          <input type="text" th:field="*{memberContact}" class="form-control"
                  placeholder="010-0000-0000" maxlength="13" required oninput="autoHyphen(this)" style="height: 50px;">
         </div>
 
@@ -56,7 +55,7 @@
         <div class="form-group">
           <label>우편번호</label>
           <div class="input-group">
-            <input type="text" id="zipcode" name="memberAddress.addressPostCode" class="form-control" placeholder="우편번호" readonly onclick="execDaumPostcode()" style="height: 50px;">
+            <input type="text" id="zipcode" th:field="*{memberAddress.addressPostCode}" class="form-control" placeholder="우편번호" readonly onclick="execDaumPostcode()" style="height: 50px;">
             <div class="input-group-append">
               <button class="btn btn-primary font-weight-bold" type="button" onclick="execDaumPostcode()">주소 찾기</button>
             </div>
@@ -65,18 +64,17 @@
 
         <div class="form-group">
           <label>기본 주소</label>
-          <input type="text" id="addressBase" name="memberAddress.addressBase" class="form-control" placeholder="주소 찾기를 이용해주세요" readonly style="height: 50px;">
+          <input type="text" id="addressBase" th:field="*{memberAddress.addressBase}" class="form-control" placeholder="주소 찾기를 이용해주세요" readonly style="height: 50px;">
         </div>
 
         <div class="form-group">
           <label>상세 주소</label>
-          <input type="text" id="addressDetail" name="memberAddress.addressDetail" class="form-control" placeholder="상세 주소를 입력해주세요" style="height: 50px;">
+          <input type="text" id="addressDetail" th:field="*{memberAddress.addressDetail}" class="form-control" placeholder="상세 주소를 입력해주세요" style="height: 50px;">
         </div>
 
-        <input type="hidden" name="memberAddress.addressAlias" value="우리집">
-
-        <input type="hidden" name="memberOauthId" th:value="${memberOauthId}">
-        <input type="hidden" name="memberEmail" th:value="${memberEmail}">
+        <input type="hidden" th:field="*{memberAddress.addressAlias}" value="우리집">
+        <input type="hidden" th:field="*{memberOauthId}">
+        <input type="hidden" th:field="*{memberEmail}">
 
         <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold mt-4" style="height: 50px;">가입 완료</button>
       </form>

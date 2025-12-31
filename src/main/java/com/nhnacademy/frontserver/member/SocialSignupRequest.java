@@ -1,7 +1,9 @@
 package com.nhnacademy.frontserver.member;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 import java.time.LocalDate;
 
 public record SocialSignupRequest(
