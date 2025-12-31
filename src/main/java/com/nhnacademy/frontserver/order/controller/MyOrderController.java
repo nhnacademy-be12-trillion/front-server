@@ -23,7 +23,7 @@ public class MyOrderController {
     @GetMapping
     public String myPageOrders(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "size", defaultValue = "5") int size,
             Model model
     ) {
         String sort = "orderId,desc";
