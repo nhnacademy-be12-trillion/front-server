@@ -276,7 +276,6 @@
                             <div class="row">
                                 <div class="col-md-12">
 
-                                    <!-- ===== AI 리뷰 요약(타이핑) 추가 ===== -->
                                     <div class="bg-light p-3 rounded mb-4"
                                          th:if="${reviewSummary != null && reviewSummary.reviewSummary() != null}">
                                         <div class="d-flex align-items-center mb-2">
@@ -284,15 +283,11 @@
                                             <strong>AI 리뷰 요약</strong>
                                         </div>
 
-                                        <!-- 타이핑 표시 영역 -->
                                         <div id="reviewSummaryTyping" class="text-dark"></div>
 
-                                        <!-- 실제 요약 텍스트 보관(숨김) -->
                                         <textarea id="reviewSummaryContent" style="display:none;"
                                                   th:text="${reviewSummary.reviewSummary()}"></textarea>
                                     </div>
-                                    <!-- ===== /AI 리뷰 요약(타이핑) ===== -->
-
                                     <h4 class="mb-4 border-bottom pb-2"
                                         th:text="${reviews != null ? reviews.totalElements + '개의 리뷰가 있습니다.' : '리뷰가 없습니다.'}">
                                     </h4>
@@ -310,7 +305,21 @@
                                                     <span th:if="${currentMemberId != null && review.memberId != null && review.memberId == currentMemberId}"
                                                           class="badge badge-info ml-2" style="font-size: 0.75rem;">내 리뷰</span>
                                                 </div>
-                                                <small class="text-muted" th:text="${review.createdAt}">01 Jan 2025</small>
+
+                                                <div class="text-right">
+                                                    <small class="text-muted d-block"
+                                                           th:text="${review.updatedAt != null ? review.updatedAt : review.createdAt}">
+                                                        01 Jan 2025
+                                                    </small>
+
+                                                    <th:block th:if="${currentMemberId != null && review.memberId != null && review.memberId == currentMemberId}">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1"
+                                                                style="font-size: 0.8rem; padding: 2px 8px;"
+                                                                th:onclick="openReviewEditModal([[${review.reviewId}]], [[${book.bookId}]], [[${review.reviewContents}]], [[${review.reviewRate}]])">
+                                                            수정
+                                                        </button>
+                                                    </th:block>
+                                                </div>
                                             </div>
 
                                             <div class="text-primary mb-2 mt-1">
@@ -374,12 +383,56 @@
                                     </div>
 
                                     <div th:if="${reviews == null or reviews.content.isEmpty()}">
-                                        <p class="text-muted text-center py-5">첫 번째 리뷰의 주인공이 되어보세요!</p>
+                                        <p class="text-muted text-center py-5">아직 작성된 리뷰가 없습니다.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="reviewEditModal" tabindex="-1" role="dialog" aria-labelledby="reviewEditModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <form action="/reviews/update" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reviewEditModalLabel">리뷰 수정</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="reviewId" id="editReviewId">
+                            <input type="hidden" name="bookId" id="editBookId">
+
+                            <div class="form-group">
+                                <label>별점</label>
+                                <div class="d-flex align-items-center">
+                                    <div id="editStarDisplay" class="mr-3" style="cursor: pointer;">
+                                        <i class="far fa-star text-warning" data-value="1" style="font-size: 1.5rem;"></i>
+                                        <i class="far fa-star text-warning" data-value="2" style="font-size: 1.5rem;"></i>
+                                        <i class="far fa-star text-warning" data-value="3" style="font-size: 1.5rem;"></i>
+                                        <i class="far fa-star text-warning" data-value="4" style="font-size: 1.5rem;"></i>
+                                        <i class="far fa-star text-warning" data-value="5" style="font-size: 1.5rem;"></i>
+                                    </div>
+                                    <input type="hidden" name="reviewRate" id="editReviewRate" required>
+                                    <span id="editStarText" class="font-weight-bold ml-2">0점</span>
+                                </div>
+                                <small class="text-muted mt-1 d-block">사진은 수정할 수 없습니다.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editReviewContents">내용</label>
+                                <textarea class="form-control" name="reviewContents" id="editReviewContents" rows="5" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                            <button type="submit" class="btn btn-primary">수정 완료</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -392,10 +445,43 @@
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-viewer.min.js"></script>
 
     <script>
+        // [추가] 리뷰 수정 모달 열기 함수
+        function openReviewEditModal(reviewId, bookId, contents, rate) {
+            // 값 주입
+            $('#editReviewId').val(reviewId);
+            $('#editBookId').val(bookId);
+            $('#editReviewContents').val(contents);
+
+            // 별점 초기화
+            setEditStar(rate);
+
+            // 모달 표시
+            $('#reviewEditModal').modal('show');
+        }
+
+        // [추가] 모달 내부 별점 UI 처리
+        function setEditStar(rate) {
+            $('#editReviewRate').val(rate);
+            $('#editStarText').text(rate + '점');
+
+            $('#editStarDisplay i').each(function(index) {
+                // index는 0부터 시작하므로 +1 해서 비교
+                if ((index + 1) <= rate) {
+                    $(this).removeClass('far').addClass('fas'); // 채워진 별
+                } else {
+                    $(this).removeClass('fas').addClass('far'); // 빈 별
+                }
+            });
+        }
+
         $(document).ready(function () {
-            // [수정] TUI Viewer 초기화
-            // 'toastui-editor-viewer.min.js' 사용 시 toastui.Editor 자체가 Viewer 클래스입니다.
-            // factory 메서드 대신 new 생성자를 사용하여 초기화합니다.
+            // [추가] 모달 내 별점 클릭 이벤트
+            $('#editStarDisplay i').on('click', function() {
+                var selectedRate = $(this).data('value');
+                setEditStar(selectedRate);
+            });
+
+            // [기존] TUI Viewer 초기화
             const $contentArea = $('#bookDescriptionContent');
             if ($contentArea.length > 0) {
                 const content = $contentArea.val();
@@ -517,7 +603,7 @@
                 });
             });
 
-            // ===== 리뷰 요약 타이핑 효과(추가) =====
+            // ===== 리뷰 요약 타이핑 효과 =====
             function runTypewriter(targetEl, text, options = {}) {
                 const speed = options.speed ?? 35;   // ms
                 const chunk = options.chunk ?? 1;    // 1 = 한 글자씩
@@ -572,6 +658,7 @@
             });
             // ===== /리뷰 요약 타이핑 효과 =====
         });
+
         function issueCoupon(bookId) {
             fetch("/book-coupons", {
                 method: "POST",

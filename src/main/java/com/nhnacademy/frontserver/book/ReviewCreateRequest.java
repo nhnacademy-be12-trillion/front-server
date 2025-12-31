@@ -1,6 +1,6 @@
 package com.nhnacademy.frontserver.book;
 
-public record ReviewRequest(
+public record ReviewCreateRequest(
         Long orderId,
         Long bookId,
         int reviewRate,

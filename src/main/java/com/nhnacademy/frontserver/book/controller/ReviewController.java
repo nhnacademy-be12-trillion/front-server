@@ -8,6 +8,7 @@ import com.nhnacademy.frontserver.member.MemberClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +55,7 @@ public class ReviewController {
      * 리뷰 등록 처리
      */
     @PostMapping(value = "/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public String addReview(@ModelAttribute ReviewRequest request,
+    public String addReview(@ModelAttribute ReviewCreateRequest request,
                             @RequestParam(value = "images", required = false) List<MultipartFile> images,
                             RedirectAttributes redirectAttributes) {
         try {
@@ -87,5 +88,28 @@ public class ReviewController {
         model.addAttribute("activeTab", "reviews");
 
         return "my/my-reviews";
+    }
+
+    @PostMapping("/update")
+    public String updateReview(@RequestParam("bookId") Long bookId,
+                               @RequestParam("reviewId") Long reviewId,
+                               @RequestParam("reviewRate") Integer reviewRate,
+                               @RequestParam("reviewContents") String reviewContents,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            // DTO 생성 (이미지는 수정 불가하므로 내용과 별점만 전달)
+            ReviewUpdateRequest request = new ReviewUpdateRequest(reviewRate, reviewContents);
+
+            // Feign Client 호출
+            reviewClient.updateReview(reviewId, request);
+
+            redirectAttributes.addFlashAttribute("message", "리뷰가 수정되었습니다.");
+        } catch (Exception e) {
+            log.error("리뷰 수정 실패", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "리뷰 수정 중 오류가 발생했습니다.");
+        }
+
+        // 다시 해당 책의 상세 페이지로 이동
+        return "redirect:/books/" + bookId;
     }
 }

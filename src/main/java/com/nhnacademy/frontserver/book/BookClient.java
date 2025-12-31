@@ -63,7 +63,7 @@ public interface BookClient {
     // 리뷰 등록 API
     @PostMapping(value = "/api/books/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Long createReview(
-            @RequestPart("request") ReviewRequest request,
+            @RequestPart("request") ReviewCreateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     );
 
@@ -124,11 +124,11 @@ public interface BookClient {
     @GetMapping("/api/admin/books/isbn/{isbn}")
     BookCreateRequest getBookInfoByIsbn(@PathVariable("isbn") String isbn);
 
-    // [관리자] 도서 수정 (추가됨)
+    // 도서 수정
     @PutMapping("/api/admin/books/{bookId}")
     void updateBook(@PathVariable("bookId") Long bookId, @RequestBody Map<String, Object> request);
 
-    // [관리자] 도서 삭제 (추가됨)
+    // 도서 삭제
     @DeleteMapping("/api/admin/books/{bookId}")
     void deleteBook(@PathVariable("bookId") Long bookId);
 
