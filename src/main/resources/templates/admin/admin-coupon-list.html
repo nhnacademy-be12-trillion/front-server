@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{base}">
+
+<head>
+  <meta charset="utf-8">
+  <title>Trillion-Shop | 관리자 - 쿠폰 관리</title>
+  <th:block layout:fragment="head">
+    <style>
+      body { background-color: #f5f5f5; }
+      .admin-container { padding-top: 50px; padding-bottom: 50px; }
+
+      /* [UI 통일] 네비게이션 필 스타일 */
+      .nav-pills .nav-link { border-radius: 0.25rem; margin-bottom: 5px; background-color: #e9ecef; color: #3D464D; transition: 0.3s; }
+      .nav-pills .nav-link.active, .nav-pills .nav-link:hover {
+        background-color: #87CEEB; /* 하늘색 */
+        color: #ffffff;
+        font-weight: bold;
+      }
+
+      /* 컨텐츠 박스 스타일 */
+      .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 30px; }
+
+      /* 테이블 스타일 */
+      .table thead th {
+        border-top: none;
+        background-color: #f8f9fa;
+        color: #333;
+        font-weight: 600;
+        vertical-align: middle !important;
+      }
+      .table td {
+        vertical-align: middle !important;
+      }
+
+      /* 배지 스타일 */
+      .badge-policy-fixed { background-color: #17a2b8; color: #fff; }
+      .badge-policy-rate { background-color: #6610f2; color: #fff; }
+      .badge-coupon { background-color: #28a745; color: #fff; }
+    </style>
+  </th:block>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+  <div class="container-fluid admin-container">
+    <h1 class="text-dark mb-4 text-center">Trillion-Shop 관리 시스템</h1>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show container" role="alert">
+      <i class="fas fa-check-circle mr-2"></i><span th:text="${successMessage}"></span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="row px-xl-5">
+      <th:block th:replace="~{admin/fragments/sidebar :: sidebar('coupons')}"></th:block>
+
+      <div class="col-lg-9 col-md-8">
+
+        <div class="content-box">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-primary mb-0"><i class="fas fa-clipboard-check mr-2"></i>쿠폰 정책 목록</h4>
+            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createPolicyModal">
+              <i class="fas fa-plus"></i> 정책 생성
+            </button>
+          </div>
+          <p class="text-muted small mb-3">
+            <i class="fas fa-info-circle"></i> 쿠폰을 발행하기 위해서는 먼저 할인 정책(정액/정률)을 생성해야 합니다.
+          </p>
+
+          <div class="table-responsive">
+            <table class="table table-hover text-center">
+              <thead>
+              <tr>
+                <th style="width: 10%;">ID</th>
+                <th style="width: 30%;" class="text-left pl-4">정책명</th>
+                <th style="width: 15%;">타입</th>
+                <th style="width: 15%;">할인값</th>
+                <th style="width: 15%;">최소주문금액</th>
+                <th style="width: 15%;">최대할인금액</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="policy : ${policies}">
+                <td th:text="${policy.id}"></td>
+                <td class="text-left font-weight-bold pl-4" th:text="${policy.name}"></td>
+                <td>
+                  <span class="badge"
+                        th:classappend="${policy.couponDiscountType == 'RATE'} ? 'badge-policy-rate' : 'badge-policy-fixed'"
+                        th:text="${policy.couponDiscountType == 'RATE'} ? '정률(%)' : '정액(원)'">
+                  </span>
+                </td>
+                <td>
+                  <span th:if="${policy.couponDiscountType == 'RATE'}" th:text="${#numbers.formatInteger(policy.discountValue * 100, 0, 'COMMA')} + '%'"></span>
+                  <span th:unless="${policy.couponDiscountType == 'RATE'}" th:text="${#numbers.formatInteger(policy.discountValue, 0, 'COMMA')} + '원'"></span>
+                </td>
+                <td th:text="${#numbers.formatInteger(policy.minOrderPrice, 0, 'COMMA')} + '원'"></td>
+                <td th:text="${policy.maxDiscountPrice != null ? #numbers.formatInteger(policy.maxDiscountPrice, 0, 'COMMA') + '원' : '-'}"></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(policies)}">
+                <td colspan="6" class="text-muted py-4">등록된 정책이 없습니다. 정책을 먼저 생성해주세요.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="content-box">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-primary mb-0"><i class="fas fa-ticket-alt mr-2"></i>쿠폰 발급 목록</h4>
+            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#createCouponModal">
+              <i class="fas fa-plus"></i> 쿠폰 발급하기
+            </button>
+          </div>
+          <p class="text-muted small mb-3">
+            <i class="fas fa-info-circle"></i> 생성된 정책을 선택하여 쿠폰을 대량으로 발급할 수 있습니다.
+          </p>
+
+          <div class="table-responsive">
+            <table class="table table-hover text-center">
+              <thead>
+              <tr>
+                <th style="width: 25%;" class="text-left pl-4">쿠폰명</th>
+                <th style="width: 20%;">적용 정책</th>
+                <th style="width: 15%;">발행 수량</th>
+                <th style="width: 30%;">발급 기간</th>
+                <th style="width: 10%;">상태</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="coupon : ${coupons}">
+                <td class="text-left pl-4 font-weight-bold" th:text="${coupon.name}"></td>
+                <td>
+                  <span class="badge badge-light border" th:text="'정책 #' + ${coupon.policyId}"></span>
+                </td>
+                <td th:text="${#numbers.formatInteger(coupon.quantity, 0, 'COMMA')} + '장'"></td>
+                <td class="small" style="white-space: nowrap;">
+                  <span th:text="${#temporals.format(coupon.issueStartDate, 'yyyy-MM-dd HH:mm')}"></span> <br>
+                  ~ <span th:text="${#temporals.format(coupon.issueEndDate, 'yyyy-MM-dd HH:mm')}"></span>
+                </td>
+                <td>
+                  <span class="badge badge-coupon">발급완료</span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(coupons)}">
+                <td colspan="5" class="text-muted py-4">발급된 쿠폰이 없습니다.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="createPolicyModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title font-weight-bold">새 쿠폰 정책 생성</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <form th:action="@{/admin/coupons/policies}" method="post">
+          <div class="modal-body p-4">
+            <div class="form-group">
+              <label class="font-weight-bold">정책 이름</label>
+              <input type="text" name="name" class="form-control" placeholder="예: 여름방학 10% 할인" required>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold">할인 유형</label>
+              <select id="discountTypeSelect" name="couponDiscountType" class="form-control" onchange="togglePolicyInputs()">
+                <option value="FIXED_AMOUNT">정액 할인 (금액)</option>
+                <option value="RATE">정률 할인 (비율)</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label class="font-weight-bold" id="discountValueLabel">할인 금액 (원)</label>
+                <input type="number" id="discountValueInput" name="discountValue" class="form-control" required min="0" placeholder="예: 3000">
+                <small class="text-muted" id="discountHelp">할인할 금액을 입력하세요.</small>
+              </div>
+              <div class="form-group col-md-6">
+                <label class="font-weight-bold">최소 주문 금액</label>
+                <input type="number" name="minOrderPrice" class="form-control" value="0" min="0" step="1000" required>
+              </div>
+            </div>
+
+            <div class="form-group" id="maxDiscountGroup" style="display: none;">
+              <label class="font-weight-bold">최대 할인 한도 (원)</label>
+              <input type="number" name="maxDiscountPrice" class="form-control" placeholder="제한 없음">
+              <small class="text-muted">비율 할인 시 할인이 너무 커지는 것을 방지합니다.</small>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+            <button type="submit" class="btn btn-primary">정책 저장</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="createCouponModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title font-weight-bold">새 쿠폰 발급</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <form th:action="@{/admin/coupons}" method="post" onsubmit="return validateCouponForm()">
+          <div class="modal-body p-4">
+            <div class="form-group">
+              <label class="font-weight-bold">쿠폰 이름</label>
+              <input type="text" name="name" class="form-control" placeholder="예: 2024 신년 감사 쿠폰" required>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold text-primary">적용 정책 선택 (필수)</label>
+              <select name="policyId" class="form-control" required>
+                <option value="" disabled selected>-- 정책을 선택하세요 --</option>
+                <th:block th:each="policy : ${policies}">
+                  <option th:value="${policy.id}"
+                          th:text="|${policy.name} : ${policy.couponDiscountType == 'RATE' ? (policy.discountValue * 100) + '%' : policy.discountValue + '원'} 할인|">
+                  </option>
+                </th:block>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold">발행 수량</label>
+              <input type="number" name="quantity" class="form-control" value="100" min="1" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label class="font-weight-bold">발급 시작일</label>
+                <input type="datetime-local" name="issueStartDate" class="form-control" required>
+              </div>
+              <div class="form-group col-md-6">
+                <label class="font-weight-bold">발급 종료일</label>
+                <input type="datetime-local" name="issueEndDate" class="form-control" required>
+              </div>
+            </div>
+
+            <hr>
+            <h6 class="text-danger font-weight-bold mb-3">
+              <i class="fas fa-exclamation-circle"></i> 적용 대상 (둘 중 하나 ID 필수 입력)
+            </h6>
+            <div class="alert alert-secondary small p-2 mb-3">
+              정확한 쿠폰 발급을 위해 <strong>도서 ID</strong> 또는 <strong>카테고리 ID</strong> 숫자를 입력해주세요.<br>
+              (전체 적용을 원하시면 최상위 '도서' 카테고리의 <strong>ID</strong>를 입력하세요.)
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label class="font-weight-bold">특정 도서 ID (숫자)</label>
+                <input type="number" id="targetBookId" name="bookId" class="form-control" placeholder="도서 ID 입력 (예: 73987)">
+              </div>
+              <div class="form-group col-md-6">
+                <label class="font-weight-bold">특정 카테고리 ID (숫자)</label>
+                <input type="number" id="targetCategoryId" name="categoryId" class="form-control" placeholder="카테고리 ID 입력 (예: 1)">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+            <button type="submit" class="btn btn-success">쿠폰 발급 완료</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<th:block layout:fragment="script">
+  <script th:inline="javascript">
+    function togglePolicyInputs() {
+      const typeSelect = document.getElementById('discountTypeSelect');
+      const valueLabel = document.getElementById('discountValueLabel');
+      const valueInput = document.getElementById('discountValueInput');
+      const valueHelp = document.getElementById('discountHelp');
+      const maxDiscountGroup = document.getElementById('maxDiscountGroup');
+
+      if (typeSelect.value === 'RATE') {
+        valueLabel.innerText = '할인율 (0.0 ~ 1.0)';
+        valueInput.setAttribute('step', '0.01');
+        valueInput.setAttribute('max', '1.0');
+        valueInput.placeholder = '예: 0.1 (10%)';
+        valueHelp.innerText = '10%는 0.1, 50%는 0.5를 입력하세요.';
+        maxDiscountGroup.style.display = 'block';
+      } else {
+        valueLabel.innerText = '할인 금액 (원)';
+        valueInput.removeAttribute('step');
+        valueInput.removeAttribute('max');
+        valueInput.placeholder = '예: 3000';
+        valueHelp.innerText = '할인해줄 금액을 입력하세요.';
+        maxDiscountGroup.style.display = 'none';
+      }
+    }
+
+    // [수정] 쿠폰 생성 시 도서ID/카테고리ID 필수 입력 검증
+    function validateCouponForm() {
+      // ID 필드 값 확인 (숫자)
+      const bookId = document.getElementById('targetBookId').value.trim();
+      const categoryId = document.getElementById('targetCategoryId').value.trim();
+
+      if (!bookId && !categoryId) {
+        alert("⚠️ [발급 불가] 도서 ID 또는 카테고리 ID 중 하나는 반드시 입력해야 합니다.\n\n(백엔드 데이터 매칭을 위해 정확한 숫자 ID가 필요합니다.)");
+        return false;
+      }
+      return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      togglePolicyInputs();
+    });
+  </script>
+</th:block>
+
+</body>
+</html>

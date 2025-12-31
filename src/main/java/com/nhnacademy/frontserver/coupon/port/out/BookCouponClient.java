@@ -19,5 +19,5 @@ public interface BookCouponClient {
     List<CouponResponse> getBookCoupons(@PathVariable("book-id") Long bookId, @RequestParam Integer page, @RequestParam Integer size);
 
     @PostMapping
-    void saveCoupon(@RequestBody BookCouponCreateRequest couponRequest);
+    long saveCoupon(@RequestBody BookCouponCreateRequest couponRequest);
 }

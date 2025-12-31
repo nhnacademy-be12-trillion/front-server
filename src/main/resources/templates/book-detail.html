@@ -173,7 +173,7 @@
 
                         <span class="badge badge-dark ml-2"
                               style="font-size: 0.9rem; background-color: #000000; color: #ffffff; cursor: pointer; padding: 0.4em 0.6em;"
-                              th:onclick="'issueCoupon(\'' + ${book.bookId} + '\')'">
+                              th:onclick="'issueCoupon(\'' + ${book.bookId} + '\', this)'">
                             쿠폰발급
                         </span>
                     </h5>
@@ -276,6 +276,7 @@
                             <div class="row">
                                 <div class="col-md-12">
 
+                                    <!-- ===== AI 리뷰 요약(타이핑) 추가 ===== -->
                                     <div class="bg-light p-3 rounded mb-4"
                                          th:if="${reviewSummary != null && reviewSummary.reviewSummary() != null}">
                                         <div class="d-flex align-items-center mb-2">
@@ -283,11 +284,15 @@
                                             <strong>AI 리뷰 요약</strong>
                                         </div>
 
+                                        <!-- 타이핑 표시 영역 -->
                                         <div id="reviewSummaryTyping" class="text-dark"></div>
 
+                                        <!-- 실제 요약 텍스트 보관(숨김) -->
                                         <textarea id="reviewSummaryContent" style="display:none;"
                                                   th:text="${reviewSummary.reviewSummary()}"></textarea>
                                     </div>
+                                    <!-- ===== /AI 리뷰 요약(타이핑) ===== -->
+
                                     <h4 class="mb-4 border-bottom pb-2"
                                         th:text="${reviews != null ? reviews.totalElements + '개의 리뷰가 있습니다.' : '리뷰가 없습니다.'}">
                                     </h4>
@@ -516,7 +521,7 @@
                 $('#buyNowQuantity').val(newVal);
             });
 
-            // 기존 기능: 장바구니 담기 AJAX
+            // 장바구니 담기
             $('#btn-add-cart').off('click').on('click', function () {
                 const bookId = $(this).data('book-id');
                 const quantity = $('#cartQuantity').val();
@@ -530,19 +535,12 @@
                         cartQuantity: parseInt(quantity)
                     }),
                     success: function (res) {
-                        if (typeof incrementCartBadge === 'function') {
-                            incrementCartBadge();
-                        } else {
+                        if (typeof incrementCartBadge === 'function') incrementCartBadge();
+                        else {
                             var $badge = $('#cart-badge');
-                            if ($badge.length) {
-                                var current = parseInt($badge.text().trim()) || 0;
-                                $badge.text(current + 1);
-                            }
+                            if ($badge.length) $badge.text((parseInt($badge.text().trim()) || 0) + 1);
                         }
-
-                        if (typeof updateCartBadge === 'function') {
-                            updateCartBadge();
-                        }
+                        if (typeof updateCartBadge === 'function') updateCartBadge();
 
                         if(confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
                             location.href = '/carts';
@@ -559,7 +557,7 @@
                 });
             });
 
-            // 기존 기능: 찜하기 AJAX
+            // 찜하기
             $('#btn-add-like').off('click').on('click', function () {
                 const $btn = $(this);
                 const bookId = $btn.data('book-id');
@@ -582,11 +580,7 @@
                             $icon.removeClass('fas').addClass('far');
                             $wishBadge.text(Math.max(0, currentCount - 1));
                         }
-
-                        if (typeof updateWishlistBadge === 'function') {
-                            updateWishlistBadge();
-                        }
-
+                        if (typeof updateWishlistBadge === 'function') updateWishlistBadge();
                         alert(alertMsg);
                     },
                     error: function (xhr) {
@@ -603,7 +597,7 @@
                 });
             });
 
-            // ===== 리뷰 요약 타이핑 효과 =====
+            // AI 리뷰 요약 타이핑
             function runTypewriter(targetEl, text, options = {}) {
                 const speed = options.speed ?? 35;   // ms
                 const chunk = options.chunk ?? 1;    // 1 = 한 글자씩
@@ -659,7 +653,8 @@
             // ===== /리뷰 요약 타이핑 효과 =====
         });
 
-        function issueCoupon(bookId) {
+        // [수정됨] 쿠폰 발급 로직: 204(없음), 409(중복) 처리 추가
+        function issueCoupon(bookId, btnElement) {
             fetch("/book-coupons", {
                 method: "POST",
                 headers: {
@@ -669,17 +664,36 @@
                 body:JSON.stringify({ bookId: bookId })
             })
                 .then(response => {
+                    // 204 No Content는 body가 없으므로 text() 호출 시 에러가 날 수 있음
+
                     if (response.status === 200) {
-                        alert("쿠폰이 발급되었습니다.");
-                    } else if (response.status === 400) {
-                        console.error("Error:", error);
-                        alert("이미 발급받았거나 발급할 수 없는 쿠폰입니다. ");
-                    }else if (response.status === 401) {
-                        alert("로그인이 필요한 서비스입니다.");
-                    }
-                    else {
-                        console.error("Error:", error);
-                        alert("문제가 발생했습니다. 다시 시도해주세요.");
+                        // [성공]
+                        alert("쿠폰이 정상적으로 발급되었습니다.");
+                        if (btnElement) {
+                            btnElement.innerText = "발급완료";
+                            btnElement.style.backgroundColor = "#6c757d";
+                            btnElement.style.cursor = "default";
+                            btnElement.onclick = null;
+                        }
+                    } else if (response.status === 204) {
+                        // [실패] 쿠폰 없음 (204 No Content)
+                        alert("쿠폰이 없거나 이미 쿠폰을 다운받으셨습니다.");
+                    } else if (response.status === 409 || response.status === 400) {
+                        // [실패] 중복 발급 등
+                        alert("이미 발급받으신 쿠폰입니다.");
+                        if (btnElement) {
+                            btnElement.innerText = "발급완료";
+                            btnElement.style.backgroundColor = "#6c757d";
+                            btnElement.style.cursor = "default";
+                            btnElement.onclick = null;
+                        }
+                    } else if (response.status === 401) {
+                        if(confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) {
+                            location.href = '/login';
+                        }
+                    } else {
+                        console.error("Error Status:", response.status);
+                        alert("문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
                     }
                 })
                 .catch(error => {
@@ -687,7 +701,6 @@
                     alert("서버와 통신 중 에러가 발생했습니다.");
                 });
         }
-
     </script>
 </th:block>
 
