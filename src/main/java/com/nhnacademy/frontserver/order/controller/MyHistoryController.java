@@ -24,7 +24,7 @@ public class MyHistoryController {
     @GetMapping
     public String myPageHistory(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "size", defaultValue = "5") int size,
             Model model
     ) {
         String sortOrders = "orderId,desc";
