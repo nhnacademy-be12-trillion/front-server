@@ -1,6 +1,7 @@
 package com.nhnacademy.frontserver.member.controller;
 
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
+import com.nhnacademy.frontserver.member.AddressCreateRequest;
 import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.member.MemberResponse;
 import com.nhnacademy.frontserver.member.SocialSignupRequest;
@@ -32,14 +33,14 @@ public class SocialSignupController {
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
         MemberResponse memberInfo = memberClient.getMemberByOauthId(memberOauthId);
-
+        AddressCreateRequest emptyAddress = new AddressCreateRequest(null, null, null, "우리집");
         // 받아온 정보로 폼 초기화
         SocialSignupRequest request = new SocialSignupRequest(
                 memberInfo.memberEmail(),
                 memberInfo.memberName(),
                 null, null,
                 memberInfo.memberOauthId(),
-                null
+                emptyAddress
         );
 
 
