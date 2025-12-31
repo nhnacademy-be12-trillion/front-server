@@ -32,18 +32,18 @@ public interface CartClient {
 
     /**
      * [수량 변경]
-     * PUT /api/carts/{bookId}
+     * PUT /api/carts/{book-id}
      */
-    @PutMapping("/{bookId}")
-    ResponseEntity<Void> updateCartItem(@PathVariable("bookId") Long bookId, @RequestBody CartUpdateRequestDto request
+    @PutMapping("/{book-id}")
+    ResponseEntity<Void> updateCartItem(@PathVariable("book-id") Long bookId, @RequestBody CartUpdateRequestDto request
     );
 
     /**
      * [상품 삭제]
-     * DELETE /api/carts/{bookId}
+     * DELETE /api/carts/{book-id}
      */
-    @DeleteMapping("/{bookId}")
-    ResponseEntity<Void> removeCartItem(@PathVariable("bookId") Long bookId);
+    @DeleteMapping("/{book-id}")
+    ResponseEntity<Void> removeCartItem(@PathVariable("book-id") Long bookId);
 
     /**
      * [장바구니 전체 비우기]
