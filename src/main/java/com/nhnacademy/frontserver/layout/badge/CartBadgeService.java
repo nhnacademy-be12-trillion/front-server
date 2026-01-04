@@ -1,4 +1,4 @@
-package com.nhnacademy.frontserver.layout.cartbadge.service;
+package com.nhnacademy.frontserver.layout.badge;
 
 import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.CartSummaryResponseDto;
