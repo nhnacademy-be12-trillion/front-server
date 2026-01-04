@@ -12,23 +12,22 @@
             body { background-color: #f5f5f5; }
             .admin-container { padding-top: 50px; padding-bottom: 50px; }
 
-            /* [수정] 네비게이션 필 스타일 (하늘색 테마 적용) */
+            /* 네비게이션 스타일 */
             .nav-pills .nav-link { border-radius: 0.25rem; margin-bottom: 5px; background-color: #e9ecef; color: #3D464D; transition: 0.3s; }
             .nav-pills .nav-link.active, .nav-pills .nav-link:hover {
-                background-color: #87CEEB; /* 하늘색으로 변경 */
-                color: #ffffff;            /* 텍스트 흰색 */
+                background-color: #87CEEB;
+                color: #ffffff;
                 font-weight: bold;
             }
 
             .content-box { border: 1px solid #dee2e6; padding: 25px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-            .table thead th { border-top: none; background-color: #f8f9fa; color: #333; font-weight: 600; }
-            .table td { vertical-align: middle; }
-            .badge-status-waiting { background-color: #ffc107; color: #212529; }
-            .badge-status-completed { background-color: #28a745; color: #fff; }
-            .badge-status-canceled { background-color: #dc3545; color: #fff; }
-            .badge-status-canceling { background-color: #fd7e14; color: #fff; } /* 주황색 */
-            .badge-status-shipping { background-color: #17a2b8; color: #fff; }
-            .badge-status-returned { background-color: #6c757d; color: #fff; }
+            .table thead th { border-top: none; background-color: #f8f9fa; color: #333; font-weight: 600; text-align: center; }
+            .table td { vertical-align: middle; text-align: center; }
+
+            /* 상태별 뱃지 */
+            .badge-active { background-color: #28a745; color: #fff; }
+            .badge-dormant { background-color: #ffc107; color: #212529; }
+            .badge-withdrawal { background-color: #dc3545; color: #fff; }
         </style>
     </th:block>
 </head>
@@ -44,17 +43,176 @@
 
             <div class="col-lg-9 col-md-8">
                 <div class="content-box">
-                    <h4 class="mb-4 text-primary">회원 관리</h4>
-                    <div class="alert alert-info">
-                        회원 관리 페이지입니다.
-                        <br>
-                        기존 코드가 유지되는 영역입니다.
+                    <h4 class="mb-4 text-primary"><i class="fas fa-users mr-2"></i>회원 관리</h4>
+
+                    <div class="alert alert-info py-2 mb-3">
+                        <small>※ 회원의 등급 및 상태(활성/휴면/탈퇴)를 변경할 수 있습니다.</small>
                     </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>이메일</th>
+                                <th>이름</th>
+                                <th>등급</th>
+                                <th>상태</th>
+                                <th>최근 로그인</th>
+                                <th>관리</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${members == null or members.isEmpty()}">
+                                <td colspan="7" class="text-center py-4">조회된 회원이 없습니다.</td>
+                            </tr>
+
+                            <tr th:each="member : ${members}">
+                                <td th:text="${member.memberId}"></td>
+                                <td th:text="${member.memberEmail}" class="text-left pl-3"></td>
+                                <td th:text="${member.memberName}"></td>
+                                <td>
+                                    <span class="badge badge-secondary" th:text="${member.gradeName}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${member.memberState == 'ACTIVE' ? 'badge-active' : (member.memberState == 'DORMANT' ? 'badge-dormant' : 'badge-withdrawal')}"
+                                          th:text="${member.memberState}">
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span th:text="${member.memberLatestLoginAt != null ? #temporals.format(member.memberLatestLoginAt, 'yyyy-MM-dd') : '-'}"></span>
+                                </td>
+
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm"
+                                            th:onclick="openEditMemberModal([[${member.memberId}]], [[${member.memberEmail}]], [[${member.gradeName}]], [[${member.memberState}]])">
+                                        <i class="fas fa-edit"></i> 수정
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div th:if="${totalPages > 0}" class="d-flex justify-content-center mt-4">
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/members(page=${currentPage - 1})}">이전</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/members(page=${i})}" th:text="${i + 1}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/members(page=${currentPage + 1})}">다음</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="editMemberModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title font-weight-bold">회원 정보 수정</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editMemberId">
+
+                    <div class="form-group">
+                        <label class="font-weight-bold">이메일 (계정)</label>
+                        <input type="text" id="editMemberEmail" class="form-control" readonly style="background-color: #e9ecef;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold">등급 변경</label>
+                        <select id="editMemberGrade" class="form-control">
+                            <option th:each="grade : ${grades}"
+                                    th:value="${grade.gradeName}"
+                                    th:text="${grade.gradeName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold">상태 변경</label>
+                        <select id="editMemberState" class="form-control">
+                            <option value="ACTIVE">활동중 (ACTIVE)</option>
+                            <option value="DORMANT">휴면 (DORMANT)</option>
+                            <option value="WITHDRAWAL">탈퇴 (WITHDRAWAL)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="submitMemberUpdate()">저장하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        // 모달 열기 및 데이터 바인딩
+        function openEditMemberModal(id, email, currentGrade, currentState) {
+            document.getElementById('editMemberId').value = id;
+            document.getElementById('editMemberEmail').value = email;
+            document.getElementById('editMemberGrade').value = currentGrade;
+            document.getElementById('editMemberState').value = currentState;
+
+            $('#editMemberModal').modal('show');
+        }
+
+        // 수정 요청 (AJAX)
+        function submitMemberUpdate() {
+            const memberId = document.getElementById('editMemberId').value;
+
+            // [중요] Controller의 MemberAdminUpdateRequest 스펙에 맞춰 데이터 구성
+            // memberId를 포함해야 백엔드에서 findById로 찾을 수 있습니다.
+            const data = {
+                memberId: memberId,
+                gradeName: document.getElementById('editMemberGrade').value,
+                memberState: document.getElementById('editMemberState').value
+            };
+
+            if(!confirm("회원 정보를 수정하시겠습니까?")) return;
+
+            // [중요] Controller 매핑이 @PutMapping이므로 method: 'PUT' 사용
+            fetch(`/admin/members`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(async response => {
+                    if (response.ok) {
+                        const msg = await response.text(); // ResponseEntity.ok("메시지") 처리
+                        alert(msg); // "회원 정보가 수정되었습니다."
+                        location.reload(); // 페이지 새로고침하여 변경사항 반영
+                    } else {
+                        const errorText = await response.text();
+                        alert("수정 실패: " + errorText);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("오류 발생: 시스템 관리자에게 문의하세요.");
+                });
+        }
+    </script>
+</th:block>
 
 </body>
 </html>

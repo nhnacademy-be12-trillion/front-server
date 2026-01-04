@@ -1,9 +1,11 @@
-package com.nhnacademy.frontserver.member;
+package com.nhnacademy.frontserver.member.client;
 
-import java.util.List;
-
+import com.nhnacademy.frontserver.PageResponse;
+import com.nhnacademy.frontserver.member.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @FeignClient(name = "gateway-member",
         url = "${gateway.url}",
@@ -75,4 +77,12 @@ public interface MemberClient {
     // 등급
     @GetMapping("/api/members/grades")
     List<GradeResponse> getGrades();
+
+    // 전체 회원 조회 (관리자)
+    @GetMapping("/api/members/admin")
+    PageResponse<MemberAdminResponse> getMembersByAdmin(@RequestParam("page") int page,
+                                                   @RequestParam("size") int size);
+    // 회원 등급/상태 수정 (관리자)
+    @PutMapping("/api/members/admin")
+    void updateMemberByAdmin(@RequestBody MemberAdminUpdateRequest request);
 }

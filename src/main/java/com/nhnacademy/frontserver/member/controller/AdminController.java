@@ -3,6 +3,10 @@ package com.nhnacademy.frontserver.member.controller;
 import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.CategorySearchResponse;
+import com.nhnacademy.frontserver.member.GradeResponse;
+import com.nhnacademy.frontserver.member.MemberAdminResponse;
+import com.nhnacademy.frontserver.member.MemberAdminUpdateRequest;
+import com.nhnacademy.frontserver.member.client.MemberClient;
 import com.nhnacademy.frontserver.order.OrderItemStatusPatchRequest;
 import com.nhnacademy.frontserver.order.OrderResponse;
 import com.nhnacademy.frontserver.order.client.OrderClient;
@@ -30,6 +34,7 @@ public class AdminController {
     private final BookClient bookClient;
     private final OrderClient orderClient;
     private final PointClient pointClient;
+    private final MemberClient memberClient;
 
     // 관리자 메인 리다이렉트
     @GetMapping("/admin")
@@ -101,9 +106,42 @@ public class AdminController {
 
     // 회원 관리 페이지
     @GetMapping("/admin/members")
-    public String adminMembers(Model model) {
+    public String adminMembers(@RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("activeMenu", "members");
+
+        try {
+            // 회원 목록 조회 (페이지 당 10명)
+            PageResponse<MemberAdminResponse> response = memberClient.getMembersByAdmin(page, 10);
+
+            model.addAttribute("members", response.content());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", response.totalPages());
+            model.addAttribute("totalElements", response.totalElements());
+
+            // 등급 목록 조회
+            List<GradeResponse> grades = memberClient.getGrades();
+            model.addAttribute("grades", grades);
+
+        } catch (Exception e) {
+            log.error("회원 목록 조회 실패", e);
+            model.addAttribute("members", Collections.emptyList());
+        }
+
         return "admin/members";
+    }
+
+    // 회원 정보 수정 처리 (AJAX)
+    @PutMapping("/admin/members")
+    @ResponseBody
+    public ResponseEntity<String> updateMemberInfo(@RequestBody MemberAdminUpdateRequest request) {
+        try {
+            // request 안에 memberId, state, grade가 다 들어있음
+            memberClient.updateMemberByAdmin(request);
+            return ResponseEntity.ok("회원 정보가 수정되었습니다.");
+        } catch (Exception e) {
+            log.error("회원 수정 실패", e);
+            return ResponseEntity.status(500).body("수정 실패: " + e.getMessage());
+        }
     }
 
     // 포인트 정책 수정 처리
