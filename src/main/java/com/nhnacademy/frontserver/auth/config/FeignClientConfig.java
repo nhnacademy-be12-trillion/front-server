@@ -17,11 +17,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Configuration
 public class FeignClientConfig {
 
-    // 이 빈이 등록되어야 MultipartFile과 DTO를 같이 보낼 때 에러가 안 남
     @Bean
     public Encoder feignFormEncoder(ObjectFactory<HttpMessageConverters> converters) {
         return new SpringFormEncoder(new SpringEncoder(converters));
@@ -30,67 +32,54 @@ public class FeignClientConfig {
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
-            if ("/api/auth/reissue".equals(template.path())) {
+            // 재발급 요청은 간섭하지 않음
+            if (template.path().contains("/reissue")) {
                 return;
             }
 
-            boolean useTokenHolder = false;
-
-            // 재발급된 토큰이 있는지 확인 (재시도 로직)
+            // TokenHolder에서 최신 토큰 확인 (재발급된 경우 여기에 값이 있음)
             String newAccessToken = TokenHolder.get();
-            if (StringUtils.hasText(newAccessToken)) {
-                log.info("Feign Interceptor: TokenHolder의 새 토큰으로 요청 재시도");
+            boolean isReissued = StringUtils.hasText(newAccessToken);
+
+            // Authorization 헤더 처리
+            if (isReissued) {
+                // 기존 헤더 제거 후 새 토큰 주입
                 template.header("Authorization", "Bearer " + newAccessToken);
-                TokenHolder.clear();
-                useTokenHolder = true;
+                log.debug("Authorization 헤더 교체 완료 (새 토큰 적용)");
             }
 
-            // 이미 헤더가 있으면 패스
-            if (template.headers().containsKey("Authorization")) {
-                return;
-            }
+            // 쿠키 헤더 재조립 (가장 중요)
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                Cookie[] cookies = request.getCookies();
 
-            // 쿠키에서 토큰 추출 (TokenHolder를 사용하지 않은 경우에만)
-            if (!useTokenHolder) {
-                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-                if (attributes != null) {
-                    HttpServletRequest request = attributes.getRequest();
-                    Cookie[] cookies = request.getCookies();
+                if (cookies != null) {
+                    List<String> cookieList = new ArrayList<>();
+                    boolean accessTokenReplaced = false;
 
-                    if (cookies != null) {
-                        StringBuilder cookieHeader = new StringBuilder();
-                        String accessTokenFromCookie = null;
-
-                        for (Cookie cookie : cookies) {
-                            log.info("cookie조회 :{},{}",cookie.getName(),cookie.getValue());
-                        }
-
-                        for (Cookie cookie : cookies) {
-                            if (cookieHeader.length() > 0) {
-                                cookieHeader.append("; ");
-                            }
-                            cookieHeader.append(cookie.getName()).append("=").append(cookie.getValue());
-
-                            // accessToken 쿠키를 찾아서 값을 꺼내는 로직
-                            if ("accessToken".equals(cookie.getName())) {
-                                accessTokenFromCookie = cookie.getValue();
-                            }
-                        }
-                        log.info("cookieAccessToken:{}",accessTokenFromCookie);
-
-                        // AccessToken이 있으면 헤더에 추가
-                        if (accessTokenFromCookie != null) {
-                            log.debug("Feign Interceptor: 쿠키 기반 토큰 설정 완료");
-                            template.header("Authorization", "Bearer " + accessTokenFromCookie);
+                    for (Cookie cookie : cookies) {
+                        // 재발급된 상태이고, 현재 쿠키가 accessToken이라면
+                        if (isReissued && "accessToken".equals(cookie.getName())) {
+                            // 옛날 쿠키 값 대신 TokenHolder의 새 값을 넣음
+                            cookieList.add(cookie.getName() + "=" + newAccessToken);
+                            accessTokenReplaced = true;
                         } else {
-                            // 디버깅용 로그: 쿠키는 있는데 accessToken만 없는 경우
-                            log.warn("Feign Interceptor: 쿠키 목록은 존재하나 accessToken을 찾지 못함");
+                            cookieList.add(cookie.getName() + "=" + cookie.getValue());
                         }
+                    }
 
-                        // 토큰 재발급 상황(재시도)이 아닐 때만 쿠키를 실어 보냄
-                        template.header("Cookie", cookieHeader.toString());
-                    } else {
-                        log.warn("Feign Interceptor: 요청에 쿠키가 없음");
+                    // 만약 쿠키에 accessToken이 없었는데 재발급된 경우
+                    if (isReissued && !accessTokenReplaced) {
+                        cookieList.add("accessToken=" + newAccessToken);
+                    }
+
+                    // 기존 Feign이 자동으로 붙였을 수도 있는 Cookie 헤더를 밀어버리고 새로 만든 문자열로 덮어씌움
+                    String newCookieHeader = String.join("; ", cookieList);
+                    template.header("Cookie", newCookieHeader);
+
+                    if (isReissued) {
+                        log.debug("Cookie 헤더 내 accessToken 교체 완료");
                     }
                 }
             }

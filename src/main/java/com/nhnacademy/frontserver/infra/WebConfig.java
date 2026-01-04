@@ -1,19 +1,23 @@
 package com.nhnacademy.frontserver.infra;
 
-import com.nhnacademy.frontserver.auth.interceptor.GuestCookieInterceptor;
 import com.nhnacademy.frontserver.CheckTimeInterceptor;
-import com.nhnacademy.frontserver.common.AdminCheckInterceptor; // [추가됨] 인터셉터 import
+import com.nhnacademy.frontserver.auth.interceptor.GuestCookieInterceptor;
+import com.nhnacademy.frontserver.auth.util.TokenHolder;
+import com.nhnacademy.frontserver.common.AdminCheckInterceptor;
 import com.nhnacademy.frontserver.infra.argumentResolver.CustomArgumentResolver;
-import java.util.List;
-
 import com.nhnacademy.frontserver.layout.interceptor.LayoutDataInterceptor;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Configuration
@@ -64,6 +68,13 @@ public class WebConfig implements WebMvcConfigurer {
                         "/css/**", "/js/**", "/img/**", "/lib/**",
                         "/favicon.ico", "/error"
                 );
+        registry.addInterceptor(new HandlerInterceptor() {
+                    @Override
+                    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+                        TokenHolder.clear();
+                    }
+                })
+                .addPathPatterns("/**");
     }
 
     @Bean

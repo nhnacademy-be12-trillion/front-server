@@ -75,44 +75,48 @@
 
     <div class="col-lg-4 col-6 text-right">
 
-      <div class="d-inline-flex align-items-center justify-content-end w-100"
-           th:if="${!isLogin}">
+      <th:block th:with="currentUser=${@authHelper.getMember()}">
 
-        <a th:href="@{/login}" class="btn btn-sm btn-outline-primary mx-1">
-          로그인
-        </a>
-        <a th:href="@{/members/signup}" class="btn btn-sm btn-primary mx-1">
-          회원가입
-        </a>
-        <a th:href="@{/orders/non-members-order-form}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
-          비회원 주문조회
-        </a>
-      </div>
+        <div class="d-inline-flex align-items-center justify-content-end w-100"
+             th:if="${currentUser == null}">
 
-      <div class="d-inline-flex flex-column align-items-end w-100"
-           th:if="${isLogin}">
-
-        <span class="small mb-2"
-              th:text="${member.memberName} + ' 님, 환영합니다'">
-          홍길동 님, 환영합니다
-        </span>
-
-        <div class="d-inline-flex">
-          <a th:if="${isAdmin}" th:href="@{/admin}" class="btn btn-sm btn-dark mx-1">
-            관리자페이지
+          <a th:href="@{/login}" class="btn btn-sm btn-outline-primary mx-1">
+            로그인
           </a>
-
-          <a th:unless="${isAdmin}" th:href="@{/members/my-page}" class="btn btn-sm btn-primary mx-1">
-            마이페이지
+          <a th:href="@{/members/signup}" class="btn btn-sm btn-primary mx-1">
+            회원가입
           </a>
-
-          <form th:action="@{/logout}" method="post" class="d-inline">
-            <button type="submit" class="btn text-dark btn-sm btn-outline-secondary mx-1" style="cursor: pointer;">
-              로그아웃
-            </button>
-          </form>
+          <a th:href="@{/orders/non-members-order-form}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
+            비회원 주문조회
+          </a>
         </div>
-      </div>
+
+        <div class="d-inline-flex flex-column align-items-end w-100"
+             th:if="${currentUser != null}">
+
+      <span class="small mb-2"
+            th:text="${currentUser.memberName} + ' 님, 환영합니다'">
+        사용자 님, 환영합니다
+      </span>
+
+          <div class="d-inline-flex">
+            <a th:if="${@authHelper.isAdmin()}" th:href="@{/admin}" class="btn btn-sm btn-dark mx-1">
+              관리자페이지
+            </a>
+
+            <a th:unless="${@authHelper.isAdmin()}" th:href="@{/members/my-page}" class="btn btn-sm btn-primary mx-1">
+              마이페이지
+            </a>
+
+            <form th:action="@{/logout}" method="post" class="d-inline">
+              <button type="submit" class="btn text-dark btn-sm btn-outline-secondary mx-1" style="cursor: pointer;">
+                로그아웃
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </th:block> </div>
     </div>
   </div>
 </th:block>
@@ -183,7 +187,9 @@
             <a th:href="@{/wishlists}" class="btn px-0 icon-hover-effect">
               <i class="fas fa-heart" style="color: #ff4081; font-size: 1.2rem;"></i>
               <span class="badge text-secondary"
-                    style="margin-top: 2px;" id="wishlist-badge">0</span>
+                    style="margin-top: 2px;"
+                    id="wishlist-badge"
+                    th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
             </a>
 
             <a th:href="@{/carts}" class="btn px-0 ml-3 icon-hover-effect">
