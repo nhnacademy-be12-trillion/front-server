@@ -3,12 +3,9 @@ package com.nhnacademy.frontserver.book.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.*;
-import com.nhnacademy.frontserver.book.JsonMultipartFile;
-import com.nhnacademy.frontserver.member.MemberClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +22,6 @@ public class ReviewController {
 
     private final ReviewClient reviewClient;
     private final BookClient bookClient;
-    private final MemberClient memberClient;
     private final ObjectMapper objectMapper;
 
     /**

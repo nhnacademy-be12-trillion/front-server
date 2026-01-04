@@ -1,7 +1,7 @@
 package com.nhnacademy.frontserver.point.controller;
 
-import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.member.MemberResponse;
+import com.nhnacademy.frontserver.member.client.MemberClient;
 import com.nhnacademy.frontserver.point.PointHistoryResponse;
 import com.nhnacademy.frontserver.point.client.PointClient;
 import lombok.RequiredArgsConstructor;

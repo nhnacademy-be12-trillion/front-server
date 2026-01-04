@@ -2,9 +2,9 @@ package com.nhnacademy.frontserver.member.controller;
 
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
 import com.nhnacademy.frontserver.member.AddressCreateRequest;
-import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.member.MemberResponse;
 import com.nhnacademy.frontserver.member.SocialSignupRequest;
+import com.nhnacademy.frontserver.member.client.MemberClient;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

@@ -6,16 +6,13 @@ import com.nhnacademy.frontserver.cart.client.CartClient;
 import com.nhnacademy.frontserver.cart.dto.CartResponseDto;
 import com.nhnacademy.frontserver.coupon.port.out.MemberCouponResponse;
 import com.nhnacademy.frontserver.member.AddressResponse;
-import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.member.MemberResponse;
+import com.nhnacademy.frontserver.member.client.MemberClient;
 import com.nhnacademy.frontserver.order.CheckoutItemView;
 import com.nhnacademy.frontserver.order.DeliveryPolicyResponse;
 import com.nhnacademy.frontserver.order.OrderCreateRequest;
 import com.nhnacademy.frontserver.order.PackagingResponse;
 import com.nhnacademy.frontserver.order.client.OrderClient;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +20,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Controller

@@ -28,7 +28,7 @@ public class FeignErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        log.error("methodKey: {}, response: {}",methodKey,response);
+        log.debug("methodKey: {}, response: {}",methodKey,response);
         if (methodKey.contains("login") || methodKey.contains("reissue")) {
             return defaultDecoder.decode(methodKey, response);
         }

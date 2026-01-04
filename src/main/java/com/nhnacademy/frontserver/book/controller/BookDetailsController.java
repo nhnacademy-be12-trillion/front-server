@@ -2,17 +2,19 @@ package com.nhnacademy.frontserver.book.controller;
 
 import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.*;
-import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.member.MemberResponse;
+import com.nhnacademy.frontserver.member.client.MemberClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Controller

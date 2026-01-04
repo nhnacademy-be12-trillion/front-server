@@ -3,7 +3,7 @@ package com.nhnacademy.frontserver.member.controller;
 import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
 import com.nhnacademy.frontserver.member.*;
-import com.nhnacademy.frontserver.member.MemberClient;
+import com.nhnacademy.frontserver.member.client.MemberClient;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

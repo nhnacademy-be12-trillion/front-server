@@ -2,8 +2,8 @@ package com.nhnacademy.frontserver.book.controller;
 
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookListResponse;
-import com.nhnacademy.frontserver.member.MemberClient;
 import com.nhnacademy.frontserver.member.MemberResponse;
+import com.nhnacademy.frontserver.member.client.MemberClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
