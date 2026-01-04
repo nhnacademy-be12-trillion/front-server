@@ -4,8 +4,8 @@ import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.dto.LoginRequest;
 import com.nhnacademy.frontserver.auth.dto.TokenResponse;
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
-import com.nhnacademy.frontserver.cart.client.CartClient;
 import feign.FeignException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,17 +21,13 @@ public class AuthController {
 
     private final AuthClient authClient;
 
-    private final CartClient cartClient;
-
     @GetMapping("/login")
     public String loginForm() {
         return "login";
     }
 
     @PostMapping("/login")
-    public String login(
-            @CookieValue(name = "guestId", required = false) String guestId,
-            @ModelAttribute LoginRequest loginRequest,
+    public String login(@ModelAttribute LoginRequest loginRequest,
                         HttpServletResponse response) {
         try {
             // FeignClient로 Gateway 호출 -> 토큰 받기
@@ -61,11 +57,11 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public String logout(HttpServletResponse response) {
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
         // Auth Service에 로그아웃 요청 (Redis Blacklist 등록)
         // FeignInterceptor가 현재 쿠키의 AccessToken을 헤더에 담아 보냄
         try {
-            authClient.logout();
+            authClient.logout("Bearer " + CookieUtils.getCookieValue(request, "accessToken"));
         } catch (Exception e) {
             log.warn("로그아웃 처리 중 오류 (무시됨): {}", e.getMessage());
         }

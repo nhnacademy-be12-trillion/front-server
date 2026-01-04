@@ -3,6 +3,7 @@ package com.nhnacademy.frontserver.auth.client;
 import com.nhnacademy.frontserver.auth.dto.LoginRequest;
 import com.nhnacademy.frontserver.auth.dto.TokenResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,7 @@ public interface AuthClient {
     TokenResponse login(@RequestBody LoginRequest loginRequest);
 
     @PostMapping("/api/auth/logout")
-    void logout();
+    void logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String accessToken);
 
     @PostMapping("/api/auth/reissue")
     TokenResponse reissue(@RequestHeader("X-Refresh-Token") String refreshToken);
