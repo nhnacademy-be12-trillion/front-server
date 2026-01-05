@@ -1,5 +1,6 @@
 package com.nhnacademy.frontserver.order.controller;
 
+import com.nhnacademy.frontserver.auth.util.AuthHelper;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookDetailResponse;
 import com.nhnacademy.frontserver.cart.client.CartClient;
@@ -36,6 +37,7 @@ public class CheckoutController {
     private final OrderClient orderClient;
     private final com.nhnacademy.frontserver.coupon.port.out.MemberCouponClient memberCouponClient;
     private final com.nhnacademy.frontserver.coupon.port.out.CouponClient couponClient;
+    private final AuthHelper authHelper;
 
     // 결제 요약 정보를 담을 DTO
     public record OrderSummary(int subTotal, int shippingFee, int totalPrice) {}
@@ -103,8 +105,8 @@ public class CheckoutController {
         int totalPrice = subTotal + shippingFee;
         OrderSummary orderSummary = new OrderSummary(subTotal, shippingFee, totalPrice);
 
-        // 회원 정보 확인 (GlobalControllerAdvice에서 주입된 member 활용)
-        MemberResponse member = (MemberResponse) model.getAttribute("member");
+        // 회원 정보 확인 (AuthHelper 활용)
+        MemberResponse member = authHelper.getMember();
         boolean isMember = (member != null);
 
         OrderCreateRequest orderCreateRequest;
@@ -172,7 +174,8 @@ public class CheckoutController {
         model.addAttribute("items", items);
         model.addAttribute("orderSummary", orderSummary);
         model.addAttribute("orderCreateRequest", orderCreateRequest);
-        model.addAttribute("isMember", isMember); // Model에 이미 있지만 명시적으로 유지
+        model.addAttribute("isMember", isMember);
+        model.addAttribute("member", member); // 뷰에서 사용하기 위해 추가
         model.addAttribute("addresses", addresses);
         if (defaultAddress != null) {
             model.addAttribute("defaultAddress", defaultAddress);
