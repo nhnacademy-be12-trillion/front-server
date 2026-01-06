@@ -510,7 +510,7 @@
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        // [자체 추가] 실시간 가격 업데이트 로직 (전역 함수로 분리)
+        // 실시간 가격 업데이트 로직
         function updateTotals() {
             const summaryBox = document.getElementById('summary-box');
             if (!summaryBox) return;
@@ -526,23 +526,32 @@
                 const price = parseInt(row.dataset.price, 10);
                 const quantityInput = row.querySelector('.quantity-input');
                 if (!quantityInput) return;
-                
+
                 const quantity = parseInt(quantityInput.value, 10);
                 const rowTotalCell = row.querySelector('.row-total');
 
+                // 책 가격 계산
+                let rowBookTotal = 0;
                 if (!isNaN(price) && !isNaN(quantity)) {
-                    const rowTotal = price * quantity;
-                    if (rowTotalCell) rowTotalCell.textContent = formatNumber(rowTotal) + '원';
-                    subTotal += rowTotal;
+                    rowBookTotal = price * quantity;
+                    subTotal += rowBookTotal;
                 }
 
+                // 포장비 계산 (해당 행)
+                let rowPackagingTotal = 0;
                 const packagingSelect = row.querySelector('.packaging-select');
                 if (packagingSelect) {
                     const selectedOption = packagingSelect.options[packagingSelect.selectedIndex];
                     const packagingPrice = parseInt(selectedOption.dataset.price, 10);
                     if (!isNaN(packagingPrice)) {
-                        totalPackagingFee += packagingPrice * quantity;
+                        // 포장비도 수량만큼 곱해서 계산
+                        rowPackagingTotal = packagingPrice * quantity;
+                        totalPackagingFee += rowPackagingTotal;
                     }
+                }
+
+                if (rowTotalCell) {
+                    rowTotalCell.textContent = formatNumber(rowBookTotal + rowPackagingTotal) + '원';
                 }
             });
 
