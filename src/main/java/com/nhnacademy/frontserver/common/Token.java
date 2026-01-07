@@ -43,6 +43,9 @@ public class Token {
     }
 
     private static String getCookieValue(HttpServletRequest request, String cookieName) {
+        if(request.getCookies() == null) {
+            return null;
+        }
         return Arrays.stream(request.getCookies())
                 .filter(cookie -> cookie.getName().equals(cookieName))
                 .findAny()
