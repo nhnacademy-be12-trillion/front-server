@@ -15,8 +15,9 @@
       flex: 0 0 auto;
   }
   .ai-switch .custom-control-label {
-      white-space: nowrap;
-      word-break: keep-all;
+      white-space: nowrap !important;
+      word-break: keep-all !important;
+      overflow-wrap: normal !important;
   }
 </style>
 
@@ -70,7 +71,7 @@
                          onclick="this.form.mode.value = this.checked ? 'ai' : 'bm25'"
                          th:checked="${mode == 'ai'}">
                   <label class="custom-control-label" for="aiModeToggle" style="font-size: 12px;">
-                      AI&nbsp;검색
+                      AI 검색
                   </label>
               </div>
           </div>
