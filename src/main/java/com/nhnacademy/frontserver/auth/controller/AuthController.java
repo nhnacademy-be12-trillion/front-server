@@ -4,6 +4,7 @@ import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.dto.LoginRequest;
 import com.nhnacademy.frontserver.auth.dto.TokenResponse;
 import com.nhnacademy.frontserver.auth.util.CookieUtils;
+import com.nhnacademy.frontserver.common.Token;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @Controller
@@ -27,19 +31,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginRequest loginRequest,
+    public String login(HttpServletRequest request,@ModelAttribute LoginRequest loginRequest,
                         HttpServletResponse response) {
         try {
             // FeignClient로 Gateway 호출 -> 토큰 받기
             TokenResponse tokens = authClient.login(loginRequest);
-            ResponseCookie accessCookie = CookieUtils.createHttpOnlyCookie("accessToken", tokens.getAccessToken(), 60 * 30);
-            ResponseCookie refreshCookie = CookieUtils.createHttpOnlyCookie("refreshToken", tokens.getRefreshToken(), 60 * 60 * 24 * 7);
-
-            // 응답 헤더에 추가
-            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-
-            return "redirect:/carts/merge";
+            Token.issue(request,response,tokens);
+            return "redirect:/";
+ //           return "redirect:/carts/merge";
         }catch (FeignException.Forbidden e){
             String responseBody = e.contentUTF8();
             if (responseBody.contains("DORMANT")) {

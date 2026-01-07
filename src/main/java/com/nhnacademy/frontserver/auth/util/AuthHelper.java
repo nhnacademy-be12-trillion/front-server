@@ -1,18 +1,18 @@
 package com.nhnacademy.frontserver.auth.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.frontserver.common.Token;
 import com.nhnacademy.frontserver.member.MemberResponse;
 import com.nhnacademy.frontserver.member.client.MemberClient;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Base64;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.util.Base64;
-import java.util.Map;
 
 @Slf4j
 @Component("authHelper") // 타임리프에서 @authHelper로 접근
@@ -37,7 +37,7 @@ public class AuthHelper {
     }
 
     public boolean isLogin() {
-        return StringUtils.hasText(getToken());
+        return getToken()!=null;
     }
 
     public boolean isAdmin() {
@@ -51,16 +51,11 @@ public class AuthHelper {
     // 현재 유효한 토큰 가져오기 (재발급된 것 우선)
     private String getToken() {
         // 방금 재발급된 토큰 확인
-        String holderToken = TokenHolder.get();
-        if (StringUtils.hasText(holderToken)) {
-            return holderToken;
-        }
-
         // 없으면 쿠키에서 확인
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attr != null) {
             HttpServletRequest request = attr.getRequest();
-            return CookieUtils.getCookieValue(request, "accessToken");
+            return Token.getAccessToken(request);
         }
         return null;
     }
