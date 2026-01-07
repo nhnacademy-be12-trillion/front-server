@@ -51,7 +51,7 @@
 
     <div class="col-lg-4 col-6 text-left">
       <form th:action="@{/search}" method="get" class="d-flex align-items-center">
-        <div class="input-group">
+          <div class="input-group" style="width:auto; flex: 1 1 auto; min-width: 0;">
           <input type="text" name="query" class="form-control"
                  placeholder="도서를 검색해 보세요"
                  th:value="${query}">
