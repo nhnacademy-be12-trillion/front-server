@@ -25,7 +25,6 @@ public class PaymentController {
 
     private final PaymentClient paymentClient;
     private final OrderClient orderClient;
-    private final CartClient cartClient; // [추가] 장바구니 비우기를 위해 주입
 
     @Value("${toss.client.key}")
     private String tossClientKey;
@@ -61,15 +60,6 @@ public class PaymentController {
 
             if (response != null) {
                 model.addAttribute("payment", response);
-
-                // 2. [추가] 결제가 정상적으로 승인되었으므로 장바구니 비우기 실행
-                try {
-                    cartClient.clearCart();
-                    log.info(">>>> 결제 성공 후 장바구니 비우기 완료");
-                } catch (Exception e) {
-                    // 장바구니 비우기 실패가 결제 성공 자체를 막아서는 안 됨 -> 로그만 남김
-                    log.error(">>>> 장바구니 비우기 실패 (결제는 성공함)", e);
-                }
             }
             return "payment-success";
 
