@@ -5,6 +5,7 @@ import feign.RequestInterceptor;
 import feign.Retryer;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class FeignClientConfig {
+
     @Bean
     public Encoder feignFormEncoder(ObjectFactory<HttpMessageConverters> converters) {
         return new SpringFormEncoder(new SpringEncoder(converters));
@@ -29,16 +34,34 @@ public class FeignClientConfig {
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
-            // 재발급 요청은 간섭하지 않음
+            // 재발급 요청은 가로채지 않음
             if (template.path().contains("/reissue")) {
                 return;
             }
-            template.removeHeader(HttpHeaders.AUTHORIZATION);
+
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
+            // 현재 요청 컨텍스트가 존재할 때만 로직 수행
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
-                template.header(HttpHeaders.AUTHORIZATION, "Bearer " + Token.getAccessToken(request));
+
+                // Authorization 헤더 설정
+                template.removeHeader(HttpHeaders.AUTHORIZATION);
+                String accessToken = Token.getAccessToken(request);
+                if (accessToken != null) {
+                    template.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+                }
+
+                // guestId 쿠키 추출 및 전달
+                Cookie[] cookies = request.getCookies();
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        if ("guestId".equals(cookie.getName())) {
+                            template.header("Cookie", "guestId=" + cookie.getValue());
+                            break;
+                        }
+                    }
+                }
             }
         };
     }
