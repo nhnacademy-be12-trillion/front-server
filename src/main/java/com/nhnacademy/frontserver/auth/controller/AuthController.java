@@ -37,8 +37,7 @@ public class AuthController {
             // FeignClient로 Gateway 호출 -> 토큰 받기
             TokenResponse tokens = authClient.login(loginRequest);
             Token.issue(request,response,tokens);
-            return "redirect:/";
- //           return "redirect:/carts/merge";
+            return "redirect:/carts/merge";
         }catch (FeignException.Forbidden e){
             String responseBody = e.contentUTF8();
             if (responseBody.contains("DORMANT")) {
