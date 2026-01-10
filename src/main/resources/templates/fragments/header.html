@@ -1,258 +1,131 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
-
-<style>
-  .icon-hover-effect i {
-    transition: transform 0.2s ease-in-out;
-    display: inline-block;
-  }
-  .icon-hover-effect:hover i {
-    transform: scale(1.2);
-    cursor: pointer;
-  }
-  .ai-switch {
-      white-space: nowrap;
-      flex: 0 0 auto;
-  }
-  .ai-switch .custom-control-label {
-      white-space: nowrap !important;
-      word-break: keep-all !important;
-      overflow-wrap: normal !important;
-  }
-</style>
+<html xmlns:th="http://www.thymeleaf.org">
 
 <th:block th:fragment="topbar">
+    <div class="container-fluid py-2 px-xl-5" style="border-bottom: 1px solid #f5f5f5;">
+        <div class="row align-items-center">
+            <div class="col-lg-6 d-none d-lg-block"></div>
+            <div class="col-lg-6 text-center text-lg-right">
+                <div class="d-inline-flex align-items-center justify-content-end w-100">
+                    <th:block th:with="currentUser=${@authHelper.getMember()}">
+                        <div th:if="${currentUser == null}">
+                            <a th:href="@{/login}" class="btn btn-sm btn-text-clean">로그인</a>
+                            <a th:href="@{/members/signup}" class="btn btn-sm btn-outline-brown ml-2 px-3" style="height:35px; border-width:1px !important;">회원가입</a>
+                            <a th:href="@{/orders/non-members-order-form}" class="btn btn-sm btn-text-clean ml-2 text-muted" style="font-weight: normal;">비회원 주문조회</a>
+                        </div>
 
-    <div class="col-lg-6 text-center text-lg-right">
-      <div class="d-inline-flex align-items-center d-block d-lg-none">
-        <a th:href="@{/wishlists}" class="btn px-0 ml-2">
-          <i class="fas fa-heart text-dark"></i>
-          <span class="badge text-dark"
-                style="padding-bottom: 2px;">0</span>
-        </a>
-        <a th:href="@{/api/carts}" class="btn px-0 ml-2">
-          <i class="fas fa-shopping-cart text-dark"></i>
-          <span class="badge text-dark"
-                style="padding-bottom: 2px;">0</span>
-        </a>
-      </div>
-    </div>
-  </div>
+                        <div th:if="${currentUser != null}">
+                            <span class="small font-weight-bold text-primary mr-2" th:text="${currentUser.memberName} + ' 님'">사용자 님</span>
 
-  <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
-    <div class="col-lg-4">
-      <a th:href="@{/}" class="text-decoration-none">
-        <img th:src="@{/img/logo.png}"
-             alt="Trillion-Shop Logo"
-             class="img-fluid"
-             style="background-color: #fff;">
-      </a>
-    </div>
+                            <a th:if="${@authHelper.isAdmin()}" th:href="@{/admin}" class="btn btn-sm btn-text-clean mr-1">관리자</a>
 
-    <div class="col-lg-4 col-6 text-left">
-      <form th:action="@{/search}" method="get" class="d-flex align-items-center">
-          <div class="input-group" style="width:auto; flex: 1 1 auto; min-width: 0;">
-          <input type="text" name="query" class="form-control"
-                 placeholder="도서를 검색해 보세요"
-                 th:value="${query}">
-          <div class="input-group-append">
-            <button type="submit" class="input-group-text bg-transparent text-primary">
-              <i class="fa fa-search"></i>
-            </button>
-          </div>
+                            <a th:href="@{/members/my-page}" class="btn btn-sm btn-text-clean mr-1">마이페이지</a>
+
+                            <form th:action="@{/logout}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-text-clean text-muted" style="font-weight: 500;">로그아웃</button>
+                            </form>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
         </div>
-          <div class="ml-2 ai-switch">
-              <input type="hidden" name="mode" th:value="${mode != null ? mode : 'bm25'}"/>
-
-              <div class="custom-control custom-switch">
-                  <input type="checkbox"
-                         class="custom-control-input"
-                         id="aiModeToggle"
-                         onclick="this.form.mode.value = this.checked ? 'ai' : 'bm25'"
-                         th:checked="${mode == 'ai'}">
-                  <label class="custom-control-label" for="aiModeToggle" style="font-size: 12px;">
-                      AI 검색
-                  </label>
-              </div>
-          </div>
-      </form>
     </div>
-
-
-    <div class="col-lg-4 col-6 text-right">
-
-      <th:block th:with="currentUser=${@authHelper.getMember()}">
-
-        <div class="d-inline-flex align-items-center justify-content-end w-100"
-             th:if="${currentUser == null}">
-
-          <a th:href="@{/login}" class="btn btn-sm btn-outline-primary mx-1">
-            로그인
-          </a>
-          <a th:href="@{/members/signup}" class="btn btn-sm btn-primary mx-1">
-            회원가입
-          </a>
-          <a th:href="@{/orders/non-members-order-form}" class="btn text-dark btn-sm btn-outline-secondary mx-1">
-            비회원 주문조회
-          </a>
-        </div>
-
-        <div class="d-inline-flex flex-column align-items-end w-100"
-             th:if="${currentUser != null}">
-
-      <span class="small mb-2"
-            th:text="${currentUser.memberName} + ' 님, 환영합니다'">
-        사용자 님, 환영합니다
-      </span>
-
-          <div class="d-inline-flex">
-            <a th:if="${@authHelper.isAdmin()}" th:href="@{/admin}" class="btn btn-sm btn-dark mx-1">
-              관리자페이지
-            </a>
-
-            <a th:unless="${@authHelper.isAdmin()}" th:href="@{/members/my-page}" class="btn btn-sm btn-primary mx-1">
-              마이페이지
-            </a>
-
-            <form th:action="@{/logout}" method="post" class="d-inline">
-              <button type="submit" class="btn text-dark btn-sm btn-outline-secondary mx-1" style="cursor: pointer;">
-                로그아웃
-              </button>
-            </form>
-          </div>
-        </div>
-
-      </th:block> </div>
-    </div>
-  </div>
 </th:block>
 
 <th:block th:fragment="navbar">
-  <div class="row px-xl-5">
-    <div class="col-lg-3 d-none d-lg-block category-hover-area">
-      <a id="btn-category-toggle"
-         class="btn d-flex align-items-center justify-content-between bg-primary w-100"
-         href="javascript:void(0)"
-         style="height: 65px; padding: 0 30px;">
-        <h6 class="text-dark m-0">
-          <i class="fa fa-bars mr-2"></i>Categories
-        </h6>
-        <i class="fa fa-angle-down text-dark"></i>
-      </a>
+    <div class="container-fluid mb-3">
+        <div class="row row-lg-nowrap px-xl-5 align-items-center" style="padding-top: 30px; padding-bottom: 30px;">
 
-      <nav id="navbar-vertical"
-           class="collapse position-absolute navbar navbar-vertical navbar-light
-                  align-items-start p-0 bg-light"
-           style="width: calc(100% - 30px); z-index: 999;">
-        <div class="navbar-nav w-100">
-          <th:block th:if="${categories != null and !#lists.isEmpty(categories)}">
+            <div class="col-lg-2 col-md-3 d-flex align-items-center">
+                <a th:href="@{/}" class="text-decoration-none d-block">
+                    <img th:src="@{/img/logo.png}" style="max-height: 50px; width: auto;" alt="Logo">
+                </a>
+            </div>
 
-            <th:block th:each="cat : ${categories}">
+            <div class="col-lg-2 col-md-3 navbar-vertical-container d-flex align-items-center">
+                <a id="btn-category-toggle" class="btn btn-outline-brown h-fixed w-100 justify-content-between px-3"
+                   href="javascript:void(0)">
+                    <h6 class="m-0" style="color: inherit;"><i class="fa fa-bars mr-2"></i>카테고리</h6>
+                    <i class="fa fa-angle-down"></i>
+                </a>
 
-              <a th:if="${cat.categoryName != '총류'}"
-                 th:href="@{/books(categoryId=${cat.categoryId})}"
-                 class="nav-item nav-link"
-                 th:text="${cat.categoryName}">
-                Category Name
-              </a>
+                <nav id="navbar-vertical" class="collapse navbar navbar-vertical navbar-light align-items-start p-0 bg-white">
+                    <div class="navbar-nav w-100 p-2">
+                        <th:block th:if="${categories != null}" th:each="cat : ${categories}">
+                            <a th:if="${cat.categoryName != '총류'}" th:href="@{/books(categoryId=${cat.categoryId})}" class="nav-item nav-link rounded px-3" th:text="${cat.categoryName}"></a>
+                        </th:block>
+                        <th:block th:unless="${categories != null and !#lists.isEmpty(categories)}">
+                            <a href="#" class="nav-item nav-link">전체 도서</a>
+                        </th:block>
+                    </div>
+                </nav>
+            </div>
 
-              <th:block th:if="${cat.categoryName == '역사'}">
-                <th:block th:each="gCat : ${categories}">
-                  <a th:if="${gCat.categoryName == '총류'}"
-                     th:href="@{/books(categoryId=${gCat.categoryId})}"
-                     class="nav-item nav-link">
-                    기타
-                  </a>
-                </th:block>
-              </th:block>
+            <div class="col-lg-5 col-md-6 d-flex align-items-center">
+                <div class="header-separator"></div>
 
-            </th:block>
-          </th:block>
+                <form th:action="@{/search}" method="get" class="w-100 position-relative">
+                    <div class="input-group">
+                        <input type="text" name="query" class="form-control h-fixed bg-light border-0"
+                               placeholder="도서를 검색해 보세요" th:value="${query}"
+                               style="padding-left: 20px; border: 1px solid #ced4da; border-right: none;">
+                        <div class="input-group-append">
+                            <button class="btn btn-search-outline h-fixed m-0" type="submit">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="position-absolute" style="top: 105%; right: 5px;">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="aiModeToggle" onclick="this.form.mode.value = this.checked ? 'ai' : 'bm25'" th:checked="${mode == 'ai'}">
+                            <input type="hidden" name="mode" th:value="${mode != null ? mode : 'bm25'}"/>
+                            <label class="custom-control-label small text-muted" for="aiModeToggle" style="cursor:pointer; font-size: 0.75rem;">AI 검색</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-          <th:block th:unless="${categories != null and !#lists.isEmpty(categories)}">
-            <a href="javascript:void(0)" class="nav-item nav-link">국내도서</a>
-            <a href="javascript:void(0)" class="nav-item nav-link">외국도서</a>
-          </th:block>
+            <div class="col-lg-3 col-md-12 ml-auto d-flex align-items-center justify-content-end mt-3 mt-lg-0 pr-4">
+
+                <a th:if="${@authHelper.isAdmin()}"
+                   th:href="@{/admin/books/register}"
+                   class="btn btn-text-clean small mr-2 text-decoration-none">
+                    <i class="fas fa-magic mr-1"></i>AI등록
+                </a>
+
+                <a th:href="@{/wishlists}" class="btn btn-outline-brown rounded-circle mr-3 position-relative"
+                   style="width:42px; height:42px; padding:0; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-heart text-danger" style="font-size: 1.1rem;"></i>
+                    <span class="badge badge-danger rounded-circle position-absolute" style="top:-3px; right:-3px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; font-size: 0.7rem;" id="wishlist-badge" th:text="${wishlistCount ?: 0}">0</span>
+                </a>
+
+                <a th:href="@{/carts}" class="btn btn-outline-brown rounded-circle position-relative"
+                   style="width:42px; height:42px; padding:0; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-shopping-cart" style="color: var(--primary-brown); font-size: 1.1rem;"></i>
+                    <span class="badge badge-danger rounded-circle position-absolute" style="top:-3px; right:-3px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; font-size: 0.7rem;" th:text="${badgeCount}" id="cart-badge">0</span>
+                </a>
+            </div>
         </div>
-      </nav>
     </div>
 
-    <div class="col-lg-9">
-      <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
-        <button type="button" class="navbar-toggler"
-                data-toggle="collapse" data-target="#navbarCollapse">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-between"
-             id="navbarCollapse">
-          <div class="navbar-nav mr-auto py-0">
-          </div>
-
-          <div class="navbar-nav ml-auto py-0 d-none d-lg-flex align-items-center" style="height: 65px;">
-
-            <a th:href="@{/wishlists}" class="btn px-0 icon-hover-effect">
-              <i class="fas fa-heart" style="color: #ff4081; font-size: 1.2rem;"></i>
-              <span class="badge text-secondary"
-                    style="margin-top: 2px;"
-                    id="wishlist-badge"
-                    th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
-            </a>
-
-            <a th:href="@{/carts}" class="btn px-0 ml-3 icon-hover-effect">
-              <i class="fas fa-shopping-cart text-primary" style="font-size: 1.2rem;"></i>
-              <span class="badge text-secondary"
-                    style="margin-top: 2px;"
-                    th:text="${badgeCount}"
-                    id="cart-badge">0</span>
-            </a>
-          </div>
-        </div>
-      </nav>
-    </div>
-  </div>
-
-  <script>
-
-    // 전역 함수로 선언하여 다른 파일(index.html 등)에서 호출 가능하도록 함
-    function updateWishlistBadge() {
-      fetch('/wishlists/count')
-              .then(response => {
-                if(response.ok) return response.text();
-                throw new Error('Network response was not ok');
-              })
-              .then(count => {
-                const badge = document.getElementById('wishlist-badge');
-                if (badge) {
-                  badge.innerText = count;
-                }
-              })
-              .catch(err => console.log('위시리스트 카운트 갱신 실패 (비로그인 등):', err));
-    }
-
-    // 장바구니 배지 업데이트 함수 (서버 동기화)
-    function updateCartBadge() {
-      fetch('/carts/count')
-              .then(response => {
-                if(response.ok) return response.text();
-                throw new Error('Network response was not ok');
-              })
-              .then(count => {
-                const badge = document.getElementById('cart-badge');
-                if (badge) {
-                  badge.innerText = count;
-                }
-              })
-              .catch(err => console.log('장바구니 카운트 갱신 실패:', err));
-    }
-
-    // [추가] 장바구니 배지 즉시 증가 함수 (낙관적 업데이트)
-    function incrementCartBadge() {
-      const badge = document.getElementById('cart-badge');
-      if (badge) {
-        let currentCount = parseInt(badge.innerText.trim()) || 0;
-        badge.innerText = currentCount + 1;
-      }
-    }
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('btn-category-toggle');
+            var nav = document.getElementById('navbar-vertical');
+            if(btn && nav) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if(nav.classList.contains('show')) nav.classList.remove('show');
+                    else nav.classList.add('show');
+                });
+                document.addEventListener('click', function(e) {
+                    if(!btn.contains(e.target) && !nav.contains(e.target)) nav.classList.remove('show');
+                });
+            }
+            if(typeof updateWishlistBadge === 'function') updateWishlistBadge();
+            if(typeof updateCartBadge === 'function') updateCartBadge();
+        });
+    </script>
 </th:block>
 </html>

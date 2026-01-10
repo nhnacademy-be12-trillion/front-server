@@ -1,43 +1,243 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
   <meta charset="utf-8">
-
   <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE">Trillion-Shop | Book Store</title>
-
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <meta content="Book Store, E-commerce" name="keywords">
-  <meta content="Online Book Store" name="description">
-
   <link th:href="@{/img/favicon.ico}" rel="icon">
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css">
+
   <link th:href="@{/css/style.min.css}" rel="stylesheet">
   <link th:href="@{/css/custom.css}" rel="stylesheet">
 
   <th:block layout:fragment="head"></th:block>
+
+  <style>
+    /* 색상 변수 재정의 (파란색 -> 갈색) */
+    :root {
+      --primary-brown: #8D6E63;       /* 메인 갈색 */
+      --dark-brown: #4E342E;          /* 진한 갈색 */
+      --light-brown: #D7CCC8;
+      --warm-bg: #FDFBF7;             /* 전체 배경 */
+      --text-main: #3E2723;           /* 텍스트 */
+
+      /* 부트스트랩 기본 색상 덮어쓰기 */
+      --primary: #8D6E63 !important;
+      --blue: #8D6E63 !important;
+      --info: #8D6E63 !important;
+      --secondary: #EFEBE9 !important;
+    }
+
+    body {
+      background-color: var(--warm-bg) !important;
+      color: var(--text-main) !important;
+      font-family: "Pretendard", sans-serif;
+    }
+
+    /* 초기화 */
+    .container-fluid, .row { border: none !important; }
+    /* 헤더 배경 제거 (주의: 푸터 등 다른 곳에 영향 안 가게 구체적으로 설정 가능하지만, 여기선 전역 적용) */
+    .bg-dark { background-color: transparent !important; }
+
+    .btn, .form-control, .input-group-text, .badge, .card {
+      border-radius: 50px !important;
+    }
+
+    /* 헤더 높이 & 정렬 강제 (50px) */
+    .h-fixed {
+      height: 50px !important;
+      min-height: 50px !important;
+      display: flex;
+      align-items: center;
+    }
+    input.form-control.h-fixed {
+      padding-top: 0;
+      padding-bottom: 0;
+      height: 50px;
+    }
+
+    /* 버튼 스타일 (배경 없는 갈색 테두리) */
+    .btn-outline-brown {
+      background-color: #fff !important;
+      color: var(--primary-brown) !important;
+      border: 1.5px solid var(--primary-brown) !important;
+      font-weight: 600;
+      box-shadow: none !important;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-outline-brown:hover {
+      background-color: var(--primary-brown) !important;
+      color: #fff !important;
+    }
+
+    /* 검색 버튼 (입력창과 합체) */
+    .btn-search-outline {
+      background-color: #fff !important;
+      color: var(--primary-brown) !important;
+      border: 1px solid #ced4da !important;
+      border-left: none !important;
+      border-radius: 0 50px 50px 0 !important;
+      height: 50px !important;
+      padding: 0 20px;
+    }
+    .btn-search-outline:hover { background-color: #f8f9fa !important; }
+
+    .btn-primary {
+      background-color: #fff !important;          /* 배경 흰색 */
+      color: var(--primary-brown) !important;     /* 글씨 갈색 */
+      border: 1.5px solid var(--primary-brown) !important; /* 테두리 갈색 */
+      font-weight: 700;
+      box-shadow: none !important;
+      transition: all 0.3s ease;
+    }
+
+    /* (B) 호버 효과 -> 갈색으로 채워짐 */
+    .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+      background-color: var(--primary-brown) !important; /* 배경 갈색 */
+      color: #fff !important;                            /* 글씨 흰색 */
+      border-color: var(--primary-brown) !important;
+      transform: translateY(-2px); /* 살짝 떠오르는 효과 */
+      box-shadow: 0 4px 8px rgba(141, 110, 99, 0.2) !important;
+    }
+
+    /* (C) 텍스트 전용 버튼 (관리자, 마이페이지 등) */
+    .btn-text-clean {
+      background-color: transparent !important;
+      border: none !important;
+      color: var(--text-main) !important;
+      font-weight: 700;
+      box-shadow: none !important;
+      padding: 5px 10px;
+      transition: color 0.2s;
+    }
+    .btn-text-clean:hover {
+      color: var(--primary-brown) !important;
+      text-decoration: none;
+    }
+
+    /* (D) 수동 정의한 아웃라인 버튼 (호환성 유지) */
+    .btn-outline-brown {
+      background-color: transparent !important;
+      color: var(--primary-brown) !important;
+      border: 1.5px solid var(--primary-brown) !important;
+      font-weight: 600;
+      box-shadow: none !important;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-outline-brown:hover {
+      background-color: var(--primary-brown) !important;
+      color: #fff !important;
+    }
+
+    /* 카테고리 메뉴 위치 고정 */
+    .navbar-vertical-container { position: relative; }
+    #navbar-vertical {
+      position: absolute;
+      top: 105%; left: 0; width: 100%;
+      z-index: 9999;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border: 1px solid #eee;
+      display: none;
+    }
+    #navbar-vertical.show { display: block !important; }
+
+    /* 구분선 */
+    .header-separator {
+      width: 1px;
+      height: 25px;
+      background-color: #ccc;
+      margin: 0 20px;
+      display: inline-block;
+    }
+
+    /* 공통 컴포넌트 (베스트셀러, 탭) */
+    .best-seller-box {
+      background-color: var(--dark-brown);
+      border-radius: 30px;
+      padding: 50px 30px;
+      margin-bottom: 50px;
+      box-shadow: 0 15px 30px rgba(62, 39, 35, 0.25);
+      color: white;
+    }
+
+    .category-pill {
+      border-radius: 50px !important;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      color: #666;
+      padding: 8px 25px;
+      margin: 0 5px 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .category-pill.active, .category-pill:hover {
+      background-color: var(--primary-brown);
+      border-color: var(--primary-brown);
+      color: #fff;
+    }
+
+    /* 푸터 */
+    footer, .footer-area {
+      background-color: var(--dark-brown) !important;
+      color: rgba(255,255,255,0.8) !important;
+    }
+    /* 기본 링크 스타일 */
+    .mypage-menu .nav-link,
+    .admin-menu .nav-link {
+      border-radius: 10px;
+      padding: 12px 20px;
+      color: #333 !important; /* 기본 글자색 검정 */
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    /* 마우스 올렸을 때 (Hover) -> 파란색 차단 */
+    .mypage-menu .nav-link:hover,
+    .admin-menu .nav-link:hover {
+      background-color: #f8f9fa !important;   /* 배경: 연한 회색 */
+      color: var(--primary-brown) !important; /* 글자: 갈색 */
+    }
+
+    /* 활성화(Active) 상태 -> 파란색 차단 */
+    .mypage-menu .nav-link.active,
+    .admin-menu .nav-link.active {
+      background-color: var(--primary-brown) !important; /* 배경: 갈색 */
+      color: #ffffff !important;                         /* 글자: 흰색 */
+      font-weight: 800;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* 활성화된 상태에서 마우스 올렸을 때 */
+    .mypage-menu .nav-link.active:hover,
+    .admin-menu .nav-link.active:hover {
+      background-color: var(--dark-brown) !important; /* 더 진한 갈색 */
+      color: #ffffff !important;
+    }
+  </style>
 </head>
 
 <body>
-
-<div class="container-fluid">
+<div class="container-fluid p-0 bg-white shadow-sm mb-4" style="position: relative; z-index: 1000;">
   <div th:replace="~{fragments/header :: topbar}"></div>
-</div>
-<div class="container-fluid bg-dark mb-30">
   <div th:replace="~{fragments/header :: navbar}"></div>
 </div>
-<div layout:fragment="content">
-  <p>기본 콘텐츠 영역</p>
-</div>
 
+<div layout:fragment="content"></div>
 
-<div th:insert="~{fragments/footer :: footer}" class="container-fluid bg-dark text-secondary mt-5 pt-5"></div>
-<a th:insert="~{fragments/footer :: back_to_top}" href="#" class="btn btn-primary back-to-top"></a>
+<div th:insert="~{fragments/footer :: footer}"></div>
+<a th:insert="~{fragments/footer :: back_to_top}" href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 <div th:replace="~{fragments/footer :: scripts}"></div>
-
 <th:block layout:fragment="script"></th:block>
-
 </body>
 </html>
