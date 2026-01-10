@@ -203,7 +203,7 @@
 <body>
 <div layout:fragment="content" class="search-page">
 
-    <div class="container-fluid pt-5">
+    <div class="container pt-5">
         <div class="row px-xl-5">
             <div class="col-12 mb-2 d-flex justify-content-between align-items-end flex-wrap">
                 <h2 class="search-page-title mb-2 mb-md-0">검색 결과</h2>
@@ -266,7 +266,7 @@
         </div>
     </div>
 
-    <div class="container-fluid" th:if="${result == null or #lists.isEmpty(result)}">
+    <div class="container" th:if="${result == null or #lists.isEmpty(result)}">
         <div class="row px-xl-5">
             <div class="col-12 text-center py-5">
                 <h5 class="mb-2">검색 결과가 없습니다.</h5>
@@ -275,7 +275,7 @@
         </div>
     </div>
 
-    <div class="container-fluid" th:if="${result != null and !#lists.isEmpty(result)}">
+    <div class="container" th:if="${result != null and !#lists.isEmpty(result)}">
         <div class="row px-xl-5">
             <div class="col-12">
                 <div class="search-result-list">
@@ -411,7 +411,7 @@
         </div>
     </div>
 
-    <div class="container-fluid"
+    <div class="container"
          th:if="${totalPages != null and totalPages > 1 and page != null}">
         <div class="row px-xl-5">
             <div class="col-12">

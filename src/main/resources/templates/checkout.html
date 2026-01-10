@@ -46,7 +46,7 @@
         .summary-divider { border-bottom: 1px solid #dee2e6; margin: 10px 0; }
     </style>
 
-    <div class="container-fluid px-xl-5">
+    <div class="container px-xl-5">
         <form th:action="@{/orders}" method="post" th:object="${orderCreateRequest}" name="orderForm" onsubmit="return prepareFormData()">
             <div class="row">
 
