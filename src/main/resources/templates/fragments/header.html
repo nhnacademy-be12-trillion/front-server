@@ -121,9 +121,52 @@
                     if(!btn.contains(e.target) && !nav.contains(e.target)) nav.classList.remove('show');
                 });
             }
-            if(typeof updateWishlistBadge === 'function') updateWishlistBadge();
-            if(typeof updateCartBadge === 'function') updateCartBadge();
         });
+
+        // 장바구니 뱃지 숫자 1 증가 (낙관적 업데이트)
+        function incrementCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                let currentCount = parseInt(badge.innerText.trim()) || 0;
+                badge.innerText = currentCount + 1;
+
+                // 애니메이션 효과 (선택사항: 숫자가 튀는 효과)
+                badge.style.transform = "scale(1.5)";
+                setTimeout(() => badge.style.transform = "scale(1)", 200);
+            }
+        }
+
+        // 장바구니 뱃지 최신화 (서버 동기화)
+        function updateCartBadge() {
+            fetch('/carts/count')
+                .then(response => {
+                    if(response.ok) return response.text();
+                    throw new Error('Count fetch failed');
+                })
+                .then(count => {
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) badge.innerText = count;
+                })
+                .catch(() => {
+                    console.log('장바구니 카운트 갱신 실패 (API 필요)');
+                });
+        }
+
+       // 위시리스트 뱃지 최신화
+        function updateWishlistBadge() {
+            fetch('/wishlists/count')
+                .then(response => {
+                    if(response.ok) return response.text();
+                    throw new Error('Wishlist fetch failed');
+                })
+                .then(count => {
+                    const badge = document.getElementById('wishlist-badge');
+                    if (badge) badge.innerText = count;
+                })
+                .catch(() => console.log('찜 카운트 갱신 실패'));
+        }
     </script>
+</th:block>
+</html>
 </th:block>
 </html>
