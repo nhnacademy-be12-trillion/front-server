@@ -2,30 +2,29 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <th:block th:fragment="topbar">
-    <div class="container-fluid py-2 px-xl-5" style="border-bottom: 1px solid #f5f5f5;">
-        <div class="row align-items-center">
-            <div class="col-lg-6 d-none d-lg-block"></div>
-            <div class="col-lg-6 text-center text-lg-right">
-                <div class="d-inline-flex align-items-center justify-content-end w-100">
-                    <th:block th:with="currentUser=${@authHelper.getMember()}">
-                        <div th:if="${currentUser == null}">
-                            <a th:href="@{/login}" class="btn btn-sm btn-text-clean">로그인</a>
-                            <a th:href="@{/members/signup}" class="btn btn-sm btn-outline-brown ml-2 px-3" style="height:35px; border-width:1px !important;">회원가입</a>
-                            <a th:href="@{/orders/non-members-order-form}" class="btn btn-sm btn-text-clean ml-2 text-muted" style="font-weight: normal;">비회원 주문조회</a>
-                        </div>
+    <div class="container-fluid py-2" style="border-bottom: 1px solid #f5f5f5;">
+        <div class="container px-xl-4">
+            <div class="row align-items-center">
+                <div class="col-lg-6 d-none d-lg-block"></div>
+                <div class="col-lg-6 text-center text-lg-right">
+                    <div class="d-inline-flex align-items-center justify-content-end w-100">
+                        <th:block th:with="currentUser=${@authHelper.getMember()}">
+                            <div th:if="${currentUser == null}">
+                                <a th:href="@{/login}" class="btn btn-sm btn-text-clean">로그인</a>
+                                <a th:href="@{/members/signup}" class="btn btn-sm btn-outline-brown ml-2 px-3" style="height:35px; border-width:1px !important;">회원가입</a>
+                                <a th:href="@{/orders/non-members-order-form}" class="btn btn-sm btn-text-clean ml-2 text-muted" style="font-weight: normal;">비회원 주문조회</a>
+                            </div>
 
-                        <div th:if="${currentUser != null}">
-                            <span class="small font-weight-bold text-primary mr-2" th:text="${currentUser.memberName} + ' 님'">사용자 님</span>
-
-                            <a th:if="${@authHelper.isAdmin()}" th:href="@{/admin}" class="btn btn-sm btn-text-clean mr-1">관리자</a>
-
-                            <a th:href="@{/members/my-page}" class="btn btn-sm btn-text-clean mr-1">마이페이지</a>
-
-                            <form th:action="@{/logout}" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-text-clean text-muted" style="font-weight: 500;">로그아웃</button>
-                            </form>
-                        </div>
-                    </th:block>
+                            <div th:if="${currentUser != null}">
+                                <span class="small font-weight-bold text-primary mr-2" th:text="${currentUser.memberName} + ' 님'">사용자 님</span>
+                                <a th:if="${@authHelper.isAdmin()}" th:href="@{/admin}" class="btn btn-sm btn-text-clean mr-1">관리자</a>
+                                <a th:href="@{/members/my-page}" class="btn btn-sm btn-text-clean mr-1">마이페이지</a>
+                                <form th:action="@{/logout}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-text-clean text-muted" style="font-weight: 500;">로그아웃</button>
+                                </form>
+                            </div>
+                        </th:block>
+                    </div>
                 </div>
             </div>
         </div>
@@ -34,76 +33,75 @@
 
 <th:block th:fragment="navbar">
     <div class="container-fluid mb-3">
-        <div class="row row-lg-nowrap px-xl-5 align-items-center" style="padding-top: 30px; padding-bottom: 30px;">
+        <div class="container px-xl-4">
+            <div class="row row-lg-nowrap align-items-center" style="padding-top: 30px; padding-bottom: 30px;">
 
-            <div class="col-lg-2 col-md-3 d-flex align-items-center">
-                <a th:href="@{/}" class="text-decoration-none d-block">
-                    <img th:src="@{/img/logo.png}" style="max-height: 50px; width: auto;" alt="Logo">
-                </a>
-            </div>
+                <div class="col-lg-2 col-md-3 d-flex align-items-center justify-content-center">
+                    <a th:href="@{/}" class="text-decoration-none d-block">
+                        <img th:src="@{/img/logo.png}" style="max-height: 50px; width: auto;" alt="Logo">
+                    </a>
+                </div>
 
-            <div class="col-lg-2 col-md-3 navbar-vertical-container d-flex align-items-center">
-                <a id="btn-category-toggle" class="btn btn-outline-brown h-fixed w-100 justify-content-between px-3"
-                   href="javascript:void(0)">
-                    <h6 class="m-0" style="color: inherit;"><i class="fa fa-bars mr-2"></i>카테고리</h6>
-                    <i class="fa fa-angle-down"></i>
-                </a>
+                <div class="col-lg-2 col-md-3 navbar-vertical-container d-flex align-items-center">
+                    <a id="btn-category-toggle" class="btn btn-outline-brown h-fixed w-100 justify-content-between px-3"
+                       href="javascript:void(0)">
+                        <h6 class="m-0" style="color: inherit;"><i class="fa fa-bars mr-2"></i>카테고리</h6>
+                        <i class="fa fa-angle-down"></i>
+                    </a>
 
-                <nav id="navbar-vertical" class="collapse navbar navbar-vertical navbar-light align-items-start p-0 bg-white">
-                    <div class="navbar-nav w-100 p-2">
-                        <th:block th:if="${categories != null}" th:each="cat : ${categories}">
-                            <a th:if="${cat.categoryName != '총류'}" th:href="@{/books(categoryId=${cat.categoryId})}" class="nav-item nav-link rounded px-3" th:text="${cat.categoryName}"></a>
-                        </th:block>
-                        <th:block th:unless="${categories != null and !#lists.isEmpty(categories)}">
-                            <a href="#" class="nav-item nav-link">전체 도서</a>
-                        </th:block>
-                    </div>
-                </nav>
-            </div>
-
-            <div class="col-lg-5 col-md-6 d-flex align-items-center">
-                <div class="header-separator"></div>
-
-                <form th:action="@{/search}" method="get" class="w-100 position-relative">
-                    <div class="input-group">
-                        <input type="text" name="query" class="form-control h-fixed bg-light border-0"
-                               placeholder="도서를 검색해 보세요" th:value="${query}"
-                               style="padding-left: 20px; border: 1px solid #ced4da; border-right: none;">
-                        <div class="input-group-append">
-                            <button class="btn btn-search-outline h-fixed m-0" type="submit">
-                                <i class="fa fa-search"></i>
-                            </button>
+                    <nav id="navbar-vertical" class="collapse navbar navbar-vertical navbar-light align-items-start p-0 bg-white">
+                        <div class="navbar-nav w-100 p-2">
+                            <th:block th:if="${categories != null}" th:each="cat : ${categories}">
+                                <a th:if="${cat.categoryName != '총류'}" th:href="@{/books(categoryId=${cat.categoryId})}" class="nav-item nav-link rounded px-3" th:text="${cat.categoryName}"></a>
+                            </th:block>
+                            <th:block th:unless="${categories != null and !#lists.isEmpty(categories)}">
+                                <a href="#" class="nav-item nav-link">전체 도서</a>
+                            </th:block>
                         </div>
-                    </div>
-                    <div class="position-absolute" style="top: 105%; right: 5px;">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="aiModeToggle" onclick="this.form.mode.value = this.checked ? 'ai' : 'bm25'" th:checked="${mode == 'ai'}">
-                            <input type="hidden" name="mode" th:value="${mode != null ? mode : 'bm25'}"/>
-                            <label class="custom-control-label small text-muted" for="aiModeToggle" style="cursor:pointer; font-size: 0.75rem;">AI 검색</label>
+                    </nav>
+                </div>
+
+                <div class="col-lg-5 col-md-6 d-flex align-items-center">
+                    <form th:action="@{/search}" method="get" class="w-100 position-relative">
+                        <div class="input-group">
+                            <input type="text" name="query" class="form-control h-fixed bg-light border-0"
+                                   placeholder="도서를 검색해 보세요" th:value="${query}"
+                                   style="padding-left: 20px; border: 1px solid #ced4da; border-right: none;">
+                            <div class="input-group-append">
+                                <button class="btn btn-search-outline h-fixed m-0" type="submit">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </form>
-            </div>
+                        <div class="position-absolute" style="top: 105%; right: 5px;">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="aiModeToggle" onclick="this.form.mode.value = this.checked ? 'ai' : 'bm25'" th:checked="${mode == 'ai'}">
+                                <input type="hidden" name="mode" th:value="${mode != null ? mode : 'bm25'}"/>
+                                <label class="custom-control-label small text-muted" for="aiModeToggle" style="cursor:pointer; font-size: 0.75rem;">AI 검색</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
-            <div class="col-lg-3 col-md-12 ml-auto d-flex align-items-center justify-content-end mt-3 mt-lg-0 pr-4">
+                <div class="col-lg-3 col-md-12 ml-auto d-flex align-items-center justify-content-end mt-3 mt-lg-0 pr-4">
+                    <a th:if="${@authHelper.isAdmin()}"
+                       th:href="@{/admin/books/ai-register}"
+                       class="btn btn-text-clean small mr-2 text-decoration-none">
+                        <i class="fas fa-magic mr-1"></i>AI등록
+                    </a>
 
-                <a th:if="${@authHelper.isAdmin()}"
-                   th:href="@{/admin/books/register}"
-                   class="btn btn-text-clean small mr-2 text-decoration-none">
-                    <i class="fas fa-magic mr-1"></i>AI등록
-                </a>
+                    <a th:href="@{/wishlists}" class="btn btn-outline-brown rounded-circle mr-3 position-relative"
+                       style="width:42px; height:42px; padding:0; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-heart text-danger" style="font-size: 1.1rem;"></i>
+                        <span class="badge badge-danger rounded-circle position-absolute" style="top:-3px; right:-3px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; font-size: 0.7rem;" id="wishlist-badge" th:text="${wishlistCount ?: 0}">0</span>
+                    </a>
 
-                <a th:href="@{/wishlists}" class="btn btn-outline-brown rounded-circle mr-3 position-relative"
-                   style="width:42px; height:42px; padding:0; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-heart text-danger" style="font-size: 1.1rem;"></i>
-                    <span class="badge badge-danger rounded-circle position-absolute" style="top:-3px; right:-3px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; font-size: 0.7rem;" id="wishlist-badge" th:text="${wishlistCount ?: 0}">0</span>
-                </a>
-
-                <a th:href="@{/carts}" class="btn btn-outline-brown rounded-circle position-relative"
-                   style="width:42px; height:42px; padding:0; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-shopping-cart" style="color: var(--primary-brown); font-size: 1.1rem;"></i>
-                    <span class="badge badge-danger rounded-circle position-absolute" style="top:-3px; right:-3px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; font-size: 0.7rem;" th:text="${badgeCount}" id="cart-badge">0</span>
-                </a>
+                    <a th:href="@{/carts}" class="btn btn-outline-brown rounded-circle position-relative"
+                       style="width:42px; height:42px; padding:0; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-shopping-cart" style="color: var(--primary-brown); font-size: 1.1rem;"></i>
+                        <span class="badge badge-danger rounded-circle position-absolute" style="top:-3px; right:-3px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; font-size: 0.7rem;" th:text="${badgeCount}" id="cart-badge">0</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
