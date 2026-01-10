@@ -40,7 +40,7 @@ public class WishlistController {
             }
             return "redirect:/login";
         } catch (Exception e) {
-            log.error("위시리스트 페이지 조회 실패: ", e);
+            log.warn("위시리스트 페이지 조회 실패: ", e);
             return "redirect:/login";
         }
     }

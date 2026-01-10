@@ -30,7 +30,7 @@ public class HomeController {
 
     @GetMapping
     public String home(
-            @RequestParam(name = "categoryId", defaultValue = "1") Long categoryId,
+            @RequestParam(name = "categoryId", defaultValue = "0") Long categoryId,
             Model model
     ) {
         // 전체 도서 목록

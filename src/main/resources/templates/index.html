@@ -173,7 +173,7 @@
                 <div class="col-12 text-center py-5" th:if="${categoryBooks == null or #lists.isEmpty(categoryBooks)}"><p class="text-muted">등록된 신간 도서가 없습니다.</p></div>
 
                 <div class="col-lg-15 col-md-4 col-6" th:if="${categoryBooks != null}" th:each="book : ${categoryBooks}" th:unless="${book.bookState.name() == 'SALE_END'}">
-                    <div class="product-item bg-light mb-4" th:classappend="${book.bookState.name() == 'SOLD_OUT'} ? 'sold-out-item' : ''">
+                    <div class="product-item bg-light mb-4" style="border-radius: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);" th:classappend="${book.bookState.name() == 'SOLD_OUT'} ? 'sold-out-item' : ''">
                         <div class="product-img position-relative overflow-hidden">
                             <div th:if="${book.bookState.name() == 'SOLD_OUT'}" class="sold-out-overlay">품절</div>
                             <img class="img-fluid w-100 book-thumb" th:src="${!#strings.isEmpty(book.bookImage) ? '/trillion-bucket/' + book.bookImage : 'https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image'}" onerror="this.onerror=null; this.src='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image';" loading="lazy" alt="책 표지">
@@ -185,7 +185,8 @@
                         </div>
                         <div class="text-center py-4 px-2">
                             <a class="h6 text-decoration-none text-truncate d-block mb-1" th:href="@{/books/{book_id}(book_id=${book.bookId})}" th:text="${book.bookName}">책 제목</a>
-                            <div class="small text-muted mb-2">${author}</div>
+                            <div class="small text-muted mb-2"
+                                 th:text="${book.bookAuthor}">저자</div>
                             <div class="mt-2 text-center">
                                 <h5 class="text-primary mb-0" th:if="${book.bookSalePrice > 0}" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
                                 <h5 class="text-primary mb-0" th:unless="${book.bookSalePrice > 0}" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
