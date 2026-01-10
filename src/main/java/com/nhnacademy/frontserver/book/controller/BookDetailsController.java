@@ -4,6 +4,7 @@ import com.nhnacademy.frontserver.PageResponse;
 import com.nhnacademy.frontserver.book.*;
 import com.nhnacademy.frontserver.member.MemberResponse;
 import com.nhnacademy.frontserver.member.client.MemberClient;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -24,7 +25,7 @@ public class BookDetailsController {
 
     private final BookClient bookClient;
     private final ReviewSummaryClient reviewSummaryClient;
-    private final MemberClient memberClient; // [필수] 회원 정보 조회를 위한 클라이언트
+    private final MemberClient memberClient; // 회원 정보 조회를 위한 클라이언트
 
     @GetMapping("/{book_id}")
     public String bookDetail(@PathVariable("book_id") Long bookId,
@@ -32,14 +33,20 @@ public class BookDetailsController {
                              @RequestParam(name = "size", defaultValue = "10") int size,
                              Model model) {
 
-        // 1. 도서 상세 정보 조회
-        BookDetailResponse bookDetail = bookClient.getBookDetail(bookId);
+        BookDetailResponse bookDetail;
+        try {
+            bookDetail = bookClient.getBookDetail(bookId);
 
-        // 2. 리뷰 리스트 조회
+        } catch (FeignException.NotFound e) {
+            model.addAttribute("message", "판매가 종료되었거나 존재하지 않는 도서입니다.");
+            model.addAttribute("redirectUrl", "/books"); // 도서 목록 페이지로 이동
+            return "message-redirect";
+        }
+        // 리뷰 리스트 조회
         String sort = "reviewId,desc";
         PageResponse<ReviewResponse> reviewPage = bookClient.getReviews(bookId, page, size, sort);
 
-        // [수정] 리뷰 작성자 이름 매핑 로직
+        // 리뷰 작성자 이름 매핑 로직
         // MemberClient에 특정 ID로 타인을 조회하는 기능이 없으므로,
         // 현재 로그인한 사용자(본인)인 경우에만 이름을 갱신하고 나머지는 기존 값을 유지합니다.
 
