@@ -1,10 +1,13 @@
 package com.nhnacademy.frontserver.book.controller;
 
+import com.nhnacademy.frontserver.auth.util.AuthHelper;
 import com.nhnacademy.frontserver.book.BookClient;
 import com.nhnacademy.frontserver.book.BookListResponse;
 import com.nhnacademy.frontserver.member.MemberResponse;
-import com.nhnacademy.frontserver.member.client.MemberClient;
 import feign.FeignException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -26,12 +25,12 @@ import java.util.Objects;
 public class WishlistController {
 
     private final BookClient bookClient;
-    private final MemberClient memberClient;
+    private final AuthHelper authHelper;
 
     @GetMapping
     public String wishlistsPage(Model model) {
         try {
-            MemberResponse memberResponse = memberClient.getMember();
+            MemberResponse memberResponse = authHelper.getMember();
             if(Objects.nonNull(memberResponse)) {
                 // [수정] 회원 ID를 헤더로 전달
                 List<BookListResponse> wishlists = bookClient.getWishlists(memberResponse.memberId());
@@ -49,7 +48,8 @@ public class WishlistController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> toggle(@RequestParam("bookId") Long bookId) {
         try {
-            MemberResponse memberResponse = memberClient.getMember();
+            MemberResponse memberResponse = authHelper.getMember();
+
             if(Objects.nonNull(memberResponse)) {
                 // [수정] 실제 로그인한 사용자의 ID를 백엔드에 명시적 전달
                 Map<String, Object> result = bookClient.toggleWishlist(bookId, memberResponse.memberId());
@@ -69,7 +69,7 @@ public class WishlistController {
     @ResponseBody
     public ResponseEntity<Integer> getWishlistCount() {
         try {
-            MemberResponse memberResponse = memberClient.getMember();
+            MemberResponse memberResponse = authHelper.getMember();
             if(Objects.nonNull(memberResponse)) {
                 List<BookListResponse> wishlists = bookClient.getWishlists(memberResponse.memberId());
                 return ResponseEntity.ok(wishlists.size());
