@@ -41,6 +41,13 @@ public class Token {
     private static void saveAccessToken(HttpServletRequest request,String newAccessToken) {
         request.setAttribute(ACCESS_TOKEN,newAccessToken);
     }
+    public static void removeToken(HttpServletResponse response) {
+        ResponseCookie accessCookie = CookieUtils.createHttpOnlyCookie(ACCESS_TOKEN,"", 0);
+        ResponseCookie refreshCookie = CookieUtils.createHttpOnlyCookie(REFRESH_TOKEN, "", 0);
+        // 응답 헤더에 추가
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+    }
 
     private static String getCookieValue(HttpServletRequest request, String cookieName) {
         if(request.getCookies() == null) {

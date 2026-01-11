@@ -1,14 +1,18 @@
-package com.nhnacademy.frontserver.common;
+package com.nhnacademy.frontserver.auth.interceptor;
 
 import com.nhnacademy.frontserver.auth.client.AuthClient;
 import com.nhnacademy.frontserver.auth.dto.TokenResponse;
+import com.nhnacademy.frontserver.common.Token;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
+@Slf4j
 public class TokenCheckInterceptor implements HandlerInterceptor {
 
     private final AuthClient authClient;
@@ -24,10 +28,16 @@ public class TokenCheckInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if(Token.getAccessToken(request)==null&&Token.canReissue(request)){
-            TokenResponse reissue = authClient.reissue(Token.getRefreshToken(request));
-            Token.reissue(request,response,reissue);
+            try{
+                TokenResponse reissue = authClient.reissue(Token.getRefreshToken(request));
+                Token.reissue(request,response,reissue);
+            }catch (Exception ex){
+                log.info("token reissue error:{}",Token.getRefreshToken(request));
+                Token.removeToken(response);
+                response.sendRedirect("/login");
+            }
         }
     }
 
