@@ -129,7 +129,7 @@
                                 </div>
                                 <div class="text-center py-4 px-2">
                                     <a class="h6 text-decoration-none text-truncate d-block mb-1" th:href="@{/books/{book_id}(book_id=${book.bookId})}" th:text="${book.bookName}">책 제목</a>
-                                    <div class="small text-muted mb-2"><span th:text="${book.bookAuthor}">저자</span></div>
+                                    <div class="small text-muted mb-2 text-truncate" th:text="${book.bookAuthor}">저자</div>
                                     <div class="mt-2 text-center">
                                         <h5 class="text-primary mb-0" th:if="${book.bookSalePrice > 0}" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
                                         <h5 class="text-primary mb-0" th:unless="${book.bookSalePrice > 0}" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
@@ -177,7 +177,7 @@
                         </div>
                         <div class="text-center py-4 px-2">
                             <a class="h6 text-decoration-none text-truncate d-block mb-1" th:href="@{/books/{book_id}(book_id=${book.bookId})}" th:text="${book.bookName}">책 제목</a>
-                            <div class="small text-muted mb-2" th:text="${book.bookAuthor}">저자</div>
+                            <div class="small text-muted mb-2 text-truncate" th:text="${book.bookAuthor}">저자</div>
                             <div class="mt-2 text-center">
                                 <h5 class="text-primary mb-0" th:if="${book.bookSalePrice > 0}" th:text="${#numbers.formatInteger(book.bookSalePrice, 0, 'COMMA')} + '원'">12,000원</h5>
                                 <h5 class="text-primary mb-0" th:unless="${book.bookSalePrice > 0}" th:text="${#numbers.formatInteger(book.bookRegularPrice, 0, 'COMMA')} + '원'">15,000원</h5>
@@ -192,7 +192,6 @@
 
 <th:block layout:fragment="script">
     <script th:inline="javascript">
-        // 서버에서 넘겨준 찜 목록 ID 리스트를 자바스크립트 변수로 저장 (AJAX용)
         /*<![CDATA[*/
         const myWishlistIds = [[${wishlistBookIds}]] || [];
         /*]]>*/
@@ -200,7 +199,6 @@
         let currentPopularIndex = 0;
 
         function slidePopular(direction) {
-            // ... (슬라이더 코드는 기존과 동일하므로 생략) ...
             const track = document.getElementById('popularBooksTrack');
             const items = track.querySelectorAll('.slider-item');
             const totalItems = items.length;
@@ -241,8 +239,6 @@
                     let soldOutClass = (book.bookState === 'SOLD_OUT') ? 'sold-out-item' : '';
                     let soldOutOverlay = (book.bookState === 'SOLD_OUT') ? '<div class="sold-out-overlay">품절</div>' : '';
 
-                    // AJAX 로딩 시 찜 목록 확인 후 하트 채우기
-                    // myWishlistIds 배열에 현재 책 ID가 있으면 채운 하트 사용
                     const isLiked = myWishlistIds.includes(book.bookId);
                     const heartClass = isLiked ? 'fas fa-heart text-danger' : 'far fa-heart';
 
@@ -254,17 +250,15 @@
                                 <img class="img-fluid w-100 book-thumb" src="${imageUrl}" onerror="this.src='https://dummyimage.com/220x330/ced4da/6c757d.jpg&text=No+Image'" loading="lazy">
                                 <div class="product-action">
                                     <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" onclick="addToCart(${book.bookId})"><i class="fa fa-shopping-cart"></i></a>
-
                                     <a class="btn btn-outline-dark btn-square" href="javascript:void(0);" onclick="toggleWishlist(${book.bookId}, this)">
                                         <i class="${heartClass}"></i>
                                     </a>
-
                                     <a class="btn btn-outline-dark btn-square" href="/books/${book.bookId}"><i class="fa fa-search"></i></a>
                                 </div>
                             </div>
                             <div class="text-center py-4 px-2">
                                 <a class="h6 text-decoration-none text-truncate d-block mb-1" href="/books/${book.bookId}">${book.bookName}</a>
-                                <div class="small text-muted mb-2">${author}</div>
+                                <div class="small text-muted mb-2 text-truncate">${author}</div>
                                 <div class="mt-2 text-center">${priceHtml}</div>
                             </div>
                         </div>
@@ -292,11 +286,9 @@
             }).catch(error => { console.error('Error:', error); alert('오류가 발생했습니다.'); });
         }
 
-        // 찜하기 버튼 클릭 처리 함수
         function toggleWishlist(bookId, btnElement) {
             fetch('/wishlists/toggle?bookId=' + bookId, { method: 'GET' })
                 .then(response => {
-                    // 로그인 안 된 경우 처리
                     if (response.status === 401) {
                         if(confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) { location.href = '/login'; }
                         return null;
@@ -306,32 +298,19 @@
                 })
                 .then(data => {
                     if (data) {
-                        // 뱃지 숫자 업데이트 (헤더 등)
                         if (typeof updateWishlistBadge === 'function') { updateWishlistBadge(); }
-
-                        // 클릭한 버튼의 하트 아이콘 즉시 변경
                         if (btnElement) {
                             const icon = btnElement.querySelector('i');
                             if (icon) {
                                 if (data.isWished) {
-                                    // 찜 추가됨: 빈 하트(far) -> 꽉 찬 빨간 하트(fas text-danger)
                                     icon.classList.remove('far');
                                     icon.classList.add('fas', 'text-danger');
-
-                                    // [중요] AJAX로 다른 카테고리 갔다 와도 유지되도록 로컬 배열에도 추가
-                                    if (!myWishlistIds.includes(bookId)) {
-                                        myWishlistIds.push(bookId);
-                                    }
+                                    if (!myWishlistIds.includes(bookId)) { myWishlistIds.push(bookId); }
                                 } else {
-                                    // 찜 해제됨: 꽉 찬 하트 -> 빈 하트
                                     icon.classList.remove('fas', 'text-danger');
                                     icon.classList.add('far');
-
-                                    // 로컬 배열에서 삭제
                                     const idx = myWishlistIds.indexOf(bookId);
-                                    if (idx > -1) {
-                                        myWishlistIds.splice(idx, 1);
-                                    }
+                                    if (idx > -1) { myWishlistIds.splice(idx, 1); }
                                 }
                             }
                         }

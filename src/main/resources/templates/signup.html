@@ -126,15 +126,24 @@
         </div>
     </div>
 </div>
+
 <th:block layout:fragment="script">
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <script>
-        // 전화번호 자동 하이픈 생성 함수
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.onload = function() {
+            var errorMessage = [[${errorMessage}]];
+            if (errorMessage) {
+                alert(errorMessage);
+            }
+        };
+        /*]]>*/
+
         function autoHyphen(target) {
             target.value = target.value
-                .replace(/[^0-9]/g, '') // 숫자 이외의 문자 제거
-                .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3") // 3-4-4 자리 하이픈 처리
-                .replace(/(\-{1,2})$/g, ""); // 끝에 남은 하이픈 제거
+                .replace(/[^0-9]/g, '')
+                .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3")
+                .replace(/(\-{1,2})$/g, "");
         }
 
         // 비밀번호 일치 확인 (실시간)
@@ -154,7 +163,6 @@
                 complexityMsg.style.display = 'none';
             }
 
-            // 비밀번호 일치 검사
             if (pwConfirm.value === "") {
                 msgBox.innerText = "";
                 return;
@@ -174,7 +182,7 @@
             const pw = document.getElementById('memberPassword').value;
             const pwConfirm = document.getElementById('passwordConfirm').value;
             const phone = document.getElementById('memberContact').value;
-            const birthInput = document.getElementById('memberBirth').value; // 생년월일 값 가져오기
+            const birthInput = document.getElementById('memberBirth').value;
 
             // 비밀번호 일치 확인
             if (pw !== pwConfirm) {

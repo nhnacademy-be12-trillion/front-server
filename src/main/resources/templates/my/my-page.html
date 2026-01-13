@@ -471,7 +471,8 @@
             new daum.Postcode({
                 oncomplete: function(data) {
                     var addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-                    if(data.userSelectedType === 'R'){\n                        var extraAddr = '';
+                    if(data.userSelectedType === 'R'){
+                        var extraAddr = '';
                         if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)) extraAddr += data.bname;
                         if(data.buildingName !== '' && data.apartment === 'Y') extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
                         if(extraAddr !== '') addr += ' (' + extraAddr + ')';
